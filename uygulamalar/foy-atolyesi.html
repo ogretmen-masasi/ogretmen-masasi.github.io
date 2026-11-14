@@ -606,10 +606,32 @@ const Depo = {
         r.onblocked = () => hata(new Error('engellendi'));
       });
       this.kalici = true;
-      try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (x) { /* yoksay */ }
     } catch (x) {
       this.kalici = false;
     }
+    this.kaliciIste();
+  },
+
+  /* Kalıcı depolama izni ister (başlangıcı bekletmez). Verilmezse yedek hatırlatması 3 güne iner. */
+  kaliciIste() {
+    const sonuc = (ok) => {
+      try {
+        if (ok) { localStorage.removeItem('foy-kalici-red'); return; }
+        localStorage.setItem('foy-kalici-red', '1');
+        if (!localStorage.getItem('foy-kalici-red-bildirildi')) {
+          localStorage.setItem('foy-kalici-red-bildirildi', '1');
+          bildir('Tarayıcı bu sayfaya kalıcı depolama izni vermedi; disk dolarsa föyler silinebilir. Bu yüzden yedek hatırlatması 3 günde bir gelecek.', true);
+        }
+        if (typeof YedekHatirlat !== 'undefined') YedekHatirlat.denetle(false);
+      } catch (x) { /* yoksay */ }
+    };
+    try {
+      if (navigator.storage && navigator.storage.persist) {
+        Promise.resolve(navigator.storage.persist()).then(ok => sonuc(ok === true), () => sonuc(false));
+      } else {
+        sonuc(false);
+      }
+    } catch (x) { sonuc(false); }
   },
 
   _islem(depo, kip, fn) {
@@ -664,14 +686,21 @@ const Depo = {
 
 /* ===== Yedek al / yükle ===== */
 const Yedek = {
-  async al() {
+  /* ek: dosya adına eklenecek söz (ör. 'GERIYUKLEME_ONCESI'); hata olursa fırlatır */
+  async al(ek) {
     /* bekleyen kayıt varsa önce yaz */
     if (typeof Foy !== 'undefined') await Foy.simdiKaydet();
     const ayar = await Depo.ayarOku();
     const foyler = await Depo.foyleriOku();
+    /* açık föyün bellekteki hâli yedeğe girsin (depoya yazılamamış olsa bile) */
+    if (typeof Foy !== 'undefined' && Foy.f && Foy.f.id) {
+      const kopya = JSON.parse(JSON.stringify(Foy.f));
+      const i = foyler.findIndex(x => x && x.id === kopya.id);
+      if (i >= 0) foyler[i] = kopya; else foyler.push(kopya);
+    }
     const veri = { uygulama: 'foy-atolyesi', surum: 1, tarih: new Date().toISOString(), ayar: ayar || Ayar.v, foyler };
     const blob = new Blob([JSON.stringify(veri)], { type: 'application/json' });
-    dosyaIndir('foy-atolyesi-yedek-' + bugunIso() + '.json', blob);
+    dosyaIndir('foy-atolyesi-yedek-' + (typeof ek === 'string' && ek ? ek + '-' : '') + bugunIso() + '.json', blob);
     if (typeof YedekHatirlat !== 'undefined') YedekHatirlat.kaydet();
     bildir('Yedek dosyası hazırlandı (' + foyler.length + ' föy). İndirilenler klasöründe dosyanın indiğini kontrol edin.');
   },
@@ -688,10 +717,28 @@ const Yedek = {
       await pencere({ baslik: 'Yedek açılamadı', mesaj: 'Bu dosya Föy Atölyesi yedeği değil. Hiçbir şey değiştirilmedi.' });
       return false;
     }
-    const gelen = veri.foyler.map(f => Foy.duzelt(f)).filter(Boolean);
+    /* gelen: düzeltilmiş föyler; gelenZaman: yedekteki ham güncelleme zamanı (eksikse NaN) */
+    const zaman = x => {
+      if (typeof x === 'number') return isFinite(x) ? x : NaN;
+      if (typeof x === 'string' && x.trim()) { const n = Number(x); return isFinite(n) ? n : Date.parse(x); }
+      if (x instanceof Date) return x.getTime();
+      return NaN;
+    };
+    const gelen = [];
+    const gelenZaman = new Map();
+    veri.foyler.forEach(h => {
+      const f = Foy.duzelt(h);
+      if (!f) return;
+      gelen.push(f);
+      gelenZaman.set(f, zaman(h && h.guncelleme));
+    });
+    if (gelen.length === 0) {
+      await pencere({ baslik: 'Yedek yüklenemedi', mesaj: 'Yedek dosyasında föy yok; hiçbir şey değiştirilmedi.' });
+      return false;
+    }
     const sec = await pencere({
       baslik: 'Yedekten yükle',
-      mesaj: 'Yedekte ' + gelen.length + ' föy var (' + (veri.tarih ? tarihYaz(veri.tarih) : 'tarihsiz') + '). Nasıl yüklensin?',
+      mesaj: 'Yedekte ' + gelen.length + ' föy var (' + (veri.tarih ? tarihYaz(veri.tarih) : 'tarihsiz') + '). Nasıl yüklensin? "Birleştir": aynı föyün yedekteki hâli yalnızca daha yeniyse geçer. "Hepsini değiştir": bu bilgisayardaki bütün föyler silinip yedektekiler konur. İki yolda da önce şu anki föyleriniz ayrıca indirilecek.',
       html: '<label class="onay"><input type="checkbox" name="ayar" checked> Kurum kimliği ayarları da yedektekiyle değişsin (logo, okul adı, renkler)</label>',
       dugmeler: [
         { ad: 'Vazgeç', deger: false },
@@ -701,25 +748,59 @@ const Yedek = {
     });
     if (!sec.deger) return false;
     await Foy.simdiKaydet();
+    /* değiştirmeden önce şu anki bütün föylerin ve ayarların tam yedeği indirilir; hazırlanamazsa işlem yapılmaz */
+    try {
+      await Yedek.al('GERIYUKLEME_ONCESI');
+    } catch (x) {
+      bildir('Önceki föyleriniz indirilemediği için yükleme yapılmadı; hiçbir şey değiştirilmedi. (' + (x && x.message ? x.message : 'bilinmeyen hata') + ')', true);
+      return false;
+    }
+    if (Foy._kayitHata) {
+      await pencere({ baslik: 'Yükleme yapılmadı', mesaj: 'Açık föyünüz tarayıcıya kaydedilemiyor (depolama dolu olabilir). Föy kaybolmasın diye yedekten yükleme yapılmadı. Az önce inen yedek dosyası açık föyün son hâlini de içeriyor.' });
+      return false;
+    }
+    const indi = await pencere({
+      baslik: 'Önceki föyleriniz indirildi',
+      mesaj: 'Şu anki föylerinizin yedeği ("foy-atolyesi-yedek-GERIYUKLEME_ONCESI-…json") İndirilenler klasörüne indi mi? İndiyse devam edin; inmediyse vazgeçin, hiçbir şey değişmez.',
+      dugmeler: [
+        { ad: 'Vazgeç', deger: false },
+        { ad: 'İndi, devam et', deger: true, birincil: true }
+      ]
+    });
+    if (!indi || !indi.deger) { bildir('Yedekten yükleme yapılmadı; föylerinize dokunulmadı.'); return false; }
     const mevcut = await Depo.foyleriOku();
     let son;
+    let eklenen = 0, guncellenen = 0, atlanan = 0;
     if (sec.deger === 'degistir') {
       son = gelen;
     } else {
       const harita = new Map(mevcut.map(f => [f.id, f]));
-      gelen.forEach(f => harita.set(f.id, f));
+      gelen.forEach(f => {
+        const m = harita.get(f.id);
+        if (!m) { harita.set(f.id, f); eklenen++; return; }
+        const gz = gelenZaman.get(f), mz = zaman(m.guncelleme);
+        /* alan eksik ya da okunamazsa mevcut kalır; yalnızca yedek kesin daha yeniyse geçer */
+        if (isFinite(gz) && isFinite(mz) && gz > mz) { harita.set(f.id, f); guncellenen++; }
+        else atlanan++;
+      });
       son = Array.from(harita.values());
     }
     await Depo.foylerHepsiniDegistir(son);
-    if (sec.secili.ayar && veri.ayar) {
-      Ayar.v = Object.assign({}, Ayar.varsayilan, veri.ayar);
-      await Ayar.kaydet();
-      Ayar.uygula();
-      Ayar.arayuzuYenile();
+    try {
+      if (sec.secili.ayar && veri.ayar && typeof veri.ayar === 'object' && !Array.isArray(veri.ayar)) {
+        Ayar.v = Object.assign({}, Ayar.varsayilan, veri.ayar);
+        Ayar.duzelt();
+        await Ayar.kaydet();
+        Ayar.uygula();
+        Ayar.arayuzuYenile();
+      }
+    } catch (x) {
+      bildir('Ayarlar yedekten uygulanamadı: ' + (x && x.message ? x.message : 'bilinmeyen hata') + '. Föyler yüklendi.', true);
     }
     await Foy.acIlkini();
     if (typeof Liste !== 'undefined') Liste.yenile();
-    bildir('Yedek yüklendi: ' + gelen.length + ' föy.');
+    if (sec.deger === 'degistir') bildir('Yedek yüklendi: ' + gelen.length + ' föy.');
+    else await pencere({ baslik: 'Yedek birleştirildi', mesaj: 'Yedek birleştirildi: ' + eklenen + ' föy eklendi, ' + guncellenen + ' föy güncellendi, ' + atlanan + ' föy bu bilgisayardaki aynı ya da daha yeni hâli korunduğu için atlandı.' });
     return true;
   }
 };
@@ -990,7 +1071,14 @@ const Foy = {
       $$('#sutunGrup button').forEach(x => x.classList.toggle('aktif', x === b));
       this.degisti();
     });
-    window.addEventListener('beforeunload', () => { if (this._gec && this._gec.bekliyor()) this._kaydetAsil(); });
+    window.addEventListener('beforeunload', ev => {
+      if ((this._gec && this._gec.bekliyor()) || this._kayitHata) {
+        this._kaydetAsil();
+        /* henüz yazılmamış kayıt var: tarayıcı "ayrılmak istiyor musunuz" diye sorsun */
+        ev.preventDefault();
+        ev.returnValue = '';
+      }
+    });
     document.addEventListener('visibilitychange', () => { if (document.hidden && this._gec && this._gec.bekliyor()) { this._gec.hemen(); } });
   }
 };
@@ -2482,8 +2570,15 @@ const YZ = {
 
   /* Gelen öneriyi gösterir; onaylanırsa bloğa yerleştirir */
   onizle(sonuc, kaynak, yon, duz) {
+    /* yanıt beklenirken hedef blok silinmiş ya da pencere kapatılmış olabilir */
+    const hi = this.hedef ? Editor.bul(this.hedef.id) : -1;
+    const b = hi >= 0 && Foy.f ? Foy.f.bloklar[hi] : null;
+    if (!b) {
+      this._kapat();
+      bildir('Hedef bölüm silindiği için öneri uygulanmadı.', true);
+      return;
+    }
     const tur = this.hedef.tur;
-    const b = Foy.f.bloklar[Editor.bul(this.hedef.id)];
     const duzG = t => '<div style="white-space:pre-wrap">' + e(t) + '</div>';
     const parca = (et, ic) => '<div class="etiket" style="margin-top:8px">' + et + '</div><div class="foyi yzOnizle">' + ic + '</div>';
     let goster = '';
@@ -2861,7 +2956,8 @@ const Gecmis = {
 
 /* ===== Yedek hatırlatma (sürüm 4) ===== */
 const YedekHatirlat = {
-  GUN: 7,
+  /* kalıcı depolama izni verilmediyse 3 gün, değilse 7 gün */
+  get GUN() { try { return localStorage.getItem('foy-kalici-red') === '1' ? 3 : 7; } catch (x) { return 7; } },
   _al(k) { try { return +localStorage.getItem(k) || 0; } catch (x) { return 0; } },
   _yaz(k) { try { localStorage.setItem(k, String(Date.now())); } catch (x) { /* yoksay */ } },
   kaydet() { this._yaz('foy-son-yedek'); this.denetle(false); },
@@ -2893,9 +2989,33 @@ const YedekHatirlat = {
 };
 
 ;
+/* ===== İki sekme uyarısı ===== */
+const IkiSekme = {
+  _uyardi: false,
+  kur() {
+    if (typeof BroadcastChannel === 'undefined') return;
+    try {
+      const kanal = new BroadcastChannel('foy-atolyesi-sekme');
+      const uyar = () => {
+        if (this._uyardi) return;
+        this._uyardi = true;
+        bildir('⚠️ Föy Atölyesi başka bir sekmede de açık. Föylerin birbirini ezmemesi için yalnız bir sekmede çalışın; öbürünü kapatın.', true);
+      };
+      kanal.onmessage = ev => {
+        if (ev.data === 'merhaba') { try { kanal.postMessage('buradayım'); } catch (x) { /* yoksay */ } uyar(); }
+        else if (ev.data === 'buradayım') uyar();
+      };
+      kanal.postMessage('merhaba');
+      this.kanal = kanal;
+    } catch (x) { /* sessizce geç */ }
+  }
+};
+
+;
 /* ===== Başlangıç ===== */
 async function baslat() {
   try {
+    IkiSekme.kur();
     await Depo.ac();
     await Ayar.yukle();
     Sekme.bagla();
