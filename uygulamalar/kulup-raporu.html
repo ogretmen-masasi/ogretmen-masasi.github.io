@@ -1,0 +1,1438 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kulüp Faaliyet Raporu</title>
+<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js"></script>
+<style>
+:root{
+  --lacivert:#1F3864;--lacivert2:#2E4E6E;--altin:#D4AA46;--altin-acik:#FBF3DC;
+  --zemin:#F4F6FB;--kart:#fff;--yazi:#1d2433;--gri:#6b7385;--cizgi:#e2e6ef;
+  --ok:#1e8e4e;--ok-bg:#e6f4ea;--uyari:#b86e00;--uyari-bg:#fff3e0;--hata:#c62828;--hata-bg:#fdecea;
+  --golge:0 1px 3px rgba(20,30,60,.08),0 6px 18px rgba(20,30,60,.05);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;background:var(--zemin);color:var(--yazi);line-height:1.45}
+button{font-family:inherit}
+[hidden]{display:none!important}
+
+/* ---- Üst çubuk ---- */
+.top{position:sticky;top:0;z-index:30;background:linear-gradient(135deg,var(--lacivert),var(--lacivert2));color:#fff;border-bottom:3px solid var(--altin);display:flex;align-items:center;gap:18px;padding:10px 22px;flex-wrap:wrap}
+.marka{display:flex;align-items:center;gap:12px;min-width:0}
+.logo{width:40px;height:40px;border-radius:10px;background:var(--altin);display:grid;place-items:center;font-size:21px;flex:none}
+.marka h1{margin:0;font-size:17px;font-weight:700;letter-spacing:.2px}
+.marka p{margin:0;font-size:12px;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:46vw}
+.sekmeler{display:flex;gap:6px;margin-left:auto}
+.sekme{background:rgba(255,255,255,.1);color:#fff;border:0;padding:9px 16px;border-radius:9px;font-weight:600;font-size:14px;cursor:pointer;transition:background .15s}
+.sekme:hover{background:rgba(255,255,255,.2)}
+.sekme.aktif{background:#fff;color:var(--lacivert)}
+.ayar-btn{background:var(--altin);color:#1b1b1b;border:0;padding:9px 14px;border-radius:9px;font-weight:700;font-size:14px;cursor:pointer}
+
+main{max-width:1240px;margin:0 auto;padding:20px 18px 70px}
+
+/* ---- Ortak bileşenler ---- */
+.kart{background:var(--kart);border-radius:14px;box-shadow:var(--golge);padding:18px}
+.btn{background:var(--lacivert);color:#fff;border:0;padding:10px 16px;border-radius:9px;cursor:pointer;font-weight:600;font-size:14px;transition:filter .15s,transform .05s}
+.btn:hover{filter:brightness(1.12)}
+.btn:active{transform:translateY(1px)}
+.btn.altin{background:var(--altin);color:#1b1b1b}
+.btn.gri{background:#e7ebf3;color:var(--yazi)}
+.btn.tehlike{background:var(--hata-bg);color:var(--hata)}
+.btn.kucuk{padding:6px 11px;font-size:13px;border-radius:8px}
+.btn:disabled{opacity:.55;cursor:wait;filter:none}
+.btn.buyuk{padding:13px 22px;font-size:15px}
+input[type=text],input[type=password],input[type=search],textarea,select{width:100%;padding:9px 11px;border:1px solid #c9d0de;border-radius:9px;font:inherit;font-size:14px;background:#fff;color:var(--yazi)}
+input:focus,textarea:focus,select:focus{outline:2px solid #9db4e6;border-color:#6f8fd6}
+textarea{resize:vertical;min-height:64px}
+label.alan{display:block;font-size:13px;font-weight:600;margin:12px 0 5px;color:var(--lacivert)}
+.chip{display:inline-block;background:var(--altin-acik);color:#7a5a00;border:1px solid #efdba0;border-radius:999px;padding:2px 9px;font-size:12px;margin:2px 4px 2px 0}
+.bos{color:#a3a9b8}
+.rozet{display:inline-block;border:0;border-radius:999px;padding:4px 11px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
+.rozet.ok{background:var(--ok-bg);color:var(--ok)}
+.rozet.kismen{background:var(--uyari-bg);color:var(--uyari)}
+.rozet.yok{background:var(--hata-bg);color:var(--hata)}
+.rozet.belirsiz{background:#eef0f5;color:var(--gri)}
+
+/* ---- Yıllık plan ---- */
+.istatistik{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px}
+.stat{background:var(--kart);border-radius:12px;box-shadow:var(--golge);padding:12px 14px;border-left:4px solid var(--cizgi)}
+.stat b{display:block;font-size:24px;color:var(--lacivert);line-height:1.1}
+.stat span{font-size:12px;color:var(--gri)}
+.stat.ok{border-left-color:var(--ok)}.stat.uyari{border-left-color:var(--altin)}
+.arac{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.arac .ara{flex:1;min-width:220px;position:relative}
+.arac .ara input{padding-left:34px}
+.arac .ara::before{content:"🔍";position:absolute;left:11px;top:9px;font-size:14px}
+.filtre{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.f-chip{border:1px solid var(--cizgi);background:#fff;color:var(--yazi);padding:6px 13px;border-radius:999px;font-size:13px;cursor:pointer;font-weight:600}
+.f-chip.aktif{background:var(--lacivert);border-color:var(--lacivert);color:#fff}
+.tablo-kap{overflow-x:auto;background:var(--kart);border-radius:14px;box-shadow:var(--golge)}
+table.plan{border-collapse:collapse;width:100%;min-width:940px;font-size:13.5px}
+table.plan th{position:sticky;top:0;background:#eef1f8;color:var(--lacivert);text-align:left;padding:10px 12px;font-size:12px;text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--cizgi)}
+table.plan td{padding:10px 12px;border-bottom:1px solid #eef0f6;vertical-align:top}
+table.plan tr.satir:hover td{background:#fafbfe}
+table.plan tr.eksik td:nth-child(2),table.plan tr.eksik td:nth-child(3){background:#fffaf0}
+tr.grup td{background:linear-gradient(90deg,var(--lacivert),var(--lacivert2));color:#fff;padding:0;border:0}
+.grup-ic{display:flex;align-items:center;gap:12px;padding:9px 12px;flex-wrap:wrap}
+.grup-ad{font-weight:800;letter-spacing:.5px}
+.grup-say{font-size:12px;opacity:.85}
+.grup-btn{margin-left:auto;display:flex;gap:8px}
+.grup-btn button{background:rgba(255,255,255,.16);color:#fff;border:0;border-radius:7px;padding:5px 10px;font-size:12px;font-weight:600;cursor:pointer}
+.grup-btn button:hover{background:rgba(255,255,255,.28)}
+.c-hafta{white-space:nowrap;color:var(--lacivert)}
+.c-islem{text-align:right;white-space:nowrap}
+.ikon{background:#eef1f8;border:0;border-radius:8px;padding:6px 9px;cursor:pointer;font-size:13px}
+.ikon:hover{background:#dfe5f3}
+.bos-durum{padding:40px 16px;text-align:center;color:var(--gri)}
+.plan-not{font-size:12px;color:var(--gri);margin-top:10px}
+
+/* ---- Aylık rapor ---- */
+.pill-sira{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 10px;margin-bottom:6px}
+.pill{flex:none;border:1px solid var(--cizgi);background:#fff;border-radius:12px;padding:8px 14px;cursor:pointer;font-weight:700;font-size:13px;color:var(--yazi);text-align:center;min-width:86px}
+.pill small{display:block;font-weight:500;font-size:11px;color:var(--gri);margin-top:1px}
+.pill.aktif{background:var(--lacivert);border-color:var(--lacivert);color:#fff}
+.pill.aktif small{color:#cdd8f2}
+.ay-baslik{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:12px}
+.ay-baslik h2{margin:0;font-size:20px;color:var(--lacivert)}
+.ilerleme{flex:1;min-width:160px;height:8px;background:#e4e8f1;border-radius:99px;overflow:hidden}
+.ilerleme i{display:block;height:100%;background:linear-gradient(90deg,var(--ok),#5bbf85);border-radius:99px;transition:width .25s}
+.ay-baslik .sayi{font-size:13px;color:var(--gri)}
+.hafta{background:var(--kart);border-radius:14px;box-shadow:var(--golge);padding:14px 16px;margin-bottom:12px;border-left:5px solid #d3d8e6}
+.hafta.ok{border-left-color:var(--ok)}.hafta.kismen{border-left-color:var(--altin)}.hafta.yok{border-left-color:var(--hata)}
+.hafta.uyari{box-shadow:0 0 0 2px #e4a11b,var(--golge)}
+.h-ust{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.h-ad{font-weight:800;color:var(--lacivert);font-size:15px}
+.seg{display:inline-flex;border:1px solid var(--cizgi);border-radius:10px;overflow:hidden}
+.seg-b{border:0;background:#fff;padding:7px 14px;font-size:13px;font-weight:600;color:var(--gri);cursor:pointer;border-right:1px solid var(--cizgi)}
+.seg-b:last-child{border-right:0}
+.seg-b:hover{background:#f3f5fa}
+.seg-b.on.ok{background:var(--ok);color:#fff}
+.seg-b.on.kismen{background:#e4a11b;color:#fff}
+.seg-b.on.yok{background:var(--hata);color:#fff}
+.h-plan{display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:13.5px;margin-bottom:6px}
+.h-plan span{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--gri);margin-bottom:1px}
+.hafta textarea{min-height:48px;margin-top:8px}
+.eylem{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:16px 0}
+.eylem .ipucu{font-size:13px;color:var(--gri)}
+.rapor-kart{margin-top:6px}
+.rapor-kart h2{margin:0 0 2px;font-size:18px;color:var(--lacivert)}
+.rapor-meta{font-size:12px;color:var(--gri);margin-bottom:8px}
+.bolum-baslik{display:flex;justify-content:space-between;align-items:baseline;margin:16px 0 5px}
+.bolum-baslik b{font-size:13px;color:var(--lacivert)}
+.bolum-baslik small{font-size:11px;color:var(--gri)}
+.rapor-kart textarea{min-height:90px;line-height:1.55;overflow:hidden}
+.rapor-bos{border:2px dashed var(--cizgi);border-radius:14px;padding:26px;text-align:center;color:var(--gri);font-size:14px}
+
+/* ---- Bildirim ---- */
+#bildirimler{position:fixed;right:16px;bottom:16px;z-index:100;display:flex;flex-direction:column;gap:8px;max-width:min(440px,92vw)}
+.bildirim{padding:11px 14px;border-radius:11px;font-size:13.5px;box-shadow:0 6px 22px rgba(0,0,0,.2);white-space:pre-wrap;word-break:break-word;cursor:pointer;background:#fff;border-left:5px solid var(--lacivert)}
+.bildirim.ok{border-left-color:var(--ok)}.bildirim.hata{border-left-color:var(--hata);background:#fff8f7}.bildirim.uyari{border-left-color:var(--altin)}
+
+/* ---- Kayıt hatası şeridi ---- */
+#kayitSeridi{position:fixed;top:0;left:0;right:0;z-index:300;background:var(--hata);color:#fff;padding:10px 16px;font-size:14px;font-weight:600;display:flex;gap:12px;align-items:center;box-shadow:0 4px 16px rgba(0,0,0,.3)}
+#kayitSeridi span{flex:1}
+#kayitSeridi button{background:rgba(255,255,255,.22);color:#fff;border:0;border-radius:7px;padding:4px 11px;cursor:pointer;font-weight:700;font-size:14px}
+
+/* ---- Pencereler ---- */
+dialog{border:0;border-radius:16px;padding:0;width:min(580px,94vw);box-shadow:0 14px 50px rgba(0,0,0,.35);max-height:92vh}
+dialog::backdrop{background:rgba(15,25,50,.5)}
+dialog .ic{padding:22px}
+dialog h2{margin:0 0 4px;color:var(--lacivert);font-size:18px}
+.alt-satir{display:flex;gap:10px;margin-top:20px;align-items:center;flex-wrap:wrap}
+.bosluk{flex:1}
+.ayrac{border:0;border-top:1px solid var(--cizgi);margin:18px 0}
+.anahtar-sira{display:flex;gap:8px}
+.test-sonuc{font-size:13px;margin-top:8px;white-space:pre-wrap;line-height:1.7}
+.not{font-size:12px;color:var(--gri);margin:6px 0 0}
+
+@media(max-width:860px){
+  .istatistik{grid-template-columns:repeat(2,1fr)}
+  .h-plan{grid-template-columns:1fr}
+  .sekmeler{margin-left:0;order:3;width:100%}
+  .sekme{flex:1}
+  .marka p{max-width:60vw}
+}
+@media print{.top,.eylem,#bildirimler,#kayitSeridi{display:none}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="marka">
+    <div class="logo">📘</div>
+    <div><h1>Kulüp Faaliyet Raporu</h1><p id="altBaslik"></p></div>
+  </div>
+  <nav class="sekmeler">
+    <button class="sekme" data-sekme="plan" type="button">📅 Yıllık Plan</button>
+    <button class="sekme" data-sekme="rapor" type="button">📝 Aylık Rapor</button>
+  </nav>
+  <button class="ayar-btn" id="btnAyar" type="button">⚙️ Ayarlar</button>
+</header>
+
+<main>
+  <!-- ============ YILLIK PLAN ============ -->
+  <section id="vPlan" hidden>
+    <div class="istatistik" id="statlar"></div>
+    <div class="arac">
+      <div class="ara"><input type="search" id="arama" placeholder="Planda ara: amaç, etkinlik, belirli gün…"></div>
+      <input type="file" id="planDosya" accept=".xlsx,.xls,.docx,.pdf,.json" hidden>
+      <button class="btn gri" id="btnPlanYukle" type="button">📂 Plan Yükle</button>
+      <button class="btn gri" id="btnPlanIndir" type="button">⬇️ Planı Dışa Aktar</button>
+      <button class="btn gri" id="btnPlanSifirla" type="button">↩️ Gömülü Plana Dön</button>
+    </div>
+    <div class="filtre" id="filtre"></div>
+    <div class="tablo-kap">
+      <table class="plan">
+        <thead><tr><th style="width:130px">Hafta</th><th>Amaç</th><th>Etkinlik</th><th style="width:26%">Belirli Gün ve Haftalar</th><th style="width:118px">Durum</th><th style="width:60px"></th></tr></thead>
+        <tbody id="planGovde"></tbody>
+      </table>
+    </div>
+    <p class="plan-not" id="planNot"></p>
+  </section>
+
+  <!-- ============ AYLIK RAPOR ============ -->
+  <section id="vRapor" hidden>
+    <div class="pill-sira" id="ayPills"></div>
+    <div class="ay-baslik" id="ayBaslik"></div>
+    <div id="haftalar"></div>
+    <div class="eylem">
+      <button class="btn altin buyuk" id="btnUret" type="button">✨ AI ile Rapor Yaz</button>
+      <button class="btn gri" id="btnHepsiYapildi" type="button">✅ İşaretsizleri "Yapıldı" yap</button>
+      <span class="ipucu" id="uretIpucu"></span>
+    </div>
+    <div id="raporAlani"></div>
+  </section>
+</main>
+
+<div id="bildirimler"></div>
+
+<!-- ============ AYARLAR ============ -->
+<dialog id="ayarDlg">
+  <div class="ic">
+    <h2>⚙️ Ayarlar</h2>
+    <label class="alan" for="a_api_key">Gemini API Anahtarı</label>
+    <div class="anahtar-sira">
+      <input type="password" id="a_api_key" placeholder="AIza..." autocomplete="off">
+      <button class="btn gri kucuk" id="btnGoster" type="button">Göster</button>
+    </div>
+    <div style="margin-top:8px"><button class="btn gri kucuk" id="btnTest" type="button">🔌 Bağlantıyı Test Et</button></div>
+    <div class="test-sonuc" id="testSonuc"></div>
+
+    <label class="alan" for="a_okul_adi">Okul Adı</label><input type="text" id="a_okul_adi">
+    <label class="alan" for="a_kulup_adi">Kulüp Adı</label><input type="text" id="a_kulup_adi">
+    <label class="alan" for="a_ogretmen">Danışman Öğretmen</label><input type="text" id="a_ogretmen">
+    <label class="alan" for="a_mudur">Okul Müdürü</label><input type="text" id="a_mudur">
+    <label class="alan" for="a_yil">Eğitim-Öğretim Yılı</label><input type="text" id="a_yil" placeholder="2026-2027">
+
+    <hr class="ayrac">
+    <label class="alan" style="margin-top:0">Raporların Kaydedileceği Klasör</label>
+    <div class="not" id="klasorDurum" style="margin-top:0"></div>
+    <div class="alt-satir" style="margin-top:8px">
+      <button class="btn gri kucuk" id="btnKlasor" type="button">📁 Klasör Seç</button>
+      <button class="btn gri kucuk" id="btnKlasorKaldir" type="button">Kaldır</button>
+    </div>
+    <p class="not">Word raporu ve plan dosyası bu klasöre sormadan kaydedilir. Chrome/Edge gerekir. Masaüstünde "Kulüp Raporları" gibi bir klasör açıp onu seçmeniz önerilir; tarayıcı Masaüstü'nün kendisini bazen kabul etmez.</p>
+
+    <hr class="ayrac">
+    <label class="alan" style="margin-top:0">Ayarları Başka Bilgisayara Taşı</label>
+    <div class="alt-satir" style="margin-top:6px">
+      <button class="btn gri kucuk" id="btnAyarDisa" type="button">⬇️ Dışa Aktar</button>
+      <input type="file" id="ayarDosya" accept=".json" hidden>
+      <button class="btn gri kucuk" id="btnAyarIce" type="button">⬆️ İçe Aktar</button>
+    </div>
+    <p class="not">Dışa aktarılan dosya API anahtarınızı da içerir, başkasına vermeyin.</p>
+
+    <hr class="ayrac">
+    <label class="alan" style="margin-top:0">Tüm Veriyi Yedekle / Geri Yükle</label>
+    <div class="alt-satir" style="margin-top:6px">
+      <button class="btn kucuk" id="btnYedekAl" type="button">💾 Tüm Veriyi Yedekle</button>
+      <input type="file" id="yedekDosya" accept=".json,application/json" hidden>
+      <button class="btn gri kucuk" id="btnYedekGeri" type="button">📂 Tüm Veriyi Geri Yükle</button>
+    </div>
+    <p class="not" id="sonYedekNot"></p>
+
+    <div class="alt-satir">
+      <span class="bosluk"></span>
+      <button class="btn gri" id="btnAyarKapat" type="button">Kapat</button>
+      <button class="btn" id="btnAyarKaydet" type="button">Kaydet</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- ============ HAFTA DÜZENLE ============ -->
+<dialog id="satirDlg">
+  <div class="ic">
+    <h2 id="satirBaslik">Haftayı düzenle</h2>
+    <label class="alan" for="s_ay">Ay</label>
+    <input type="text" id="s_ay" list="ayListe" placeholder="EKİM"><datalist id="ayListe"></datalist>
+    <label class="alan" for="s_hafta">Hafta</label>
+    <input type="text" id="s_hafta" placeholder="06-10 Ekim">
+    <label class="alan" for="s_amac">Amaç</label>
+    <textarea id="s_amac"></textarea>
+    <label class="alan" for="s_etkinlik">Etkinlik</label>
+    <textarea id="s_etkinlik"></textarea>
+    <label class="alan" for="s_gun">Belirli Gün ve Haftalar (virgülle ayırın)</label>
+    <textarea id="s_gun" style="min-height:52px"></textarea>
+    <div class="alt-satir">
+      <button class="btn tehlike" id="s_sil" type="button">🗑️ Sil</button>
+      <span class="bosluk"></span>
+      <button class="btn gri" id="s_iptal" type="button">İptal</button>
+      <button class="btn" id="s_kaydet" type="button">Kaydet</button>
+    </div>
+  </div>
+</dialog>
+
+<script>
+/* ================= GÖMÜLÜ YILLIK PLAN ================= */
+const GOMULU_PLAN = [
+{"ay":"EYLÜL","hafta":"1. Hafta (14-18 Eylül)","amac":"Kulübün amacının açıklanması","etkinlik":"Kulübün Tanıtılması","belirli_gun":"Uluslararası Temiz Hava Günü"},
+{"ay":"EYLÜL","hafta":"2. Hafta (21-25 Eylül)","amac":"Kulübün amacının açıklanması","etkinlik":"Kulübün Tanıtılması","belirli_gun":"İlköğretim Haftası, Mevlid-i Nebî Haftası, Öğrenciler Günü, Gaziler Günü"},
+{"ay":"EYLÜL","hafta":"3. Hafta (28 Eylül - 02 Ekim)","amac":"Kulüp iç tüzüğünün hazırlanması Yönetim kurulunun ve denetleme kurulunun seçilmesi Yapılacak çalışmaların tespiti","etkinlik":"Kulüp iç tüzüğü ve Kulüp çalışma programının hazırlanması. Yönetim kurulunun seçilmesi Denetleme kurulunun seçilmesi","belirli_gun":""},
+{"ay":"EKIM","hafta":"4. Hafta (05-09 Ekim)","amac":"Kütüphanenin tanıtılması ve kitapların gözden geçirilmesi","etkinlik":"Kütüphanenin tanıtılması ve kitapların gözden geçirilmesi","belirli_gun":"Disleksi Haftası, Dünya Disleksi Günü"},
+{"ay":"EKIM","hafta":"5. Hafta (12-16 Ekim)","amac":"Kütüphanenin tanıtılması ve kitapların gözden geçirilmesi","etkinlik":"Kütüphanenin tanıtılması ve kitapların gözden geçirilmesi","belirli_gun":"Ahilik Kültürü Haftası"},
+{"ay":"EKIM","hafta":"6. Hafta (19-23 Ekim)","amac":"Kütüphanenin açık bulunacağı zamanların tespitinin yapılması","etkinlik":"Kütüphanenin açık bulunacağı zamanların tespitinin yapılması","belirli_gun":""},
+{"ay":"EKIM","hafta":"7. Hafta (26-30 Ekim)","amac":"Kütüphanenin açık bulunacağı zamanların tespitinin yapılması","etkinlik":"Kütüphanenin açık bulunacağı zamanların tespitinin yapılması","belirli_gun":"Cumhuriyet Bayramı, Kızılay Haftası"},
+{"ay":"KASIM","hafta":"8. Hafta (02-06 Kasım)","amac":"Okul kitaplığının eğitim-öğretimdeki yerinin ve öneminin anlatılması","etkinlik":"Okul kitaplığının eğitim-öğretimdeki yerinin ve öneminin anlatılması","belirli_gun":"Organ Bağışı ve Nakli Haftası, Lösemili Çocuklar Haftası"},
+{"ay":"KASIM","hafta":"9. Hafta (09-13 Kasım)","amac":"tatürk’ü Anma Haftası çalışmalarının yapılması","etkinlik":"tatürk’ü Anma Haftası çalışmalarının yapılması","belirli_gun":""},
+{"ay":"KASIM","hafta":"10. Hafta (23-27 Kasım)","amac":"Öğretmenler gününün anlam ve önemini kavrayabilme.","etkinlik":"Öğretmenler gününün anlam ve önemini kavrayabilme.","belirli_gun":"Öğretmenler Günü, Ağız ve Diş Sağlığı Haftası"},
+{"ay":"KASIM","hafta":"11. Hafta (30 Kasım - 04 Aralık)","amac":"Kitap okuma alışkanlığı kazandırma çalışmalarının planlanması.","etkinlik":"Kitap okuma alışkanlığı kazandırma çalışmalarının planlanması.","belirli_gun":"Dünya Engelliler Günü, Dünya Madenciler Günü, Türk Kadınına Seçme ve Seçilme Hakkının Verilişi"},
+{"ay":"ARALIK","hafta":"12. Hafta (07-11 Aralık)","amac":"Kütüphaneyi zenginleştirme çalışmaları yapılması","etkinlik":"Kütüphaneyi zenginleştirme çalışmaları yapılması","belirli_gun":"İnsan Hakları ve Demokrasi Haftası"},
+{"ay":"ARALIK","hafta":"13. Hafta (14-18 Aralık)","amac":"Bilgi Kaynakları ve Türleri konulu çalışmalar yapılması","etkinlik":"Bilgi Kaynakları ve Türleri konulu çalışmalar yapılması","belirli_gun":"Mevlana Haftası, Tutum, Yatırım ve Türk Malları Haftası"},
+{"ay":"ARALIK","hafta":"14. Hafta (21-25 Aralık)","amac":"Kütüphane içerisinde, “Tavsiye Edilen Kitaplar” köşesi oluşturulması","etkinlik":"Kütüphane içerisinde, “Tavsiye Edilen Kitaplar” köşesi oluşturulması","belirli_gun":""},
+{"ay":"ARALIK","hafta":"15. Hafta (28 Aralık - 01 Ocak)","amac":"Bilgi merkezleri konusunda çalışmalar yapılması","etkinlik":"Bilgi merkezleri konusunda çalışmalar yapılması","belirli_gun":"Mehmet Akif Ersoy'u Anma Haftası"},
+{"ay":"OCAK","hafta":"16. Hafta (04-08 Ocak)","amac":"Halk ve okul kütüphanelerinin tanıtılması","etkinlik":"Halk ve okul kütüphanelerinin tanıtılması","belirli_gun":""},
+{"ay":"OCAK","hafta":"17. Hafta (11-15 Ocak)","amac":"1. Dönem Değerlendirilmesi","etkinlik":"1. Dönemde yapılan çalışmaların değerlendirilmesi.","belirli_gun":"Enerji Tasarrufu Haftası"},
+{"ay":"OCAK","hafta":"18. Hafta (18-22 Ocak)","amac":"İkinci dönem yapılacak çalışmaların gözden geçirilmesi","etkinlik":"İkinci dönem yapılacak çalışmaların gözden geçirilmesi","belirli_gun":""},
+{"ay":"ŞUBAT","hafta":"19. Hafta (08-12 Şubat)","amac":"Arşivler hakkında bilgi verilmesi, araştırmalar yapılması","etkinlik":"Arşivler hakkında bilgi verilmesi, araştırmalar yapılması","belirli_gun":""},
+{"ay":"ŞUBAT","hafta":"20. Hafta (15-19 Şubat)","amac":"Yaşam boyu öğrenme sürecinde okuma alışkanlığının önemi konulu sunum","etkinlik":"Yaşam boyu öğrenme sürecinde okuma alışkanlığının önemi konulu sunum","belirli_gun":""},
+{"ay":"ŞUBAT","hafta":"21. Hafta (22-26 Şubat)","amac":"İstiklâl Marşı’nın Kabulü ve Mehmet Akif ERSOY’u Anma Günü nedeniyle program, okul panosu ve kütüphane çalışmaları hazırlanması","etkinlik":"İstiklâl Marşı’nın Kabulü ve Mehmet Akif ERSOY’u Anma Günü nedeniyle program, okul panosu ve kütüphane çalışmaları hazırlanması","belirli_gun":""},
+{"ay":"MART","hafta":"22. Hafta (01-05 Mart)","amac":"Kütüphaneler Haftası ile ilgili kitap sergisi hazırlanması","etkinlik":"Kütüphaneler Haftası ile ilgili kitap sergisi hazırlanması","belirli_gun":"Vergi Haftası, Yeşilay Haftası"},
+{"ay":"MART","hafta":"23. Hafta (15-19 Mart)","amac":"Bilgi merkezlerinde yürütülen işlemlerin tanıtılması","etkinlik":"Bilgi merkezlerinde yürütülen işlemlerin tanıtılması","belirli_gun":"Bilim ve Teknoloji Haftası, İstiklâl Marşı'nın Kabulü ve Mehmet Akif Ersoy'u Anma Günü"},
+{"ay":"MART","hafta":"24. Hafta (22-26 Mart)","amac":"Kütüphane düzenleme çalışmaları","etkinlik":"Kütüphane düzenleme çalışmaları","belirli_gun":"Orman Haftası, Dünya Tiyatrolar Günü"},
+{"ay":"MART","hafta":"25. Hafta (29 Mart - 02 Nisan)","amac":"Kütüphane düzenleme çalışmaları","etkinlik":"Kütüphane düzenleme çalışmaları","belirli_gun":"Kütüphaneler Haftası, Kanser Haftası, Dünya Otizm Farkındalık Günü"},
+{"ay":"NISAN","hafta":"26. Hafta (05-09 Nisan)","amac":"Atatürk’ün okumaya verdiği önem ve okuduğu kitaplar","etkinlik":"Atatürk’ün okumaya verdiği önem ve okuduğu kitaplar","belirli_gun":"Kanser Haftası, Dünya Sağlık Günün/Dünya Sağlık Haftası, Kişisel Verileri Koruma Günü"},
+{"ay":"NISAN","hafta":"27. Hafta (12-16 Nisan)","amac":"Okuma alışkanlığının, genç bireylerin kişisel gelişimine katkılarının kavratılması","etkinlik":"Okuma alışkanlığının, genç bireylerin kişisel gelişimine katkılarının kavratılması","belirli_gun":"Turizm Haftası"},
+{"ay":"NISAN","hafta":"28. Hafta (19-23 Nisan)","amac":"Okuma alışkanlığının, genç bireylerin kişisel gelişimine katkılarının kavratılması","etkinlik":"Okuma alışkanlığının, genç bireylerin kişisel gelişimine katkılarının kavratılması","belirli_gun":"Ulusal Egemenlik ve Çocuk Bayramı"},
+{"ay":"NISAN","hafta":"29. Hafta (26-30 Nisan)","amac":"Üst Eğitim Kurumlarının “Kütüphanecilik” bölümünün tanıtılması","etkinlik":"Üst Eğitim Kurumlarının “Kütüphanecilik” bölümünün tanıtılması","belirli_gun":"Kût'ül Amâre Zaferi"},
+{"ay":"MAYIS","hafta":"30. Hafta (03-07 Mayıs)","amac":"Boş zamanları kitap okuma ile değerlendirme alışkanlığının kazandırılması. Kitap okumanın başarılı olmadaki etkisini kavratmak.","etkinlik":"Kitap okuma kampanyasının düzenlenmesi. Ders çalışma ve sınavlarda başarılı olmada kitap okumanın yararlarının belirtilmesi.","belirli_gun":"Bilişim Haftası, Trafik ve İlkyardım Haftası, İş Sağlığı ve Güvenliği Haftası"},
+{"ay":"MAYIS","hafta":"31. Hafta (10-14 Mayıs)","amac":"Kütüphanecilik hakkında bilgilendirme.","etkinlik":"Ülkemizdeki Kütüphanecilik durumunun öğrencilere aktarılması.","belirli_gun":"Engelliler Haftası, Vakıflar Haftası"},
+{"ay":"MAYIS","hafta":"32. Hafta (17-21 Mayıs)","amac":"Yıl boyunca yapılan etkinliklerin değerlendirilmesi.","etkinlik":"Yıl sonu faaliyet raporunun hazırlanması.","belirli_gun":"Müzeler Haftası, Atatürk'ü Anma ve Gençlik ve Spor Bayramı"},
+{"ay":"MAYIS","hafta":"33. Hafta (24-28 Mayıs)","amac":"Yıl boyunca yapılan etkinliklerin değerlendirilmesi.","etkinlik":"Yıl sonu faaliyet raporunun hazırlanması.","belirli_gun":""},
+{"ay":"MAYIS","hafta":"34. Hafta (31 Mayıs - 04 Haziran)","amac":"Yıl boyunca yapılan etkinliklerin değerlendirilmesi.","etkinlik":"Yıl sonu faaliyet raporunun hazırlanması.","belirli_gun":""},
+{"ay":"HAZIRAN","hafta":"35. Hafta (07-11 Haziran)","amac":"Yıl boyunca yapılan etkinliklerin değerlendirilmesi.","etkinlik":"Yıl sonu faaliyet raporunun hazırlanması.","belirli_gun":""},
+{"ay":"HAZIRAN","hafta":"36. Hafta (14-18 Haziran)","amac":"Yıl boyunca yapılan etkinliklerin değerlendirilmesi.","etkinlik":"Yıl sonu faaliyet raporunun hazırlanması.","belirli_gun":""},
+{"ay":"HAZIRAN","hafta":"37. Hafta (21-25 Haziran)","amac":"Etkinlik Haftası","etkinlik":"Etkinlik Haftası","belirli_gun":""}
+];
+
+/* ================= SABİTLER ================= */
+const AYAR_K = "tde_kulup_ayarlar";
+const PLAN_K = "tde_kulup_plan";
+const META_K = "tde_kulup_plan_meta";
+const DURUM_K = "tde_kulup_haftalik_durum";
+const RAPOR_K = "tde_kulup_raporlar";
+const GORUNUM_K = "tde_kulup_gorunum";
+const RAPOR_ONCEKI_K = "tde_kulup_raporlar_onceki";
+const PLAN_ONCEKI_K = "tde_kulup_plan_onceki";
+const SON_YEDEK_K = "tde_kulup_son_yedek";
+const GECIS_BAYRAK_K = "tde_kulup_gecis_v3_belirli_gun";
+const GECIS_YEDEK_K = "tde_kulup_plan_gecis_oncesi";
+const AYLAR_TR = ["OCAK","ŞUBAT","MART","NİSAN","MAYIS","HAZİRAN","TEMMUZ","AĞUSTOS","EYLÜL","EKİM","KASIM","ARALIK"];
+const MODELLER_RAPOR = ["gemini-2.5-flash","gemini-flash-latest","gemini-2.5-flash-lite","gemini-2.5-pro"];
+const MODELLER_PLAN = ["gemini-2.5-flash","gemini-flash-latest","gemini-2.5-flash-lite"];
+const DURUMLAR = ["Yapıldı","Kısmen Yapıldı","Yapılmadı"];
+const BOLUMLER = [
+  ["1. RAPOR VE DÖNEM ÖZETİ","rapor_ozeti"],
+  ["2. GERÇEKLEŞTİRİLEN SOSYAL KULÜP FAALİYETLERİ","yapilan_faaliyetler"],
+  ["3. PEDAGOJİK VE SOSYAL KAZANIMLAR","kazanimlar"],
+  ["4. KARŞILAŞILAN GÜÇLÜKLER VE ALINAN TEDBİRLER","sorunlar_ve_cozumler"],
+  ["5. GELECEK AY ÇALIŞMA PLANI VE HEDEFLER","gelecek_ay_plani"],
+  ["6. DANIŞMAN ÖĞRETMEN GENEL DEĞERLENDİRMESİ","genel_degerlendirme"]
+];
+
+/* ================= YARDIMCILAR ================= */
+const $ = (s, r) => (r || document).querySelector(s);
+const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function trUp(s){ return String(s||"").trim().toLocaleUpperCase("tr-TR"); }
+function trLow(s){ return String(s||"").toLocaleLowerCase("tr-TR"); }
+/* Ay adı karşılaştırması için: İ ile I aynı sayılır (planda "EKIM", takvimde "EKİM"). Saklanan yazıyı değiştirmez. */
+function ayNorm(s){ return String(s==null?"":s).toLocaleUpperCase("tr-TR").replace(/İ/g, "I").trim(); }
+function depoOku(k, v){ try{ const x = localStorage.getItem(k); return x ? JSON.parse(x) : v; }catch(e){ return v; } }
+function depoYaz(k, v){
+  try{ localStorage.setItem(k, JSON.stringify(v)); return true; }
+  catch(e){ kayitUyari(); return false; }
+}
+function depoSil(k){ try{ localStorage.removeItem(k); }catch(e){} }
+/* Kayıt başarısız olunca kapatılabilir kırmızı şerit; şerit bir kez eklenir, her hatada yeniden görünür. */
+function kayitUyari(){
+  try{
+    if(!document.body) return;
+    let s = document.getElementById("kayitSeridi");
+    if(!s){
+      s = document.createElement("div"); s.id = "kayitSeridi"; s.setAttribute("role", "alert");
+      const sp = document.createElement("span");
+      sp.textContent = "⚠️ Kayıt yapılamadı (tarayıcı depolaması dolu ya da engelli). Son değişiklik kaydedilmedi. 'Tüm Veriyi Yedekle' ile yedek alın.";
+      const b = document.createElement("button"); b.type = "button"; b.textContent = "✕"; b.setAttribute("aria-label", "Kapat");
+      b.onclick = ()=>{ s.hidden = true; };
+      s.appendChild(sp); s.appendChild(b);
+      document.body.insertBefore(s, document.body.firstChild);
+    }
+    s.hidden = false;
+  }catch(e){}
+}
+function nesneMi(v){ return !!v && typeof v === "object" && !Array.isArray(v); }
+function tarihYaz(iso){ const d = new Date(iso); return isNaN(d.getTime()) ? String(iso) : d.toLocaleString("tr-TR"); }
+function zamanDamgasi(){
+  const d = new Date(), p = n=>String(n).padStart(2, "0");
+  return d.getFullYear() + "-" + p(d.getMonth()+1) + "-" + p(d.getDate()) + "_" + p(d.getHours()) + "-" + p(d.getMinutes());
+}
+
+function bildir(metin, tur, sure){
+  const d = document.createElement("div");
+  d.className = "bildirim " + (tur || "");
+  d.textContent = metin;
+  d.onclick = ()=>d.remove();
+  $("#bildirimler").appendChild(d);
+  setTimeout(()=>{ if(d.parentNode) d.remove(); }, sure || (tur==="hata" ? 14000 : 4500));
+}
+
+function varsayilanYil(){
+  const d = new Date(), y = d.getFullYear(), m = d.getMonth()+1;
+  return m >= 9 ? (y + "-" + (y+1)) : ((y-1) + "-" + y);
+}
+function ayarlar(){ return Object.assign({kulup_adi:"Kültür ve Edebiyat Kulübü", yil:varsayilanYil()}, depoOku(AYAR_K, {})); }
+function plan(){ const p = depoOku(PLAN_K, null); return (Array.isArray(p) && p.length) ? p : GOMULU_PLAN; }
+function metaOku(){ return depoOku(META_K, null); }
+function durumlar(){ return depoOku(DURUM_K, {}); }
+function raporlar(){ return depoOku(RAPOR_K, {}); }
+function raporlarOnceki(){ const o = depoOku(RAPOR_ONCEKI_K, {}); return nesneMi(o) ? o : {}; }
+/* Bir ayın önceki rapor kopyaları: [{tarih, rapor}, ...] en yeni başta. Eski biçimde tek nesne ise diziye çevrilir. */
+function oncekiListesi(O, ay){
+  const v = nesneMi(O) ? O[ay] : null;
+  const l = Array.isArray(v) ? v : (nesneMi(v) ? [v] : []);
+  return l.filter(x=>nesneMi(x) && nesneMi(x.rapor));
+}
+const ONCEKI_EN_FAZLA = 3;
+function dKey(h){ return (h.ay||"") + "|" + (h.hafta||""); }
+function aylar(){ const g = []; plan().forEach(r=>{ const a = trUp(r.ay); if(a && !g.includes(a)) g.push(a); }); return g; }
+function ayHaftalari(ay){ return plan().map((r,i)=>Object.assign({_i:i}, r)).filter(r=>trUp(r.ay) === ay); }
+function durumKodu(s){ return s==="Yapıldı" ? "ok" : s==="Kısmen Yapıldı" ? "kismen" : s==="Yapılmadı" ? "yok" : "belirsiz"; }
+
+/* Planda ayNorm'u eşit bir ay varsa onun yazımını döndürür; yoksa verilen yazım olduğu gibi kalır. */
+function ayPlanYazimi(ay){
+  const n = ayNorm(ay);
+  if(!n) return ay;
+  const bul = aylar().find(a=>ayNorm(a) === n);
+  return bul || ay;
+}
+/* Yüklenen plan satırlarının ayını, mevcut planın yazımına çevirir (yeni ayrı grup oluşmasın);
+   planda olmayan ayda ilk görülen yazım kullanılır, böylece yeni plan kendi içinde de tek yazımda kalır. */
+function ayYazimiUyarla(rows){
+  const harita = {};
+  aylar().forEach(a=>{ harita[ayNorm(a)] = a; });
+  return rows.map(r=>{
+    const n = ayNorm(r.ay);
+    if(!harita[n]) harita[n] = r.ay;
+    return Object.assign({}, r, {ay: harita[n]});
+  });
+}
+
+function planKaydet(rows, metaYeni){
+  const ok1 = depoYaz(PLAN_K, rows);
+  const al = []; rows.forEach(r=>{ const a = trUp(r.ay); if(a && !al.includes(a)) al.push(a); });
+  const m = Object.assign({}, metaYeni || metaOku() || {dosya_adi:"Gömülü plan (düzenlenmiş)", yukleme_tarihi:new Date().toLocaleString("tr-TR")});
+  m.hafta_sayisi = rows.length; m.aylar = al;
+  depoYaz(META_K, m);
+  if(!ok1) bildir("Plan bu tarayıcıda kaydedilemedi (gizli sekme veya depolama kapalı olabilir).", "hata");
+  return ok1;
+}
+function durumGuncelle(key, patch){
+  const D = durumlar();
+  D[key] = Object.assign({yapildi:"", notlar:""}, D[key], patch);
+  depoYaz(DURUM_K, D);
+}
+
+function ayBul(){
+  const A = aylar();
+  const bu = ayNorm(AYLAR_TR[new Date().getMonth()]);
+  return A.find(a=>ayNorm(a) === bu) || (A[0] || null);
+}
+let gorunum = "plan", seciliAy = ayBul(), filtreAy = "TUMU", arama = "", duzenlenenIdx = -1, uretiyor = false;
+function seciliAyDuzelt(){ const A = aylar(); if(!A.includes(seciliAy)) seciliAy = ayBul(); if(filtreAy !== "TUMU" && !A.includes(filtreAy)) filtreAy = "TUMU"; }
+
+function chipler(s){
+  if(!s) return "";
+  return String(s).split(",").map(x=>x.trim()).filter(Boolean).map(x=>'<span class="chip">'+esc(x)+'</span>').join("");
+}
+function autoGrow(t){ t.style.height = "auto"; t.style.height = (t.scrollHeight + 2) + "px"; }
+
+/* ================= GÖRÜNÜM ================= */
+function gorunumDegistir(v, ay){
+  gorunum = v;
+  depoYaz(GORUNUM_K, v);
+  if(ay) seciliAy = ay;
+  seciliAyDuzelt();
+  $("#vPlan").hidden = v !== "plan";
+  $("#vRapor").hidden = v !== "rapor";
+  $$(".sekme").forEach(b=>b.classList.toggle("aktif", b.dataset.sekme === v));
+  if(v === "plan") planCiz(); else raporSayfasiCiz();
+  window.scrollTo({top:0});
+}
+function altBaslikGuncelle(){
+  const a = ayarlar();
+  $("#altBaslik").textContent = [a.okul_adi, a.kulup_adi, a.yil].filter(Boolean).join(" · ");
+}
+
+/* ================= KAYIT KLASÖRÜ ================= */
+let klasorHandle = null;
+function idbAc(){
+  return new Promise((res, rej)=>{
+    const r = indexedDB.open("kulup_rapor_db", 1);
+    r.onupgradeneeded = ()=>r.result.createObjectStore("kv");
+    r.onsuccess = ()=>res(r.result);
+    r.onerror = ()=>rej(r.error);
+  });
+}
+async function idbGet(k){
+  const db = await idbAc();
+  return new Promise((res, rej)=>{ const q = db.transaction("kv").objectStore("kv").get(k); q.onsuccess = ()=>res(q.result); q.onerror = ()=>rej(q.error); });
+}
+async function idbSet(k, v){
+  const db = await idbAc();
+  return new Promise((res, rej)=>{
+    const t = db.transaction("kv", "readwrite"), st = t.objectStore("kv");
+    if(v === undefined) st.delete(k); else st.put(v, k);
+    t.oncomplete = ()=>res(); t.onerror = ()=>rej(t.error);
+  });
+}
+function klasorDestegi(){ return typeof window.showDirectoryPicker === "function"; }
+async function klasorYukle(){
+  try{ klasorHandle = (await idbGet("klasor")) || null; }catch(e){ klasorHandle = null; }
+  klasorDurumYaz();
+}
+function klasorDurumYaz(){
+  const el = $("#klasorDurum"); if(!el) return;
+  if(!klasorDestegi()) el.textContent = "Bu tarayıcı klasöre doğrudan kayıt desteklemiyor (Chrome veya Edge gerekir). Dosyalar tarayıcının indirme klasörüne iner.";
+  else if(klasorHandle) el.textContent = "Seçili klasör: " + klasorHandle.name;
+  else el.textContent = "Seçilmedi — dosyalar tarayıcının indirme klasörüne iner.";
+}
+async function klasorSec(){
+  if(!klasorDestegi()){ klasorDurumYaz(); bildir("Bu tarayıcı klasöre doğrudan kayıt desteklemiyor. Chrome veya Edge kullanın; şimdilik dosyalar indirme klasörüne iner.", "uyari", 8000); return; }
+  try{
+    const h = await window.showDirectoryPicker({id:"kulup-raporlari", mode:"readwrite", startIn:"desktop"});
+    klasorHandle = h;
+    try{ await idbSet("klasor", h); }catch(e){ bildir("Klasör seçildi ama bir sonraki açılışta hatırlanamayabilir.", "uyari"); }
+    klasorDurumYaz();
+    bildir("Kayıt klasörü: " + h.name, "ok");
+  }catch(e){
+    if(e && e.name === "AbortError") return;
+    bildir("Klasör seçilemedi: " + ((e && e.message) || e) + "\nMasaüstünde yeni bir klasör açıp onu seçmeyi deneyin.", "hata", 9000);
+  }
+}
+async function klasorKaldir(){
+  klasorHandle = null;
+  try{ await idbSet("klasor", undefined); }catch(e){}
+  klasorDurumYaz();
+  bildir("Kayıt klasörü kaldırıldı; dosyalar indirme klasörüne iner.", "ok");
+}
+/* Tıklamanın hemen başında çağrılır (izin penceresi kullanıcı hareketi ister). */
+async function klasorIzni(){
+  if(!klasorHandle) return null;
+  try{
+    let p = await klasorHandle.queryPermission({mode:"readwrite"});
+    if(p !== "granted") p = await klasorHandle.requestPermission({mode:"readwrite"});
+    return p === "granted" ? klasorHandle : null;
+  }catch(e){ return null; }
+}
+async function benzersizAd(kh, ad){
+  const nokta = ad.lastIndexOf("."), govde = nokta > 0 ? ad.slice(0, nokta) : ad, uzanti = nokta > 0 ? ad.slice(nokta) : "";
+  for(let i = 1; i <= 99; i++){
+    const aday = i === 1 ? ad : govde + " (" + i + ")" + uzanti;
+    try{ await kh.getFileHandle(aday); }
+    catch(e){ if(e && e.name === "NotFoundError") return aday; throw e; }
+  }
+  return govde + " (" + Date.now() + ")" + uzanti;
+}
+/* Seçili klasöre yazar; olmazsa normal indirmeye düşer. Mevcut dosyanın üzerine yazmaz. */
+async function kaydet(blob, ad, kh){
+  if(kh){
+    try{
+      const gercek = await benzersizAd(kh, ad);
+      const fh = await kh.getFileHandle(gercek, {create:true});
+      const w = await fh.createWritable();
+      await w.write(blob); await w.close();
+      return {klasorde:true, ad:gercek, klasor:kh.name};
+    }catch(e){
+      indir(blob, ad);
+      return {klasorde:false, ad, hata:(e && e.message) || String(e)};
+    }
+  }
+  indir(blob, ad);
+  return {klasorde:false, ad};
+}
+function kayitBildir(r, tur){
+  if(r.klasorde) bildir(tur + " kaydedildi:\n📁 " + r.klasor + " / " + r.ad, "ok", 7000);
+  else if(r.hata) bildir(tur + " seçili klasöre yazılamadı (" + r.hata + "). Normal indirme yapıldı.", "uyari", 9000);
+  else bildir(tur + " indirildi.", "ok");
+}
+
+/* ================= YILLIK PLAN EKRANI ================= */
+function planCiz(){
+  const P = plan(), D = durumlar();
+  let y = 0, k = 0, n = 0, b = 0;
+  P.forEach(r=>{
+    const d = D[dKey(r)];
+    if(!d || !d.yapildi) b++; else if(d.yapildi === "Yapıldı") y++; else if(d.yapildi === "Kısmen Yapıldı") k++; else n++;
+  });
+  const tile = (sayi, et, c)=>'<div class="stat '+(c||"")+'"><b>'+sayi+'</b><span>'+et+'</span></div>';
+  $("#statlar").innerHTML = tile(P.length, "Toplam hafta") + tile(aylar().length, "Ay") + tile(y, "Yapıldı", "ok") + tile(k+n, "Kısmen / yapılmadı", "uyari") + tile(b, "İşaretlenmemiş");
+
+  $("#filtre").innerHTML =
+    '<button type="button" class="f-chip '+(filtreAy==="TUMU"?"aktif":"")+'" data-filtre="TUMU">Tümü</button>' +
+    aylar().map(a=>'<button type="button" class="f-chip '+(filtreAy===a?"aktif":"")+'" data-filtre="'+esc(a)+'">'+esc(a)+'</button>').join("");
+
+  const q = trLow(arama.trim());
+  let html = "", gosterilen = 0;
+  aylar().forEach(ay=>{
+    if(filtreAy !== "TUMU" && filtreAy !== ay) return;
+    const satirlar = ayHaftalari(ay).filter(r=>{
+      if(!q) return true;
+      return trLow([r.hafta, r.amac, r.etkinlik, r.belirli_gun].join(" ")).includes(q);
+    });
+    if(!satirlar.length) return;
+    const tumu = ayHaftalari(ay);
+    const isaretli = tumu.filter(r=>D[dKey(r)] && D[dKey(r)].yapildi).length;
+    html += '<tr class="grup"><td colspan="6"><div class="grup-ic"><span class="grup-ad">'+esc(ay)+'</span>' +
+      '<span class="grup-say">'+tumu.length+' hafta · '+isaretli+' işaretli</span>' +
+      '<span class="grup-btn"><button type="button" data-rapor="'+esc(ay)+'">Raporu aç →</button><button type="button" data-ekle="'+esc(ay)+'">＋ Hafta ekle</button></span></div></td></tr>';
+    satirlar.forEach(r=>{
+      gosterilen++;
+      const d = D[dKey(r)] || {};
+      const kod = durumKodu(d.yapildi);
+      const eksik = !r.amac && !r.etkinlik;
+      html += '<tr class="satir '+(eksik?"eksik":"")+'">' +
+        '<td class="c-hafta"><b>'+esc(r.hafta)+'</b></td>' +
+        '<td>'+(r.amac ? esc(r.amac) : '<span class="bos">'+(eksik?"Plan boş — düzenleyin":"—")+'</span>')+'</td>' +
+        '<td>'+(r.etkinlik ? esc(r.etkinlik) : '<span class="bos">—</span>')+'</td>' +
+        '<td>'+(chipler(r.belirli_gun) || '<span class="bos">—</span>')+'</td>' +
+        '<td><button type="button" class="rozet '+kod+'" data-rapor="'+esc(ay)+'" title="Raporda aç">'+(d.yapildi ? esc(d.yapildi) : "İşaretlenmedi")+'</button></td>' +
+        '<td class="c-islem"><button type="button" class="ikon" data-duzenle="'+r._i+'" title="Düzenle">✏️</button></td></tr>';
+    });
+  });
+  $("#planGovde").innerHTML = html || '<tr><td colspan="6"><div class="bos-durum">Aramanızla eşleşen hafta bulunamadı.</div></td></tr>';
+  const m = metaOku();
+  $("#planNot").textContent = (m ? ("Kaynak: " + m.dosya_adi + (m.yukleme_tarihi ? " · " + m.yukleme_tarihi : "")) : "Kaynak: gömülü yıllık plan") +
+    " · Tarihler plandaki gibi gösterilir; eksik veya yanlış satırları ✏️ ile düzeltebilirsiniz.";
+}
+
+function satirDlgAc(idx, ayOn){
+  duzenlenenIdx = idx;
+  $("#ayListe").innerHTML = aylar().map(a=>'<option value="'+esc(a)+'">').join("");
+  const r = idx >= 0 ? plan()[idx] : {ay: ayOn || "", hafta:"", amac:"", etkinlik:"", belirli_gun:""};
+  $("#satirBaslik").textContent = idx >= 0 ? "Haftayı düzenle" : "Yeni hafta ekle";
+  $("#s_ay").value = r.ay || ""; $("#s_hafta").value = r.hafta || "";
+  $("#s_amac").value = r.amac || ""; $("#s_etkinlik").value = r.etkinlik || ""; $("#s_gun").value = r.belirli_gun || "";
+  $("#s_sil").hidden = idx < 0;
+  $("#satirDlg").showModal();
+}
+function satirKaydet(){
+  const ay = ayPlanYazimi(trUp($("#s_ay").value)), hafta = $("#s_hafta").value.trim();
+  if(!ay || !hafta){ bildir("Ay ve hafta alanları boş olamaz.", "uyari"); return; }
+  const yeni = {ay, hafta, amac:$("#s_amac").value.trim(), etkinlik:$("#s_etkinlik").value.trim(), belirli_gun:$("#s_gun").value.trim()};
+  const rows = plan().map(r=>Object.assign({}, r));
+  if(duzenlenenIdx >= 0){
+    const eski = rows[duzenlenenIdx];
+    const eskiKey = dKey(eski), yeniKey = dKey(yeni);
+    rows[duzenlenenIdx] = yeni;
+    if(eskiKey !== yeniKey){
+      const D = durumlar();
+      if(D[eskiKey] && !rows.some((r,i)=>i!==duzenlenenIdx && dKey(r)===eskiKey)){ D[yeniKey] = D[eskiKey]; delete D[eskiKey]; depoYaz(DURUM_K, D); }
+    }
+  }else{
+    let son = -1; rows.forEach((r,i)=>{ if(ayNorm(r.ay) === ayNorm(ay)) son = i; });
+    if(son >= 0) rows.splice(son+1, 0, yeni); else rows.push(yeni);
+  }
+  if(planKaydet(rows)){ bildir("Plan güncellendi.", "ok"); }
+  $("#satirDlg").close();
+  seciliAyDuzelt(); planCiz();
+}
+function satirSil(){
+  if(duzenlenenIdx < 0) return;
+  const r = plan()[duzenlenenIdx];
+  if(!confirm('"' + r.hafta + '" haftası plandan silinsin mi?')) return;
+  const rows = plan().filter((_, i)=>i !== duzenlenenIdx);
+  if(!rows.length){ bildir("Planda en az bir hafta kalmalı.", "uyari"); return; }
+  const D = durumlar(); delete D[dKey(r)]; depoYaz(DURUM_K, D);
+  planKaydet(rows);
+  $("#satirDlg").close();
+  seciliAyDuzelt(); planCiz();
+}
+/* Planın üzerine yazılmadan önce eski plan saklanır. Kayıtlı (düzenlenmiş/yüklenmiş) plan yoksa saklanacak bir şey yoktur. */
+function eskiPlaniSakla(){
+  const p = depoOku(PLAN_K, null);
+  if(!(Array.isArray(p) && p.length)) return true;
+  return depoYaz(PLAN_ONCEKI_K, {tarih:new Date().toISOString(), plan:p});
+}
+function planSifirla(){
+  if(!confirm("Yüklediğiniz/düzenlediğiniz plan silinip gömülü yıllık plana dönülsün mü? Eski plan bu bilgisayarda saklanacak. (Haftalık işaretlemeleriniz ve raporlarınız silinmez.)")) return;
+  if(!eskiPlaniSakla() && !confirm("Eski plan saklanamadı. Yine de gömülü plana dönülsün mü?")) return;
+  depoSil(PLAN_K); depoSil(META_K);
+  seciliAyDuzelt(); planCiz();
+  bildir("Gömülü plana dönüldü.", "ok");
+}
+async function planDisaAktar(){
+  const kh = await klasorIzni();
+  kayitBildir(await kaydet(new Blob([JSON.stringify(plan(), null, 2)], {type:"application/json"}), "yillik_plan.json", kh), "Plan dosyası");
+}
+function indir(blob, ad){
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = ad;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 5000);
+}
+
+/* ================= AYLIK RAPOR EKRANI ================= */
+function raporSayfasiCiz(){
+  pillCiz(); haftalarCiz(); raporAlaniCiz();
+}
+function pillCiz(){
+  const D = durumlar(), R = raporlar();
+  $("#ayPills").innerHTML = aylar().map(a=>{
+    const hs = ayHaftalari(a);
+    const n = hs.filter(h=>D[dKey(h)] && D[dKey(h)].yapildi).length;
+    return '<button type="button" class="pill '+(a===seciliAy?"aktif":"")+'" data-ay="'+esc(a)+'">'+esc(a)+'<small>'+n+'/'+hs.length+' işaretli'+(R[a]?" · 📄":"")+'</small></button>';
+  }).join("");
+  const akt = $("#ayPills .pill.aktif");
+  if(akt && akt.scrollIntoView) akt.scrollIntoView({block:"nearest", inline:"center"});
+}
+function haftalarCiz(){
+  const D = durumlar(), hs = ayHaftalari(seciliAy);
+  const n = hs.filter(h=>D[dKey(h)] && D[dKey(h)].yapildi).length;
+  $("#ayBaslik").innerHTML = '<h2>'+esc(seciliAy || "")+'</h2><div class="ilerleme"><i style="width:'+(hs.length ? Math.round(n*100/hs.length) : 0)+'%"></i></div><span class="sayi">'+n+' / '+hs.length+' hafta işaretlendi</span>';
+  $("#haftalar").innerHTML = hs.map(h=>{
+    const d = D[dKey(h)] || {}, kod = durumKodu(d.yapildi);
+    return '<article class="hafta '+(kod==="belirsiz"?"":kod)+'" data-key="'+esc(dKey(h))+'">' +
+      '<div class="h-ust"><div class="h-ad">'+esc(h.hafta)+'</div><div class="seg">' +
+      DURUMLAR.map(s=>'<button type="button" class="seg-b '+(d.yapildi===s?"on "+durumKodu(s):"")+'" data-set="'+s+'">'+s+'</button>').join("") +
+      '</div></div>' +
+      '<div class="h-plan"><div><span>Planlanan amaç</span>'+(h.amac?esc(h.amac):'<i class="bos">Planda yok</i>')+'</div><div><span>Planlanan etkinlik</span>'+(h.etkinlik?esc(h.etkinlik):'<i class="bos">Planda yok</i>')+'</div></div>' +
+      (h.belirli_gun ? '<div>'+chipler(h.belirli_gun)+'</div>' : '') +
+      '<textarea data-not placeholder="Kısa not: ne yapıldı, kaç öğrenci katıldı, neden yapılamadı… (isteğe bağlı)">'+esc(d.notlar||"")+'</textarea></article>';
+  }).join("") || '<div class="rapor-bos">Bu ay için planda hafta yok. Yıllık Plan sekmesinden ekleyebilirsiniz.</div>';
+  $("#uretIpucu").textContent = hs.length && n < hs.length ? "Raporu yazmadan önce tüm haftaların durumunu işaretleyin." : "";
+}
+
+function bolumMetni(v){ return (typeof v === "string") ? v : ""; }
+function raporAlaniCiz(){
+  const R = raporlar()[seciliAy];
+  const kap = $("#raporAlani");
+  if(!R){ kap.innerHTML = '<div class="rapor-bos">Henüz '+esc(seciliAy||"")+' raporu yazılmadı. Haftaları işaretleyip "AI ile Rapor Yaz"a basın.</div>'; return; }
+  const O = oncekiListesi(raporlarOnceki(), seciliAy)[0];
+  const oncekiVar = !!O;
+  kap.innerHTML = '<div class="kart rapor-kart"><h2>'+esc(seciliAy)+' Raporu</h2>' +
+    '<div class="rapor-meta">'+esc(R.model ? "Model: "+R.model+" · " : "")+esc(R.tarih||"")+' · Düzenlemeleriniz otomatik kaydedilir.</div>' +
+    BOLUMLER.map(([b,k])=>'<div class="bolum-baslik"><b>'+esc(b)+'</b><small data-say="'+k+'"></small></div><textarea data-bolum="'+k+'">'+esc(bolumMetni((R.bolumler||{})[k]))+'</textarea>').join("") +
+    '<div class="alt-satir"><button type="button" class="btn" id="btnWord">📄 Word İndir</button><button type="button" class="btn gri" id="btnKopyala">📋 Metni Kopyala</button>' +
+    (oncekiVar ? '<button type="button" class="btn gri kucuk" id="btnOncekiGeri"'+(uretiyor ? ' disabled' : '')+' title="En yeni önceki kopyanın tarihi: '+esc(O.tarih ? tarihYaz(O.tarih) : "bilinmiyor")+'">↩ Önceki metni geri getir</button>' : '') +
+    '<span class="bosluk"></span><button type="button" class="btn gri" id="btnYenidenYaz">🔄 Yeniden Yaz</button></div></div>';
+  $$("textarea[data-bolum]", kap).forEach(t=>{ autoGrow(t); sayiGuncelle(t); });
+}
+function sayiGuncelle(t){ const s = $('[data-say="'+t.dataset.bolum+'"]'); if(s) s.textContent = t.value.length + " karakter"; }
+/* Mevcut ve önceki rapor metnini yer değiştirir; hiçbiri kaybolmaz. */
+function oncekiGeriGetir(){
+  if(uretiyor) return;
+  const ay0 = seciliAy, R = raporlar(), O = raporlarOnceki(), L = oncekiListesi(O, ay0), o = L[0];
+  if(!o){ bildir("Bu ay için saklanmış önceki metin yok.", "uyari"); return; }
+  const simdiki = R[ay0] || null;
+  /* En yeni kopya çıkar, şimdiki metin listenin başına girer; en fazla 3 kopya tutulur */
+  let yeniL = (simdiki ? [{tarih:new Date().toISOString(), rapor:simdiki}] : []).concat(L.slice(1));
+  const atilacak = yeniL.length > ONCEKI_EN_FAZLA;
+  if(atilacak) yeniL = yeniL.slice(0, ONCEKI_EN_FAZLA);
+  if(!confirm("Şu anki rapor metni ile en yeni önceki metin yer değiştirecek." + (atilacak ? " En eski kopya silinecek (en fazla " + ONCEKI_EN_FAZLA + " kopya tutulur)." : " Hiçbiri silinmez; isterseniz tekrar değiştirebilirsiniz.") + "\n\nÖnceki metnin tarihi: " + (o.tarih ? tarihYaz(o.tarih) : "bilinmiyor") + "\n\nDevam edilsin mi?")) return;
+  R[ay0] = o.rapor;
+  if(!depoYaz(RAPOR_K, R)){ bildir("Rapor kaydedilemedi; hiçbir şey değişmedi.", "hata"); return; }
+  if(yeniL.length) O[ay0] = yeniL; else delete O[ay0];
+  if(!depoYaz(RAPOR_ONCEKI_K, O)){
+    if(simdiki) R[ay0] = simdiki; else delete R[ay0];
+    depoYaz(RAPOR_K, R);
+    bildir("Önceki metin saklanamadığı için işlem geri alındı; hiçbir şey kaybolmadı.", "hata");
+  }else{
+    bildir("Önceki metin geri getirildi. Şimdiki metin 'önceki' olarak saklandı.", "ok");
+  }
+  pillCiz(); raporAlaniCiz();
+}
+
+/* ================= GEMINI ================= */
+function temizDuzMetin(v){
+  if(v==null) return "";
+  if(typeof v === "string") return v;
+  if(Array.isArray(v)) return v.map(x=>(x && typeof x==="object") ? "• " + Object.values(x).filter(Boolean).join(" - ") : "• " + x).join("\n");
+  if(typeof v === "object") return Object.entries(v).map(([k,x])=>k.toUpperCase()+":\n"+temizDuzMetin(x)).join("\n\n");
+  return String(v);
+}
+function jsonAyikla(metin){
+  metin = (metin||"").trim();
+  if(metin.startsWith("```")) metin = metin.replace(/^```[a-zA-Z]*\n?/, "").replace(/\n?```$/, "");
+  const veri = JSON.parse(metin.trim());
+  if(veri && !Array.isArray(veri) && typeof veri === "object") Object.keys(veri).forEach(k=>{ veri[k] = temizDuzMetin(veri[k]); });
+  return veri;
+}
+let ISTEK_ZAMAN_ASIMI_MS = 90000;
+let suAnkiModel = "";
+async function geminiCagir(apiKey, model, govde){
+  const url = "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent";
+  /* 2.5 Flash varsayılan olarak yanıttan önce uzun süre "düşünür"; resmi rapor için gerekmez, kapatılır.
+     Pro modelinde düşünme kapatılamaz, o yüzden dokunulmaz. */
+  const dusunmeKapat = !/pro/.test(model);
+  async function gonder(g){
+    const ctl = new AbortController();
+    const zt = setTimeout(()=>ctl.abort(), ISTEK_ZAMAN_ASIMI_MS);
+    try{
+      const r = await fetch(url, {method:"POST", headers:{"Content-Type":"application/json","x-goog-api-key":apiKey}, body:JSON.stringify(g), signal:ctl.signal});
+      const j = await r.json().catch(()=>({}));
+      return {r, j};
+    }catch(e){
+      const zaman = e && e.name === "AbortError";
+      const er = new Error(zaman ? "Yanıt " + Math.round(ISTEK_ZAMAN_ASIMI_MS/1000) + " sn içinde gelmedi (zaman aşımı)." : "İnternet bağlantısı kurulamadı.");
+      er.status = zaman ? 408 : 0; throw er;
+    }finally{ clearTimeout(zt); }
+  }
+  let g = govde;
+  if(dusunmeKapat) g = Object.assign({}, govde, {generationConfig:Object.assign({}, govde.generationConfig, {thinkingConfig:{thinkingBudget:0}})});
+  let {r, j} = await gonder(g);
+  if(!r.ok && dusunmeKapat && r.status === 400 && /think/i.test((j.error && j.error.message) || "")){
+    ({r, j} = await gonder(govde));
+  }
+  if(!r.ok){
+    const er = new Error((j.error && j.error.message) ? j.error.message : ("HTTP " + r.status));
+    er.status = r.status; throw er;
+  }
+  const parca = j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts;
+  const metin = parca ? parca.map(p=>p.text||"").join("") : "";
+  if(!metin.trim()){ const er = new Error("Model boş yanıt döndürdü."); er.status = 0; throw er; }
+  return metin;
+}
+function hataKisa(e){
+  let m = (e && e.message ? e.message : String(e)).replace(/\s+/g, " ");
+  if(m.length > 170) m = m.slice(0,170) + "…";
+  const s = e && e.status;
+  let on = "";
+  if(s === 429) on = "Kota/limit doldu — ";
+  else if(s === 500 || s === 503) on = "Sunucu yoğun — ";
+  else if(s === 404) on = "Model bulunamadı — ";
+  else if(s === 400 && /api key/i.test(m)) on = "API anahtarı geçersiz — ";
+  else if(s === 403) on = "Erişim reddedildi — ";
+  return on + m;
+}
+function anahtarHatasi(e){
+  const m = (e && e.message) || "";
+  return (e.status === 400 && /api key/i.test(m)) || (e.status === 403 && /(api key|permission|leaked|denied)/i.test(m));
+}
+async function modelleriDene(apiKey, modeller, govdeUret, ayikla){
+  const hatalar = [];
+  for(const m of modeller){
+    let metin;
+    suAnkiModel = m;
+    try{
+      metin = await geminiCagir(apiKey, m, govdeUret());
+    }catch(e){
+      if(anahtarHatasi(e)) throw new Error("API anahtarı kabul edilmedi. Ayarlar'dan anahtarı kontrol edin.\n" + hataKisa(e));
+      hatalar.push(m + ": " + hataKisa(e));
+      continue;
+    }
+    try{
+      return {sonuc: ayikla(metin), model: m};
+    }catch(e){
+      hatalar.push(m + ": Yanıt çözümlenemedi — " + (e.message || e));
+    }
+  }
+  throw new Error("\n" + hatalar.join("\n"));
+}
+
+function eksikHaftalar(){
+  const D = durumlar();
+  return ayHaftalari(seciliAy).filter(h=>!(D[dKey(h)] && D[dKey(h)].yapildi));
+}
+
+async function raporUret(){
+  if(uretiyor) return;
+  const ay = ayarlar();
+  if(!(ay.api_key||"").trim()){ bildir("Önce Ayarlar bölümünden Gemini API anahtarınızı girip kaydedin.", "hata"); return; }
+  const hs = ayHaftalari(seciliAy);
+  if(!hs.length) return;
+  const eksik = eksikHaftalar();
+  if(eksik.length){
+    $$("#haftalar .hafta").forEach(c=>c.classList.toggle("uyari", eksik.some(h=>dKey(h) === c.dataset.key)));
+    bildir("Şu haftaların durumu işaretlenmemiş:\n" + eksik.map(h=>"• "+h.hafta).join("\n") + "\n\nYapılmayan bir faaliyeti yapılmış gibi yazmamak için önce işaretleyin.", "uyari", 9000);
+    const ilk = $("#haftalar .hafta.uyari"); if(ilk) ilk.scrollIntoView({behavior:"smooth", block:"center"});
+    return;
+  }
+  const D = durumlar();
+  const hm = hs.map(h=>{
+    const d = D[dKey(h)] || {};
+    return "\nHafta: "+h.hafta+"\nPlanlanan Amaç: "+(h.amac||"")+"\nPlanlanan Etkinlik: "+(h.etkinlik||"")+"\nBelirli Gün/Haftalar: "+(h.belirli_gun||"")+"\nUygulama Durumu: "+d.yapildi+"\nÖğretmen Notu: "+(d.notlar||"")+"\n---";
+  }).join("");
+
+  const prompt =
+`Sen Millî Eğitim Bakanlığı mevzuatına ve resmi yazışma kurallarına tam hakim bir okul kulüp danışman öğretmenisin.
+Görevin: Okul müdürlüğüne sunulacak resmi bir "AYLIK SOSYAL KULÜP FAALİYET RAPORU" metni yazmaktır.
+
+TEMEL BİLGİLER:
+- Okul: ${ay.okul_adi || 'Okul Belirtilmemiş'}
+- Sosyal Kulüp: ${ay.kulup_adi}
+- Danışman Öğretmen: ${ay.ogretmen || 'Danışman Öğretmen'}
+- Eğitim Yılı: ${ay.yil}
+- Rapor Ayı: ${seciliAy}
+
+HAFTALIK ÇALIŞMA VERİLERİ:
+${hm}
+
+KESİNLİKLE UYULMASI GEREKEN KURALLAR:
+1. ASLA "25 yıllık tecrübemle", "kıdemli öğretmen olarak" gibi kişisel veya yapay ifadeler KULLANMA. Rapor tamamen kurumsal, resmi ve üçüncü şahıs/edilgen dilde yazılmalıdır ("yapılmıştır", "sağlanmıştır").
+2. BÜTÜN ALANLAR SADECE DÜZ METİN (STRING) OLMALIDIR. Kesinlikle iç içe JSON objesi veya dizi üretme.
+3. "kazanimlar" alanı: Bilişsel, duyuşsal ve sosyal kazanımları madde imi (•) ile alt alta tek bir düz metin olarak yaz.
+4. "yapilan_faaliyetler" alanı: Her hafta için birer paragraf şeklinde alt alta yazılmış zengin bir düz metin olmalı.
+5. "sorunlar_ve_cozumler" alanı: Sorun yoksa "Dönem boyunca faaliyetler planlandığı şekilde yürütülmüş olup herhangi bir aksaklık yaşanmamıştır." yaz.
+6. Uygulama durumu "Yapılmadı" veya "Kısmen Yapıldı" olan haftaları gerçeğe uygun şekilde yansıt; yapılmayan bir faaliyeti yapılmış gibi anlatma. Planda amaç/etkinlik boş olan haftalar için kendi başına faaliyet uydurma; yalnızca öğretmen notuna dayan.
+
+SADECE geçerli bir JSON objesi döndür:
+{
+  "rapor_ozeti": "Ayın özetini anlatan 4-5 cümlelik resmi metin.",
+  "yapilan_faaliyetler": "Her hafta için ayrı paragraf içeren detaylı düz metin.",
+  "kazanimlar": "• Öğrencilerin ... becerisi geliştirilmiştir.\\n• ... farkındalığı kazandırılmıştır.",
+  "sorunlar_ve_cozumler": "Karşılaşılan güçlükler ve çözümler düz metni.",
+  "gelecek_ay_plani": "Sonraki ay için planlanan çalışmalar düz metni.",
+  "genel_degerlendirme": "Okul müdürlüğüne sunulan resmi değerlendirme düz metni."
+}`;
+
+  uretiyor = true;
+  const btn = $("#btnUret"), eski = btn.textContent;
+  btn.disabled = true; btn.textContent = "⏳ Rapor yazılıyor…";
+  const yb = $("#btnYenidenYaz"); if(yb) yb.disabled = true;
+  const ob = $("#btnOncekiGeri"); if(ob) ob.disabled = true;
+  const ay0 = seciliAy;
+  const t0 = Date.now();
+  const tik = setInterval(()=>{ btn.textContent = "⏳ Rapor yazılıyor… " + Math.round((Date.now()-t0)/1000) + " sn" + (suAnkiModel ? " · " + suAnkiModel : ""); }, 1000);
+  try{
+    const {sonuc, model} = await modelleriDene(
+      ay.api_key.trim(), MODELLER_RAPOR,
+      ()=>({
+        systemInstruction:{parts:[{text:"Sen MEB resmi yazışma kurallarına tam uyan resmi bir okul danışman öğretmenisin. Asla kişisel övgü veya yapay zeka olduğunu belirten cümleler kurmazsın."}]},
+        contents:[{role:"user", parts:[{text:prompt}]}],
+        generationConfig:{temperature:0.4, responseMimeType:"application/json"}
+      }),
+      (m)=>{
+        const o = jsonAyikla(m);
+        if(!o || Array.isArray(o) || typeof o !== "object") throw new Error("Beklenmeyen biçim");
+        if(!BOLUMLER.some(([_,k])=>o[k])) throw new Error("Beklenen alanlar yok");
+        return o;
+      }
+    );
+    const R = raporlar();
+    /* Mevcut rapor varsa, üzerine yazılmadan hemen önce "önceki" olarak saklanır (en güncel hâliyle, düzenlemeler dahil). */
+    if(R[ay0] && typeof R[ay0] === "object"){
+      const O = raporlarOnceki();
+      O[ay0] = [{tarih:new Date().toISOString(), rapor:R[ay0]}].concat(oncekiListesi(O, ay0)).slice(0, ONCEKI_EN_FAZLA);
+      if(!depoYaz(RAPOR_ONCEKI_K, O) && !confirm("Önceki rapor metni saklanamadı. Yeni metin yine de yazılsın mı? (Önceki metin kaybolacak.)")){
+        bildir("Yeni metin kaydedilmedi; önceki rapor olduğu gibi duruyor.", "uyari", 9000);
+        return;
+      }
+    }
+    const bol = {}; BOLUMLER.forEach(([_,k])=>{ bol[k] = temizDuzMetin(sonuc[k]); });
+    R[ay0] = {bolumler:bol, model, tarih:new Date().toLocaleString("tr-TR")};
+    if(depoYaz(RAPOR_K, R)){
+      bildir("Rapor hazır. Aşağıda düzenleyip Word olarak indirebilirsiniz.", "ok");
+    }else{
+      const metin = BOLUMLER.map(([b,k])=>b + "\n" + (bol[k] || "")).join("\n\n");
+      const dosyaAd = "Kulup_Raporu_" + ay0 + "_" + zamanDamgasi() + ".txt";
+      indir(new Blob(["﻿" + metin], {type:"text/plain;charset=utf-8"}), dosyaAd);
+      bildir("Rapor yazıldı ama tarayıcıya kaydedilemedi. Metin dosya olarak indirildi: " + dosyaAd, "hata", 20000);
+    }
+    if(seciliAy === ay0){ pillCiz(); raporAlaniCiz(); const k = $("#raporAlani"); if(k.scrollIntoView) k.scrollIntoView({behavior:"smooth", block:"start"}); }
+  }catch(e){
+    bildir("Yapay zeka yanıt oluşturamadı:" + (String(e.message).startsWith("\n") ? "" : " ") + e.message, "hata");
+  }finally{
+    clearInterval(tik);
+    uretiyor = false; btn.disabled = false; btn.textContent = eski;
+    const y2 = $("#btnYenidenYaz"); if(y2) y2.disabled = false;
+    const o2 = $("#btnOncekiGeri"); if(o2) o2.disabled = false;
+  }
+}
+
+/* ================= WORD ================= */
+async function wordIndir(){
+  if(typeof docx === "undefined"){ bildir("Word kütüphanesi yüklenemedi. İnternet bağlantınızı kontrol edip sayfayı yenileyin.", "hata"); return; }
+  const R = raporlar()[seciliAy];
+  if(!R){ bildir("Önce raporu yazın.", "uyari"); return; }
+  const kh = await klasorIzni();
+  const {Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, ShadingType, AlignmentType, VerticalAlign} = docx;
+  const ay = ayarlar();
+  const D = durumlar();
+  const haftalar = ayHaftalari(seciliAy).map(h=>{ const d = D[dKey(h)] || {}; return Object.assign({}, h, {yapildi:d.yapildi || "İşaretlenmedi", notlar:d.notlar || ""}); });
+  const rapor = R.bolumler || {};
+
+  const FONT = "Times New Roman", TOPLAM = 9412;
+  const sh = fill => ({type: ShadingType.CLEAR, color:"auto", fill});
+  function runlar(metin, o){
+    return String(metin||"").split("\n").map((satir, i)=>new TextRun({text:satir, bold:!!o.bold, size:Math.round(o.size*2), font:FONT, color:o.color, break:i>0 ? 1 : 0}));
+  }
+  function par(metin, o){
+    o = o || {};
+    return new Paragraph({alignment:o.align || AlignmentType.LEFT, spacing:{before:o.before!=null?o.before:40, after:o.after!=null?o.after:40, line:276}, children:runlar(metin, {bold:o.bold, size:o.size||10, color:o.color})});
+  }
+  function hucre(metin, w, o){
+    o = o || {};
+    return new TableCell({width:{size:w, type:WidthType.DXA}, shading:o.fill ? sh(o.fill) : undefined, verticalAlign:VerticalAlign.CENTER, margins:{top:o.mv!=null?o.mv:40, bottom:o.mv!=null?o.mv:40, left:100, right:100}, children:String(metin==null?"":metin).split("\n").map(satir=>par(satir, o))});
+  }
+  const bosParag = ()=>new Paragraph({spacing:{after:60}, children:[]});
+
+  const baslikSatirlari = [
+    ["T.C.\nMİLLÎ EĞİTİM BAKANLIĞI","1F3864","FFFFFF",11.5],
+    [trUp(ay.okul_adi || "OKUL MÜDÜRLÜĞÜ"),"1F3864","D4AA46",11],
+    [trUp(ay.kulup_adi),"2E4E6E","FFFFFF",12.5],
+    ["AYLIK FAALİYET RAPORU — "+trUp(seciliAy)+" "+ay.yil,"D4AA46","FFFFFF",11]
+  ];
+  const t0 = new Table({width:{size:TOPLAM,type:WidthType.DXA}, columnWidths:[TOPLAM],
+    rows:baslikSatirlari.map(([m,fill,renk,boy])=>new TableRow({cantSplit:true, children:[hucre(m, TOPLAM, {fill, color:renk, bold:true, size:boy, align:AlignmentType.CENTER})]}))});
+
+  const W1 = 2835, W2 = TOPLAM - W1;
+  const t1 = new Table({width:{size:TOPLAM,type:WidthType.DXA}, columnWidths:[W1,W2],
+    rows:[["Kulüp Adı", ay.kulup_adi],["Danışman Öğretmen", ay.ogretmen || ".............................."],["Eğitim-Öğretim Yılı", ay.yil]].map(([k,v])=>
+      new TableRow({cantSplit:true, children:[hucre(k,W1,{fill:"EBF0F8", bold:true, size:9.5, color:"1F3864"}), hucre(v,W2,{size:9.5})]}))});
+
+  const sut = [["Hafta",1417],["Planlanan Amaç",2268],["Planlanan Faaliyet",2324],["Durum",1247],["Açıklama / Not",2156]];
+  const renkler = {"Yapıldı":"E8F5E9","Kısmen Yapıldı":"FFF3E0","Yapılmadı":"FFEBEE"};
+  const t2 = new Table({width:{size:TOPLAM,type:WidthType.DXA}, columnWidths:sut.map(s=>s[1]), rows:[
+    new TableRow({cantSplit:true, tableHeader:true, children:sut.map(([b,w])=>hucre(b,w,{fill:"1F3864", color:"FFFFFF", bold:true, size:9, align:AlignmentType.CENTER}))}),
+    ...haftalar.map(h=>{
+      const v = [h.hafta, h.amac, h.etkinlik, h.yapildi, h.notlar];
+      return new TableRow({cantSplit:true, children:v.map((x,i)=>hucre(x||"", sut[i][1], {size:8.5, fill:i===3 ? (renkler[h.yapildi]||"FFFFFF") : undefined, align:(i===0||i===3) ? AlignmentType.CENTER : AlignmentType.LEFT}))});
+    })
+  ]});
+
+  const bolumler = [];
+  BOLUMLER.forEach(([baslik,key])=>{
+    bolumler.push(new Table({width:{size:TOPLAM,type:WidthType.DXA}, columnWidths:[TOPLAM], rows:[
+      new TableRow({cantSplit:true, children:[hucre("  "+baslik, TOPLAM, {fill:"1F3864", color:"FFFFFF", bold:true, size:10.5})]}),
+      new TableRow({cantSplit:false, children:[hucre(rapor[key]||"—", TOPLAM, {fill:"F9FAFC", size:10, align:AlignmentType.JUSTIFIED, before:30, after:30, mv:90})]})
+    ]}));
+    bolumler.push(bosParag());
+  });
+
+  const WI = TOPLAM/2;
+  const imza = new Table({width:{size:TOPLAM,type:WidthType.DXA}, columnWidths:[WI,WI], rows:[
+    new TableRow({cantSplit:true, children:["Danışman Öğretmen","Okul Müdürü"].map(b=>hucre(b,WI,{fill:"EBF0F8", bold:true, size:9.5, color:"1F3864", align:AlignmentType.CENTER}))}),
+    new TableRow({cantSplit:true, children:[ay.ogretmen||"..............................", ay.mudur||".............................."].map(v=>hucre(v,WI,{bold:true, size:10, align:AlignmentType.CENTER, before:240, after:240}))}),
+    new TableRow({cantSplit:true, children:[0,1].map(()=>hucre("Tarih: ...../...../202...\nİmza: ............................", WI, {size:8.5, align:AlignmentType.CENTER}))})
+  ]});
+
+  const dok = new Document({
+    styles:{default:{document:{run:{font:FONT, size:20}}}},
+    sections:[{properties:{page:{size:{width:11906, height:16838}, margin:{top:1134, bottom:1134, left:1247, right:1247}}}, children:[t0, bosParag(), t1, bosParag(), t2, bosParag(), ...bolumler, imza]}]
+  });
+  try{
+    const blob = await Packer.toBlob(dok);
+    const sonuc = await kaydet(blob, "Kulup_Raporu_" + seciliAy + "_" + String(ay.yil).replace(/-/g,"_") + ".docx", kh);
+    kayitBildir(sonuc, "Word dosyası");
+  }catch(e){
+    bildir("Word dosyası oluşturulamadı: " + e.message, "hata");
+  }
+}
+
+async function metniKopyala(){
+  const R = raporlar()[seciliAy]; if(!R) return;
+  const metin = BOLUMLER.map(([b,k])=>b + "\n" + ((R.bolumler||{})[k]||"")).join("\n\n");
+  try{ await navigator.clipboard.writeText(metin); bildir("Rapor metni panoya kopyalandı.", "ok"); }
+  catch(e){
+    const t = document.createElement("textarea"); t.value = metin; document.body.appendChild(t); t.select();
+    try{ document.execCommand("copy"); bildir("Rapor metni panoya kopyalandı.", "ok"); }catch(_){ bildir("Kopyalanamadı.", "hata"); }
+    t.remove();
+  }
+}
+
+/* ================= AYARLAR ================= */
+function ayarAc(){
+  const a = ayarlar();
+  ["api_key","okul_adi","kulup_adi","ogretmen","mudur","yil"].forEach(k=>{ $("#a_"+k).value = a[k] || ""; });
+  $("#a_api_key").type = "password"; $("#btnGoster").textContent = "Göster";
+  $("#testSonuc").textContent = "";
+  klasorDurumYaz();
+  sonYedekYaz();
+  $("#ayarDlg").showModal();
+}
+function ayarKaydet(){
+  const o = {};
+  ["api_key","okul_adi","kulup_adi","ogretmen","mudur","yil"].forEach(k=>{ o[k] = $("#a_"+k).value.trim(); });
+  if(!o.kulup_adi) o.kulup_adi = "Kültür ve Edebiyat Kulübü";
+  if(!o.yil) o.yil = varsayilanYil();
+  if(!depoYaz(AYAR_K, o)){ alert("Ayarlar bu tarayıcıda kaydedilemedi (gizli sekme veya depolama kapalı olabilir)."); return; }
+  $("#ayarDlg").close();
+  altBaslikGuncelle();
+  bildir("Ayarlar kaydedildi.", "ok");
+}
+function ayarDisaAktar(){
+  indir(new Blob([JSON.stringify(ayarlar(), null, 2)], {type:"application/json"}), "kulup_ayarlar.json");
+}
+function ayarIceAktar(inp){
+  const f = inp.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = ()=>{
+    try{
+      const o = JSON.parse(r.result);
+      if(!o || typeof o !== "object" || Array.isArray(o)) throw new Error("Geçersiz dosya");
+      depoYaz(AYAR_K, o); ayarAc(); altBaslikGuncelle();
+      bildir("Ayarlar içe aktarıldı.", "ok");
+    }catch(e){ bildir("Ayar dosyası okunamadı.", "hata"); }
+    inp.value = "";
+  };
+  r.readAsText(f);
+}
+async function baglantiTest(){
+  const key = $("#a_api_key").value.trim(), kap = $("#testSonuc");
+  if(!key){ kap.textContent = "Önce API anahtarını yazın."; return; }
+  const btn = $("#btnTest"); btn.disabled = true;
+  const satirlar = MODELLER_RAPOR.map(m=>"⏳ " + m);
+  const yaz = ()=>{ kap.textContent = satirlar.join("\n"); };
+  yaz();
+  for(let i = 0; i < MODELLER_RAPOR.length; i++){
+    try{
+      await geminiCagir(key, MODELLER_RAPOR[i], {contents:[{role:"user", parts:[{text:"Sadece 'tamam' yaz."}]}]});
+      satirlar[i] = "✅ " + MODELLER_RAPOR[i] + " — çalışıyor";
+    }catch(e){
+      satirlar[i] = "❌ " + MODELLER_RAPOR[i] + " — " + hataKisa(e);
+      if(anahtarHatasi(e)){ for(let j = i+1; j < satirlar.length; j++) satirlar[j] = "— " + MODELLER_RAPOR[j] + " (atlandı)"; yaz(); break; }
+    }
+    yaz();
+  }
+  btn.disabled = false;
+}
+
+/* ================= TÜM VERİ YEDEĞİ ================= */
+/* API anahtarı yedeğe konmaz (ayarlardaki alan adı: api_key). */
+function yedekVerisi(){
+  return {
+    uygulama:"kulup_rapor", surum:3, tarih:new Date().toISOString(),
+    plan:depoOku(PLAN_K, null), meta:depoOku(META_K, null), durum:depoOku(DURUM_K, {}),
+    raporlar:depoOku(RAPOR_K, {}), raporlar_onceki:depoOku(RAPOR_ONCEKI_K, {}),
+    plan_onceki:depoOku(PLAN_ONCEKI_K, null), plan_gecis_oncesi:depoOku(GECIS_YEDEK_K, null),
+    ayarlar:Object.assign({}, ayarlar(), {api_key:""})
+  };
+}
+/* onEk: "YEDEK" ya da "GERIYUKLEME_ONCESI". Başarılıysa dosya adını, olmazsa "" döndürür. */
+function yedekIndir(onEk){
+  try{
+    const ad = "Kulup_TumVeri_" + onEk + "_" + zamanDamgasi() + ".json";
+    indir(new Blob([JSON.stringify(yedekVerisi(), null, 2)], {type:"application/json"}), ad);
+    depoYaz(SON_YEDEK_K, new Date().toISOString());
+    return ad;
+  }catch(e){ return ""; }
+}
+function sonYedekYaz(ek){
+  const el = $("#sonYedekNot"); if(!el) return;
+  const t = depoOku(SON_YEDEK_K, null);
+  el.textContent = (ek ? ek + " " : "") + "Plan, işaretler, notlar ve raporlar tek dosyada saklanır; API anahtarı yedeğe konmaz. " + (t ? "Son yedek: " + tarihYaz(t) + "." : "Henüz yedek alınmadı.");
+}
+function yedekAlTikla(){
+  const ad = yedekIndir("YEDEK");
+  if(ad){ sonYedekYaz("Yedek indirildi: " + ad + "."); bildir("Yedek indirildi: " + ad, "ok", 7000); }
+  else{ sonYedekYaz("Yedek oluşturulamadı."); bildir("Yedek oluşturulamadı.", "hata"); }
+}
+/* Geçersizse hata metni, geçerliyse "" döndürür. */
+function yedekDenetle(o){
+  if(!nesneMi(o)) return "Dosya bir yedek dosyası değil.";
+  if(o.uygulama !== "kulup_rapor") return "Bu dosya Kulüp Faaliyet Raporu yedeği değil.";
+  if(!nesneMi(o.durum)) return "Yedekte haftalık işaret ve not bölümü (durum) bozuk.";
+  if(!nesneMi(o.raporlar)) return "Yedekte rapor bölümü bozuk.";
+  if(!Object.keys(o.raporlar).every(k=>nesneMi(o.raporlar[k]))) return "Yedekteki raporlardan biri bozuk.";
+  if(o.plan !== null){
+    if(!Array.isArray(o.plan)) return "Yedekte plan bölümü bozuk.";
+    if(!o.plan.every(r=>nesneMi(r) && typeof r.ay === "string" && typeof r.hafta === "string")) return "Yedekteki plan satırlarından biri bozuk (ay/hafta metin değil).";
+  }
+  if(o.meta != null && !nesneMi(o.meta)) return "Yedekte plan bilgisi (meta) bozuk.";
+  if(o.raporlar_onceki != null && !nesneMi(o.raporlar_onceki)) return "Yedekte önceki raporlar bölümü bozuk.";
+  if(nesneMi(o.raporlar_onceki) && !Object.keys(o.raporlar_onceki).every(k=>{ const v = o.raporlar_onceki[k]; return nesneMi(v) || (Array.isArray(v) && v.every(nesneMi)); })) return "Yedekteki önceki raporlardan biri bozuk.";
+  if(o.plan_onceki != null && !nesneMi(o.plan_onceki)) return "Yedekte önceki plan bölümü (plan_onceki) bozuk.";
+  if(o.plan_gecis_oncesi != null && !nesneMi(o.plan_gecis_oncesi)) return "Yedekte geçiş öncesi plan bölümü (plan_gecis_oncesi) bozuk.";
+  if(o.ayarlar != null && !nesneMi(o.ayarlar)) return "Yedekte ayarlar bölümü bozuk.";
+  return "";
+}
+async function yedekGeriYukle(inp){
+  const f = inp.files[0]; inp.value = "";
+  if(!f) return;
+  $("#ayarDlg").close();   /* bildirimler açık pencerenin arkasında kalmasın */
+  let o;
+  try{ o = JSON.parse(await dosyaMetni(f)); }
+  catch(e){ bildir("Yedek dosyası okunamadı (geçerli bir JSON değil). Hiçbir şeye dokunulmadı.", "hata", 9000); return; }
+  const hata = yedekDenetle(o);
+  if(hata){ bildir("Yedek geçersiz: " + hata + "\nHiçbir şeye dokunulmadı.", "hata", 10000); return; }
+
+  const planVar = Array.isArray(o.plan) && o.plan.length > 0;
+  const hs = planVar ? o.plan.length : GOMULU_PLAN.length;
+  const isaretli = Object.keys(o.durum).filter(k=>nesneMi(o.durum[k]) && o.durum[k].yapildi).length;
+  const rs = Object.keys(o.raporlar).length;
+  if(!confirm(
+    "Yedeğin tarihi: " + (o.tarih ? tarihYaz(o.tarih) : "bilinmiyor") + "\n" +
+    "Yedekteki hafta sayısı: " + hs + (planVar ? "" : " (gömülü plan)") + "\n" +
+    "İşaretli hafta sayısı: " + isaretli + "\n" +
+    "Rapor sayısı: " + rs + "\n\n" +
+    "Şu anki bütün veriler bu yedekle değiştirilecek. Önce şu anki hâl ayrıca indirilecek.\n\nDevam edilsin mi?")) return;
+
+  /* 1) Şu anki hâlin tam yedeği */
+  const oncekiAd = yedekIndir("GERIYUKLEME_ONCESI");
+  if(!oncekiAd){ bildir("Şu anki hâlin yedeği alınamadı; güvenlik için geri yükleme yapılmadı. Hiçbir şeye dokunulmadı.", "hata", 10000); return; }
+  await new Promise(res=>setTimeout(res, 800));
+  if(!confirm("Şu anki hâlin yedeği indirildi: " + oncekiAd + "\n\nDosya İndirilenler klasörüne indi mi? İndiyse TAMAM'a basın; inmediyse İPTAL (geri yükleme yapılmaz).")){
+    bildir("Geri yükleme yapılmadı; verilere dokunulmadı.", "uyari", 9000);
+    return;
+  }
+
+  /* 2) Yazma; herhangi biri başarısız olursa eski ham değerler geri konur */
+  const anahtarlar = [PLAN_K, META_K, DURUM_K, RAPOR_K, RAPOR_ONCEKI_K, PLAN_ONCEKI_K, GECIS_YEDEK_K, AYAR_K];
+  const eskiHam = {};
+  anahtarlar.forEach(k=>{ try{ eskiHam[k] = localStorage.getItem(k); }catch(e){ eskiHam[k] = null; } });
+  const cur = depoOku(AYAR_K, {}), curO = nesneMi(cur) ? cur : {};
+  const yeniAyar = Object.assign({}, curO, o.ayarlar || {});
+  yeniAyar.api_key = (curO.api_key || "").trim() ? curO.api_key : (yeniAyar.api_key || "");   /* mevcut anahtar korunur */
+  let tamam = true;
+  const yaz = (k, v)=>{ if(tamam && !depoYaz(k, v)) tamam = false; };
+  if(planVar) yaz(PLAN_K, o.plan); else depoSil(PLAN_K);
+  if(o.meta) yaz(META_K, o.meta); else depoSil(META_K);
+  yaz(DURUM_K, o.durum);
+  yaz(RAPOR_K, o.raporlar);
+  yaz(RAPOR_ONCEKI_K, o.raporlar_onceki || {});
+  if(nesneMi(o.plan_onceki)) yaz(PLAN_ONCEKI_K, o.plan_onceki);              /* yedekte yoksa mevcut olana dokunulmaz */
+  if(nesneMi(o.plan_gecis_oncesi)) yaz(GECIS_YEDEK_K, o.plan_gecis_oncesi);
+  yaz(AYAR_K, yeniAyar);
+  if(!tamam){
+    anahtarlar.forEach(k=>{ try{ if(eskiHam[k] === null) localStorage.removeItem(k); else localStorage.setItem(k, eskiHam[k]); }catch(e){} });
+    bildir("Geri yükleme yapılamadı (depolama dolu ya da engelli). Eski veriler yerine konmaya çalışıldı. Güvenlik için indirilen dosya: " + oncekiAd, "hata", 15000);
+    return;
+  }
+
+  /* 3) Arayüzü yenile */
+  seciliAy = ayBul(); filtreAy = "TUMU"; arama = "";
+  const ar = $("#arama"); if(ar) ar.value = "";
+  seciliAyDuzelt(); altBaslikGuncelle();
+  gorunumDegistir(gorunum);
+  bildir("Yedek geri yüklendi (" + hs + " hafta, " + isaretli + " işaretli, " + rs + " rapor).\nÖnceki hâl şu dosyaya indirildi: " + oncekiAd, "ok", 12000);
+}
+
+/* ================= PLAN YÜKLEME ================= */
+function dosyaBase64(file){
+  return new Promise((res, rej)=>{
+    const r = new FileReader();
+    r.onload = ()=>res(String(r.result).split(",")[1]);
+    r.onerror = ()=>rej(new Error("Dosya okunamadı"));
+    r.readAsDataURL(file);
+  });
+}
+function dosyaMetni(file){
+  return new Promise((res, rej)=>{
+    const r = new FileReader();
+    r.onload = ()=>res(String(r.result));
+    r.onerror = ()=>rej(new Error("Dosya okunamadı"));
+    r.readAsText(file, "utf-8");
+  });
+}
+function planSatirlariniTemizle(v){
+  if(!Array.isArray(v) && v && typeof v === "object"){ const d = Object.values(v).find(Array.isArray); if(d) v = d; }
+  if(!Array.isArray(v) || !v.length) throw new Error("Plan çözümlenemedi.");
+  const s = v.map(r=>({ay:trUp(r.ay), hafta:String(r.hafta||"").trim(), amac:String(r.amac||"").trim(), etkinlik:String(r.etkinlik||"").trim(), belirli_gun:String(r.belirli_gun||"").trim()})).filter(r=>r.ay && r.hafta);
+  if(!s.length) throw new Error("Plan çözümlenemedi.");
+  return ayYazimiUyarla(s);
+}
+async function planYukle(inp){
+  const f = inp.files[0]; if(!f) return;
+  inp.value = "";
+  const ext = (f.name.split(".").pop() || "").toLowerCase();
+  if(!["xlsx","xls","docx","pdf","json"].includes(ext)){ bildir("Desteklenen formatlar: .xlsx, .docx, .pdf, .json", "hata"); return; }
+
+  try{
+    let sonuc;
+    if(ext === "json"){
+      sonuc = planSatirlariniTemizle(JSON.parse(await dosyaMetni(f)));
+    }else{
+      const a = ayarlar();
+      if(!(a.api_key||"").trim()){ bildir("Plan dosyasını okumak için önce Ayarlar'dan Gemini API anahtarınızı kaydedin.", "hata"); return; }
+      bildir("Plan okunuyor ve çözümleniyor, lütfen bekleyin…", "", 6000);
+      const yonerge = 'MEB kulüp çalışma planından ay, hafta, amac, etkinlik, belirli_gun alanlarını ayıkla. ay alanı büyük harfli Türkçe ay adı olsun (EKİM gibi). Metinde olmayan bir şey ekleme, boş alanları boş bırak. SADECE JSON dizisi döndür. Biçim: [{"ay":"EKİM","hafta":"06-10 Ekim","amac":"...","etkinlik":"...","belirli_gun":"..."}]';
+      let parcalar;
+      if(ext === "pdf"){
+        parcalar = [{text:yonerge}, {inline_data:{mime_type:"application/pdf", data:await dosyaBase64(f)}}];
+      }else{
+        let metin = "";
+        const buf = await f.arrayBuffer();
+        if(ext === "xlsx" || ext === "xls"){
+          if(typeof XLSX === "undefined") throw new Error("Excel okuyucu yüklenemedi, internet bağlantısını kontrol edin.");
+          const wb = XLSX.read(buf, {type:"array"});
+          wb.SheetNames.forEach(n=>{ metin += "[" + n + "]\n" + XLSX.utils.sheet_to_csv(wb.Sheets[n]) + "\n"; });
+        }else{
+          if(typeof mammoth === "undefined") throw new Error("Word okuyucu yüklenemedi, internet bağlantısını kontrol edin.");
+          const r = await mammoth.convertToHtml({arrayBuffer:buf});
+          const tmp = document.createElement("div"); tmp.innerHTML = r.value;
+          tmp.querySelectorAll("tr").forEach(tr=>tr.appendChild(document.createTextNode("\n")));
+          tmp.querySelectorAll("td,th").forEach(td=>td.appendChild(document.createTextNode(" | ")));
+          tmp.querySelectorAll("p,li").forEach(p=>p.appendChild(document.createTextNode("\n")));
+          metin = tmp.textContent;
+        }
+        if(!metin.trim()) throw new Error("Dosyada metin bulunamadı.");
+        parcalar = [{text:yonerge + "\n\nMetin:\n" + metin.slice(0, 40000)}];
+      }
+      sonuc = (await modelleriDene(a.api_key.trim(), MODELLER_PLAN,
+        ()=>({contents:[{role:"user", parts:parcalar}], generationConfig:{temperature:0.1, responseMimeType:"application/json"}}),
+        (m)=>planSatirlariniTemizle(jsonAyikla(m)))).sonuc;
+    }
+    /* Yeni plan kaydedilmeden hemen önce onay ve eski planın saklanması */
+    if(!confirm("Şu anki plan değiştirilecek. Eski plan bu bilgisayarda saklanacak.\n\nYeni plan: " + sonuc.length + " hafta.\n\nDevam edilsin mi?")){
+      bildir("Plan yüklemesi iptal edildi; mevcut plan olduğu gibi duruyor.", "uyari"); return;
+    }
+    if(!eskiPlaniSakla() && !confirm("Eski plan saklanamadı. Yine de yeni plan yüklensin mi?")){
+      bildir("Plan yüklemesi iptal edildi; mevcut plan olduğu gibi duruyor.", "uyari"); return;
+    }
+    planKaydet(sonuc, {dosya_adi:f.name, yukleme_tarihi:new Date().toLocaleString("tr-TR")});
+    seciliAyDuzelt(); filtreAy = "TUMU"; planCiz();
+    bildir("Plan yüklendi: " + sonuc.length + " hafta. Lütfen tabloyu kontrol edin; hatalı satırları ✏️ ile düzeltebilirsiniz.", "ok", 8000);
+  }catch(e){
+    bildir("Plan yüklenemedi: " + e.message, "hata");
+  }
+}
+
+/* ================= BELİRLİ GÜN GEÇİŞİ (v3, tek seferlik) ================= */
+/* hafta no: [eski değer, yeni değer]. Yalnız "belirli_gun" alanı değişir. */
+const BELIRLI_GUN_DUZELTME = {
+  7:  ["", "Cumhuriyet Bayramı, Kızılay Haftası"],
+  8:  ["Cumhuriyet Bayramı", "Organ Bağışı ve Nakli Haftası, Lösemili Çocuklar Haftası"],
+  9:  ["Kızılay Haftası, Organ Bağışı ve Nakli Haftası, Lösemili Çocuklar Haftası", ""],
+  10: ["Dünya Felsefe Günü, Dünya Çocuk Hakları Günü", "Öğretmenler Günü, Ağız ve Diş Sağlığı Haftası"],
+  11: ["Ağız ve Diş Sağlığı Haftası, Öğretmenler Günü", "Dünya Engelliler Günü, Dünya Madenciler Günü, Türk Kadınına Seçme ve Seçilme Hakkının Verilişi"],
+  12: ["Dünya Engelliler Günü, Dünya Madenciler Günü, Türk Kadınına Seçme ve Seçilme Hakkının Verilişi", "İnsan Hakları ve Demokrasi Haftası"],
+  13: ["Mevlana Haftası, İnsan Hakları ve Demokrasi Haftası", "Mevlana Haftası, Tutum, Yatırım ve Türk Malları Haftası"],
+  14: ["Tutum, Yatırım ve Türk Malları Haftası", ""],
+  33: ["Müzeler Haftası, Atatürk'ü Anma ve Gençlik ve Spor Bayramı", ""],
+  34: ["Müzeler Haftası, Atatürk'ü Anma ve Gençlik ve Spor Bayramı", ""],
+  35: ["Müzeler Haftası, Atatürk'ü Anma ve Gençlik ve Spor Bayramı", ""],
+  36: ["Müzeler Haftası, Atatürk'ü Anma ve Gençlik ve Spor Bayramı", ""]
+};
+function belirliGunGecisi(){
+  try{
+    let bayrak;
+    try{ bayrak = localStorage.getItem(GECIS_BAYRAK_K); }catch(e){ return; }
+    if(bayrak !== null) return;
+    const bayrakKoy = ()=>depoYaz(GECIS_BAYRAK_K, {tarih:new Date().toISOString()});
+
+    const p = depoOku(PLAN_K, null);
+    if(!(Array.isArray(p) && p.length)){ bayrakKoy(); return; }   /* gömülü plan kullanılıyor: yapılacak bir şey yok */
+
+    let degisen = 0;
+    const atlanan = [];
+    const yeni = p.map(r=>{
+      if(!nesneMi(r)) return r;
+      const m = /^\s*(\d+)\.\s*Hafta/i.exec(String(r.hafta == null ? "" : r.hafta));
+      if(!m) return r;
+      const no = parseInt(m[1], 10);
+      const t = BELIRLI_GUN_DUZELTME[no];
+      if(!t) return r;
+      /* Hafta yazısının tamamı gömülü plandaki aynı numaralı haftayla birebir (kırpılmış) aynı değilse bu başka bir plandır: sessizce geçilir */
+      const g = GOMULU_PLAN.find(x=>{ const mm = /^\s*(\d+)\.\s*Hafta/i.exec(String(x.hafta == null ? "" : x.hafta)); return !!mm && parseInt(mm[1], 10) === no; });
+      if(!g || String(r.hafta == null ? "" : r.hafta).trim() !== String(g.hafta == null ? "" : g.hafta).trim()) return r;
+      const mevcut = String(r.belirli_gun == null ? "" : r.belirli_gun).trim();
+      if(mevcut === t[0]){ degisen++; return Object.assign({}, r, {belirli_gun:t[1]}); }
+      if(mevcut !== t[1]) atlanan.push(no + ". Hafta");   /* öğretmen kendisi değiştirmiş: dokunulmaz */
+      return r;
+    });
+
+    const atlananMetni = atlanan.length ? "Elle değiştirdiğiniz için dokunulmayan haftalar: " + atlanan.join(", ") + "." : "";
+    if(!degisen){
+      if(!bayrakKoy()) return;
+      if(atlananMetni) bildir(atlananMetni, "uyari", 20000);
+      return;
+    }
+    /* Önce eski planın kopyası (daha önce yazılmışsa üzerine yazılmaz); yazılamazsa geçiş yapılmaz */
+    let yedekVar = false;
+    try{ yedekVar = localStorage.getItem(GECIS_YEDEK_K) !== null; }catch(e){}
+    if(!yedekVar && !depoYaz(GECIS_YEDEK_K, {tarih:new Date().toISOString(), plan:p})) return;
+    if(!depoYaz(PLAN_K, yeni)) return;
+    if(!bayrakKoy()) return;
+    bildir("Belirli gün ve haftalar takvime göre düzeltildi (" + degisen + " hafta). Eski plan bu bilgisayarda saklandı." + (atlananMetni ? "\n" + atlananMetni : ""), "ok", 20000);
+  }catch(e){}
+}
+
+/* ================= OLAYLAR ================= */
+document.addEventListener("click", (ev)=>{
+  const t = ev.target.closest("button"); if(!t) return;
+  if(t.dataset.sekme){ gorunumDegistir(t.dataset.sekme); return; }
+  if(t.dataset.filtre){ filtreAy = t.dataset.filtre; planCiz(); return; }
+  if(t.dataset.rapor){ gorunumDegistir("rapor", t.dataset.rapor); return; }
+  if(t.dataset.ekle){ satirDlgAc(-1, t.dataset.ekle); return; }
+  if(t.dataset.duzenle){ satirDlgAc(parseInt(t.dataset.duzenle, 10)); return; }
+  if(t.dataset.ay){ seciliAy = t.dataset.ay; raporSayfasiCiz(); return; }
+  if(t.dataset.set){
+    const kart = t.closest(".hafta"); if(!kart) return;
+    durumGuncelle(kart.dataset.key, {yapildi:t.dataset.set});
+    haftalarCiz(); pillCiz(); return;
+  }
+});
+document.addEventListener("input", (ev)=>{
+  const t = ev.target;
+  if(t.matches("textarea[data-not]")){
+    const kart = t.closest(".hafta"); if(kart) durumGuncelle(kart.dataset.key, {notlar:t.value});
+  }else if(t.matches("textarea[data-bolum]")){
+    const R = raporlar();
+    if(R[seciliAy]){
+      if(!nesneMi(R[seciliAy].bolumler)) R[seciliAy].bolumler = {};
+      R[seciliAy].bolumler[t.dataset.bolum] = t.value; depoYaz(RAPOR_K, R);
+    }
+    autoGrow(t); sayiGuncelle(t);
+  }else if(t.id === "arama"){
+    arama = t.value; planCiz();
+  }
+});
+$("#btnAyar").onclick = ayarAc;
+$("#btnAyarKapat").onclick = ()=>$("#ayarDlg").close();
+$("#btnAyarKaydet").onclick = ayarKaydet;
+$("#btnGoster").onclick = ()=>{ const i = $("#a_api_key"); const g = i.type === "password"; i.type = g ? "text" : "password"; $("#btnGoster").textContent = g ? "Gizle" : "Göster"; };
+$("#btnTest").onclick = baglantiTest;
+$("#btnAyarDisa").onclick = ayarDisaAktar;
+$("#btnKlasor").onclick = klasorSec;
+$("#btnKlasorKaldir").onclick = klasorKaldir;
+$("#btnAyarIce").onclick = ()=>$("#ayarDosya").click();
+$("#ayarDosya").onchange = function(){ ayarIceAktar(this); };
+$("#btnYedekAl").onclick = yedekAlTikla;
+$("#btnYedekGeri").onclick = ()=>$("#yedekDosya").click();
+$("#yedekDosya").onchange = function(){ yedekGeriYukle(this); };
+$("#btnPlanYukle").onclick = ()=>$("#planDosya").click();
+$("#planDosya").onchange = function(){ planYukle(this); };
+$("#btnPlanIndir").onclick = planDisaAktar;
+$("#btnPlanSifirla").onclick = planSifirla;
+$("#s_iptal").onclick = ()=>$("#satirDlg").close();
+$("#s_kaydet").onclick = satirKaydet;
+$("#s_sil").onclick = satirSil;
+$("#btnUret").onclick = raporUret;
+$("#btnHepsiYapildi").onclick = ()=>{
+  const eksik = eksikHaftalar();
+  if(!eksik.length){ bildir("Tüm haftalar zaten işaretli.", "ok"); return; }
+  if(!confirm(seciliAy + " ayında işaretlenmemiş " + eksik.length + " hafta \"Yapıldı\" olarak işaretlenecek.\n\nYapılmayan haftaları yapılmış gibi işaretlemeyin; rapor bunlara göre yazılır.\n\nDevam edilsin mi?")) return;
+  eksik.forEach(h=>durumGuncelle(dKey(h), {yapildi:"Yapıldı"}));
+  haftalarCiz(); pillCiz();
+};
+$("#raporAlani").addEventListener("click", (ev)=>{
+  const t = ev.target.closest("button"); if(!t) return;
+  if(t.id === "btnWord") wordIndir();
+  else if(t.id === "btnKopyala") metniKopyala();
+  else if(t.id === "btnOncekiGeri") oncekiGeriGetir();
+  else if(t.id === "btnYenidenYaz"){ if(confirm("Rapor yeniden yazılacak. Şu anki metin saklanır; istersen \"↩ Önceki metni geri getir\" ile geri alabilirsin. Devam edilsin mi?")) raporUret(); }
+});
+
+/* ================= BAŞLAT ================= */
+belirliGunGecisi();
+seciliAyDuzelt();
+altBaslikGuncelle();
+klasorYukle();
+gorunumDegistir(depoOku(GORUNUM_K, "plan") === "rapor" ? "rapor" : "plan");
+</script>
+</body>
+</html>

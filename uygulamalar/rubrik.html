@@ -1,0 +1,1669 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yazılı Sınav Rubrik Değerlendirme (Gemini)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f4f0;--w:#fff;--sf:#fafaf8;--bd:#e2e0da;--bd2:#d0cec7;--tx:#1a1a1a;--mu:#6b6860;--ac:#2c5f8a;--al:#e8f0f7;--a2:#5a8a2c;--a2l:#edf5e8;--dn:#c0392b;--sh:0 2px 12px rgba(0,0,0,.08)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--tx);font-family:Inter,sans-serif;font-size:14px;line-height:1.6;padding-bottom:40px}
+.hdr{background:var(--w);border-bottom:2px solid var(--bd);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.hdr h1{font-family:Merriweather,serif;font-size:16px;font-weight:700;color:var(--ac)}
+.hdr .sub{font-size:11px;color:var(--mu)}
+.hbts{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.nav{background:var(--w);border-bottom:1px solid var(--bd);padding:0 24px;display:flex;overflow-x:auto}
+.stab{padding:12px 16px;font-size:13px;font-weight:500;color:var(--mu);border-bottom:3px solid transparent;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.stab .n{width:20px;height:20px;border-radius:50%;background:var(--bd);color:var(--mu);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.stab.act{color:var(--ac);border-bottom-color:var(--ac)}.stab.act .n{background:var(--ac);color:#fff}
+.stab.dn2 .n{background:var(--a2);color:#fff}
+.main{max-width:1100px;margin:0 auto;padding:24px 18px}
+.panel{display:none}.panel.act{display:block}
+.card{background:var(--w);border:1px solid var(--bd);border-radius:10px;padding:20px;margin-bottom:16px;box-shadow:var(--sh)}
+.ct{font-size:14px;font-weight:700;color:var(--ac);margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+label{font-size:13px;font-weight:500;display:block;margin-bottom:4px}
+input[type=text],input[type=number],input[type=password],textarea,select{width:100%;padding:8px 12px;border:1px solid var(--bd2);border-radius:7px;font-family:Inter,sans-serif;font-size:14px;background:var(--sf);color:var(--tx);outline:none}
+input:focus,textarea:focus,select:focus{border-color:var(--ac);box-shadow:0 0 0 3px rgba(44,95,138,.1)}
+textarea{resize:vertical}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.fg{margin-bottom:12px}
+.btn{padding:8px 16px;border-radius:7px;border:none;font-family:Inter,sans-serif;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:5px}
+.bp{background:var(--ac);color:#fff}.bp:hover{background:#235079}
+.bs{background:var(--bd);color:var(--tx)}.bs:hover{background:var(--bd2)}
+.bok{background:var(--a2);color:#fff}.bok:hover{background:#4a7a22}
+.bd3{background:#fdf0ef;color:var(--dn);border:1px solid #f5c6c2}
+.bsm{padding:5px 11px;font-size:12px}
+.blg{padding:11px 24px;font-size:14px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.upl{display:block;border:2px dashed var(--bd2);border-radius:10px;padding:22px;text-align:center;cursor:pointer;background:var(--sf)}
+.upl:hover,.upl.drag{border-color:var(--ac);background:var(--al)}
+.upl p{color:var(--mu);font-size:13px}.upl .hint{font-size:11px;color:var(--mu);margin-top:4px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chip{background:var(--al);border:1px solid var(--ac);border-radius:20px;padding:3px 6px 3px 12px;font-size:12px;display:flex;align-items:center;gap:6px}
+.chip button{border:none;background:none;cursor:pointer;color:var(--dn);font-weight:700}
+.radios{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:12px}
+.radios label{display:flex;align-items:center;gap:6px;cursor:pointer;margin:0}
+.radios input{width:auto}
+.al2{padding:10px 13px;border-radius:7px;font-size:13px;margin-bottom:12px}
+.ai{background:var(--al);border:1px solid rgba(44,95,138,.2);color:var(--ac)}
+.aw{background:#fff8e1;border:1px solid #ffe082;color:#795548}
+.aerr{background:#fdf0ef;border:1px solid #f5c6c2;color:var(--dn)}
+.apib{background:#fffbea;border:1px solid #f0d060;border-radius:8px;padding:11px 16px;margin-bottom:14px;display:flex;align-items:center;gap:10px;font-size:13px;flex-wrap:wrap}
+.apib input[type=password]{flex:1;min-width:160px;max-width:300px;font-family:monospace;font-size:12px}
+.apib select{width:auto;min-width:200px}
+.apib input.mc2{width:160px;font-size:12px}
+.emp{text-align:center;padding:30px;color:var(--mu)}
+.ait{background:var(--w);border:1px solid var(--bd);border-radius:8px;padding:16px;margin-bottom:12px}
+.qh{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.qh .tag{background:var(--al);color:var(--ac);border-radius:4px;padding:2px 8px;font-size:12px;font-weight:600}
+.qh .sp1{flex:1}
+.qt{font-size:13px;background:var(--sf);border:1px solid var(--bd);border-radius:6px;padding:8px 10px;margin-bottom:8px;white-space:pre-wrap}
+.qrow{display:grid;grid-template-columns:90px 1fr 90px 34px;gap:8px;align-items:start;margin-bottom:8px}
+.nr{display:grid;grid-template-columns:1fr 80px 34px;gap:8px;margin-bottom:6px}
+.sumok{color:var(--a2);font-weight:700}.sumbad{color:var(--dn);font-weight:700}
+.rw{border-radius:8px;border:1px solid var(--bd);margin-bottom:12px;overflow-x:auto}
+.rh,.rr{display:grid;grid-template-columns:230px repeat(5,1fr) 90px;min-width:1050px}
+.rh{background:var(--ac);color:#fff;font-size:11px;font-weight:700;text-transform:uppercase}
+.rhc{padding:8px 10px}
+.rr{background:var(--w);border-bottom:1px solid var(--bd)}
+.rr:last-child{border-bottom:none}
+.rc{padding:10px;font-size:12px;border-right:1px solid var(--bd)}
+.rc:last-child{border-right:none}
+.lv strong{font-size:12px}
+.lp{width:60px!important;padding:2px 6px!important;font-size:12px!important;margin-left:6px;font-weight:600}
+.ld2,.qs{font-size:12px;color:#444;line-height:1.5;margin-top:4px;outline:none}
+.ld2:focus,.qs:focus{background:#fffde7}
+.qs{color:var(--ac);font-weight:600}
+.cerr{background:#fdf0ef;color:var(--dn);font-size:11px;border-radius:5px;padding:5px 7px;margin-top:6px}
+.wi{width:62px!important;text-align:center;font-size:17px!important;font-weight:700;color:var(--ac);border:2px solid var(--ac)!important;padding:4px!important}
+.sct{display:flex;gap:7px;margin-bottom:12px;align-items:center;flex-wrap:wrap}
+.stw{overflow-x:auto;border-radius:8px;border:1px solid var(--bd)}
+table.st{width:100%;border-collapse:collapse;font-size:13px;background:var(--w)}
+table.st th{background:var(--ac);color:#fff;padding:9px 11px;text-align:left;font-size:12px;white-space:nowrap}
+table.st td{padding:7px 10px;border-bottom:1px solid var(--bd);vertical-align:middle}
+.si{width:62px!important;text-align:center;padding:4px 6px!important;font-weight:600}
+.bdg{display:inline-block;padding:3px 10px;border-radius:20px;font-weight:700;font-size:12px}
+.ba{background:#e8f5e9;color:#2e7d32}.bb{background:#e3f2fd;color:#1565c0}.bc{background:#fff3e0;color:#e65100}.bdd{background:#fde8e6;color:var(--dn)}.be{background:#f5f5f5;color:#555}
+.rg{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.sc{background:var(--w);border:1px solid var(--bd);border-radius:10px;padding:14px;text-align:center;box-shadow:var(--sh)}
+.sc .v{font-size:24px;font-weight:700;color:var(--ac)}.sc .l{font-size:11px;color:var(--mu)}
+.ftr{text-align:right;padding:8px 24px;font-size:12px;color:var(--mu);border-top:1px solid var(--bd);background:var(--w)}
+.arch{background:var(--w);border:1px solid var(--bd);border-radius:8px;padding:16px;margin-bottom:14px}
+.aitl{display:flex;align-items:center;gap:8px;padding:9px 12px;border:1px solid var(--bd);border-radius:7px;margin-bottom:7px;background:var(--sf)}
+.aitl .ttl{font-weight:600;color:var(--ac)}.aitl .mt{font-size:11px;color:var(--mu)}
+#ov{display:none;position:fixed;inset:0;background:rgba(255,255,255,.85);z-index:999;align-items:center;justify-content:center;flex-direction:column}
+#ov.show{display:flex}
+.sp{width:40px;height:40px;border:4px solid var(--bd);border-top-color:var(--ac);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ph{display:none;text-align:center;margin-bottom:18px;border-bottom:2px solid #333;padding-bottom:12px}
+.ph h2{font-family:Merriweather,serif;font-size:16px}.ph p{font-size:11px;color:#555}
+
+.qbox{border:1px solid var(--bd);border-radius:8px;padding:10px;margin-bottom:10px;background:var(--w)}
+.qbox .qrow{margin-bottom:6px}
+.pdet summary{cursor:pointer;font-size:12px;color:var(--ac);font-weight:600;padding:2px 0}
+.pdet textarea{margin-top:6px;font-family:Merriweather,serif;font-size:13px;line-height:1.6}
+.tag2{background:var(--al);color:var(--ac);border-radius:10px;padding:1px 8px;font-size:11px;margin-left:6px}.tg0{background:#f1f0ec;color:var(--mu)}
+.ait{border-left:4px solid var(--ac);box-shadow:var(--sh)}
+.qno{font-family:Merriweather,serif;font-size:15px;font-weight:700;color:var(--ac)}
+.lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--mu);margin:12px 0 4px}
+.qp{font-family:Merriweather,serif;line-height:1.7;background:#fffdf7;border-color:#ece3c8}
+.tg-ok{background:#e8f5e9!important;color:#2e7d32!important}.tg-no{background:#f1f0ec!important;color:var(--mu)!important}.tg-w{background:#fff3e0!important;color:#e65100!important}
+
+/* --- profesyonel görünüm --- */
+:root{--bg:#f3f2ee;--ac:#244f75;--sh:0 1px 3px rgba(20,30,40,.07),0 6px 18px rgba(20,30,40,.05)}
+body{-webkit-font-smoothing:antialiased}
+.hdr{background:linear-gradient(135deg,#1c3c59,#2c5f8a);border-bottom:none;padding:16px 28px;box-shadow:0 2px 10px rgba(0,0,0,.18)}
+.hdr h1{color:#fff;font-size:18px;letter-spacing:.01em}
+.hdr .sub{color:#c9dcec;font-size:12px}.hdr .sub strong{color:#fff!important}
+.hdr .btn.bs{background:rgba(255,255,255,.14);color:#fff}.hdr .btn.bs:hover{background:rgba(255,255,255,.26)}
+.nav{padding:0 28px;box-shadow:0 1px 0 var(--bd)}
+.stab{padding:14px 18px;font-weight:600}.stab:hover{color:var(--ac);background:#f7f9fb}
+.card{border-radius:12px;padding:22px 24px}
+.ct{font-family:Merriweather,serif;font-size:15px;color:var(--ac)}
+.btn{border-radius:8px;transition:background .15s,transform .15s,box-shadow .15s}
+.bp,.bok{box-shadow:0 1px 2px rgba(0,0,0,.18)}.btn:hover:not(:disabled){transform:translateY(-1px)}
+input[type=text],input[type=number],input[type=password],textarea,select{border-radius:8px;background:#fff}
+.qh{padding-bottom:8px;border-bottom:1px solid var(--bd);margin-bottom:4px}
+.ait{padding:18px 20px;border-radius:10px}
+.apib{background:#f7f3df;border-color:#e6d98a}
+.ftr{background:transparent;border-top:none;margin-top:10px}
+.qt{line-height:1.65}
+.gors{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:4px 0 6px}
+.gors img{max-height:120px;max-width:220px;border:1px solid var(--bd);border-radius:6px}
+.gbtn{cursor:pointer}
+.qimg{max-width:100%;max-height:420px;border:1px solid var(--bd);border-radius:8px;display:block;margin:4px 0}
+.bolb{font-size:13px;font-weight:700;color:var(--ac);margin:2px 0 8px}
+.bola{border-top:1px dashed var(--bd2);margin-top:18px;padding-top:16px}
+.ipucu{font-size:12px;color:var(--mu);margin:-4px 0 12px}
+@media print{
+  .hdr,.nav,.np,.btn,.sct,.apib,.ftr,#ov,.arch{display:none!important}
+  body{background:#fff;font-size:11px;padding:0}
+  .main{padding:0;max-width:100%}
+  .card{box-shadow:none;border:1px solid #ccc;break-inside:avoid}
+  .panel{display:none!important}
+  .panel.act{display:block!important}
+  .ph{display:block!important}
+  .stw{overflow:visible!important}
+  table.st{font-size:10px!important}
+  table.st th,table.st td{padding:4px 6px!important}
+}
+@media(max-width:700px){.fr,.qrow{grid-template-columns:1fr}.rg{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div>
+    <h1>Yazılı Sınav Rubrik Değerlendirme</h1>
+    <div class="sub">Türk Dili ve Edebiyatı &middot; Gemini</div>
+  </div>
+  <div class="hbts">
+    <button class="btn bs bsm np" onclick="tgArsiv()">📚 Arşiv</button>
+    <button class="btn bs bsm np" onclick="rstKey()">🔑 Anahtarı Sil</button>
+    <button class="btn bs bsm np" onclick="newExam()">🗑 Yeni Sınav</button>
+  </div>
+</div>
+
+<nav class="nav np">
+  <div class="stab act" id="t1" onclick="goTab(1)"><span class="n">1</span> Soru Kağıdı</div>
+  <div class="stab" id="t2" onclick="goTab(2)"><span class="n">2</span> Cevap Anahtarı</div>
+  <div class="stab" id="t3" onclick="goTab(3)"><span class="n">3</span> Rubrik</div>
+  <div class="stab" id="t4" onclick="goTab(4)"><span class="n">4</span> Öğrenci Puanla</div>
+  <div class="stab" id="t5" onclick="goTab(5)"><span class="n">5</span> Sonuçlar</div>
+</nav>
+
+<div class="main">
+
+<div class="apib np">
+  <span>🔑 Gemini API:</span>
+  <input type="password" id="apiInp" placeholder="AIza..." oninput="svKey(this.value)">
+  <span id="apiSt" style="font-size:12px;color:var(--mu)">Girilmedi</span>
+  <select id="mdl" onchange="svModel()">
+    <option value="gemini-2.5-flash">gemini-2.5-flash (ücretsiz katman, önerilen)</option>
+    <option value="gemini-3.1-flash-lite">gemini-3.1-flash-lite (ücretsiz katman)</option>
+    <option value="gemini-2.5-pro">gemini-2.5-pro (güçlü; ücretsiz kotası kısıtlı olabilir)</option>
+    <option value="gemini-3.1-pro-preview">gemini-3.1-pro-preview (ücretli)</option>
+  </select>
+  <input type="text" class="mc2" id="mdlC" placeholder="özel model kimliği" onchange="svModel()" title="Doldurursanız listedeki model yerine bu kullanılır">
+</div>
+
+<div id="arsivPanel" style="display:none" class="arch">
+  <div class="ct">📚 Rubrik Arşivi
+    <span style="margin-left:auto;display:flex;gap:7px">
+      <button class="btn bs bsm" onclick="impArsiv()">📥 İçeri Aktar</button>
+      <button class="btn bs bsm" onclick="tgArsiv()">Kapat</button>
+    </span>
+  </div>
+  <div id="arsivList"></div>
+</div>
+
+<!-- 1 -->
+<div class="panel act" id="p1">
+  <div class="card">
+    <div class="ct">Sınav Bilgileri</div>
+    <div class="fr">
+      <div class="fg"><label>Sınıf</label>
+        <select id="sinif" onchange="inf('sinif',this.value)">
+          <option value="">Seçin...</option><option>9. Sınıf</option><option>10. Sınıf</option><option>11. Sınıf</option><option>12. Sınıf</option>
+        </select></div>
+      <div class="fg"><label>Sınav Adı</label><input type="text" id="sinavAdi" placeholder="örn. 1. Dönem 1. Yazılı - TDE" onchange="inf('adi',this.value)"></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label>Tarih</label><input type="text" id="tarih" placeholder="örn. 30 Mart 2026" onchange="inf('tarih',this.value)"></div>
+      <div class="fg"><label>Öğretmen</label><input type="text" id="ogretmen" onchange="inf('ogretmen',this.value)"></div>
+    </div>
+    <div class="fg"><label>Kazanım / işlenen metinler / vurguladığınız noktalar (isteğe bağlı)</label>
+      <textarea id="baglam" rows="2" placeholder="örn. TDE.10.1.x kazanımları; derste Tanzimat'ın birinci kuşağı ve Şinasi üzerinde durduk..." onchange="inf('baglam',this.value)"></textarea>
+      <div style="font-size:11px;color:var(--mu);margin-top:3px">Cevap anahtarı üretilirken kullanılır; anahtarın sizin derste anlattığınıza uymasını sağlar.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ct">Belge</div>
+    <div class="al2 ai">Soru kâğıdını yükleyin. Hazır cevap anahtarınız da varsa onu aşağıdaki ikinci bölüme yükleyin: sorular soru kâğıdından, cevaplar ve puan kırılımı anahtardan alınır. Anahtar yüklemezseniz Adım 2'de Gemini üretir. Yalnızca anahtar yüklemek de mümkündür.</div>
+
+    <div class="bolb">1) Soru kâğıdı</div>
+    <label for="fInp" class="upl" id="uplA" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="hDrop(event,'soru')">
+      <p><strong>📂 Soru kâğıdı dosyalarını buraya sürükleyin veya tıklayın</strong></p>
+      <div class="hint">PDF, Word (.docx), TXT veya fotoğraf (JPG/PNG/WEBP). Birden fazla dosya/fotoğraf seçebilirsiniz.</div>
+    </label>
+    <input type="file" id="fInp" multiple accept=".txt,.pdf,.docx,.png,.jpg,.jpeg,.webp,.heic,image/*" style="display:none" onchange="hFiles(this.files,'soru');this.value=''">
+    <div class="chips" id="chips"></div>
+    <div class="fg" style="margin-top:12px"><label>veya metni buraya yapıştırın</label>
+      <textarea id="paste" rows="6" placeholder="Soru kağıdının metnini yapıştırın..."></textarea></div>
+
+    <div class="bola">
+    <div class="bolb">2) Cevap anahtarı (isteğe bağlı)</div>
+    <label for="fInpK" class="upl" id="uplK" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="hDrop(event,'anahtar')">
+      <p><strong>📂 Cevap anahtarı dosyalarını buraya sürükleyin veya tıklayın</strong></p>
+      <div class="hint">PDF, Word (.docx), TXT veya fotoğraf (JPG/PNG/WEBP). Birden fazla dosya/fotoğraf seçebilirsiniz.</div>
+    </label>
+    <input type="file" id="fInpK" multiple accept=".txt,.pdf,.docx,.png,.jpg,.jpeg,.webp,.heic,image/*" style="display:none" onchange="hFiles(this.files,'anahtar');this.value=''">
+    <div class="chips" id="chipsK"></div>
+    <div class="fg" style="margin-top:12px"><label>veya metni buraya yapıştırın</label>
+      <textarea id="pasteK" rows="6" placeholder="Cevap anahtarının metnini yapıştırın..."></textarea></div>
+    </div>
+
+    <button class="btn bp blg" onclick="extractQ()">🤖 Soruları Çıkar</button>
+    <span style="font-size:12px;color:var(--mu);margin-left:8px">Sonra listeyi kontrol edip düzeltebilirsiniz.</span>
+  </div>
+
+  <div class="card" id="qCard" style="display:none">
+    <div class="ct">Sorular
+      <span style="margin-left:auto;display:flex;gap:7px;flex-wrap:wrap">
+        <button class="btn bs bsm" onclick="addQ()">+ Soru Ekle</button>
+        <button class="btn bs bsm" onclick="distribute()">Puansızlara dağıt</button>
+        <button class="btn bs bsm" onclick="scaleQ()">Toplamı 100'e ölçekle</button>
+        <button class="btn bok" onclick="goTab(2)">Cevap Anahtarına Geç →</button>
+      </span>
+    </div>
+    <div class="al2 ai">Gemini'nin okuduğu soruları ve puanları <b>mutlaka kontrol edin</b>; hatalı olanı düzeltin. Toplam puan: <b id="qTot">0</b></div>
+    <div class="ipucu">İpucu: Altı çizili ifade __böyle__, kalın ifade **böyle** yazılır.</div>
+    <div id="qList"></div>
+  </div>
+</div>
+
+<!-- 2 -->
+<div class="panel" id="p2">
+  <div class="card">
+    <div class="ct">Cevap Anahtarı
+      <span style="margin-left:auto;display:flex;gap:7px;flex-wrap:wrap">
+        <button class="btn bp bsm" onclick="fillFromKey()" title="Yüklediğiniz cevap anahtarındaki cevapları sorulara yazar">📥 Anahtardan Doldur</button>
+        <input type="file" id="fInpK2" multiple accept=".txt,.pdf,.docx,.png,.jpg,.jpeg,.webp,.heic,image/*" style="display:none" onchange="hFiles(this.files,'anahtar').then(fillFromKey);this.value=''">
+        <button class="btn bs bsm" onclick="genKeyAll()">🤖 Eksikleri Üret</button>
+        <button class="btn bs bsm" onclick="dlKeyWord()">📄 Word İndir</button>
+        <button class="btn bok" onclick="goTab(3)">Rubriğe Geç →</button>
+      </span>
+    </div>
+    <div class="al2 aw">Bu bölüm <b>taslaktır</b>. Yapay zekâ hata yapabilir (özellikle yazar, eser, tarih, akım bilgisinde). <b>[KONTROL ET]</b> ile işaretlenen yerleri ve tüm cevapları gözden geçirin; rubrik bu anahtardan üretilir.</div>
+    <div id="keyList"></div>
+  </div>
+</div>
+
+<!-- 3 -->
+<div class="panel" id="p3">
+  <div class="card">
+    <div class="ct">Rubrik
+      <span style="margin-left:auto;display:flex;gap:7px;flex-wrap:wrap">
+        <button class="btn bp bsm" onclick="genRubAll()">🤖 Rubriği Oluştur</button>
+        <button class="btn bs bsm" onclick="addManual()">+ Elle Kriter</button>
+        <button class="btn bs bsm" onclick="svArsiv()">💾 Arşive Kaydet</button>
+        <button class="btn bs bsm" onclick="dlWord()">📄 Word İndir</button>
+        <button class="btn bok" onclick="goTab(4)">Puanlamaya Geç →</button>
+      </span>
+    </div>
+    <div class="al2 ai">Düzey puanlarını, açıklamaları ve soru puanını doğrudan düzenleyebilirsiniz. Soru puanını değiştirirseniz düzey puanları orantılı güncellenir.</div>
+    <div id="rubTbl"></div>
+    <div style="margin-top:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <span style="color:var(--mu)">Toplam puan:</span><b id="totW" style="font-size:16px;color:var(--ac)">0</b>
+      <span style="font-size:12px;color:var(--mu)">(100 olması şart değil; sonuçlar yüzdeye çevrilir)</span>
+      <button class="btn bs bsm" onclick="scale100()">100'e ölçekle</button>
+    </div>
+  </div>
+</div>
+
+<!-- 4 -->
+<div class="panel" id="p4">
+  <div class="card">
+    <div class="ct">Öğrenci Listesi ve Puanlama</div>
+    <div class="sct np">
+      <input type="text" id="newSt" placeholder="Öğrenci adı..." style="max-width:200px" onkeydown="if(event.key==='Enter')addSt()">
+      <button class="btn bp bsm" onclick="addSt()">+ Ekle</button>
+      <button class="btn bs bsm" onclick="bulkSt()">Toplu Ekle</button>
+      <div style="margin-left:auto;display:flex;gap:7px">
+        <button class="btn bs bsm" onclick="goTab(3)">← Rubriğe Dön</button>
+        <button class="btn bok bsm" onclick="goTab(5)">Sonuçlara Geç →</button>
+      </div>
+    </div>
+    <div class="al2 ai">Her soru için 0 ile soru puanı arasında değer girin. Veriler bu tarayıcıda otomatik kaydedilir.</div>
+    <div id="stTbl"></div>
+  </div>
+</div>
+
+<!-- 5 -->
+<div class="panel" id="p5">
+  <div class="ph"><h2 id="phT">Yazılı Sınav Değerlendirme Raporu</h2><p id="phM"></p></div>
+  <div class="sct np">
+    <button class="btn bp bsm" onclick="prt()">🖨 Yazdır / PDF</button>
+    <button class="btn bs bsm" onclick="dlCsv()">📊 CSV (Excel)</button>
+  </div>
+  <div id="resCnt"></div>
+</div>
+
+</div>
+
+<div id="ov"><div class="sp"></div><p id="ovT">Yükleniyor...</p></div>
+<div class="ftr np">Türk Dili ve Edebiyatı</div>
+
+<script>
+'use strict';
+var $ = function (id) { return document.getElementById(id); };
+var bold = function (t) { return ulDegis(esc(t).replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>'), function (c) { return '<u>' + c + '</u>'; }); };
+var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+var sleep = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
+var r05 = function (x) { return Math.round(x * 2) / 2; };
+var uid = function () { return 'q' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); };
+var LV = ['Mükemmel', 'İyi', 'Gelişiyor', 'Yetersiz', 'Boş/Yanlış'];
+var LC = ['#2e7d32', '#1565c0', '#e65100', '#c0392b', '#555555'];
+var STORE = 'rubrik_v2', ARCH = 'rubrik_arsiv_v2';
+
+var S = { info: { sinif: '', adi: '', tarih: '', ogretmen: '', baglam: '' }, docType: 'soru', q: [], crit: [], stus: [] };
+var aKey = '';
+var files = [];
+
+/* ---------- kalıcılık ---------- */
+var saveWarned = false;
+function save() { try { localStorage.setItem(STORE, JSON.stringify(S)); } catch (e) { if (!saveWarned) { saveWarned = true; alert('Uyarı: tarayıcı depolaması doldu (görseller yer kaplar). Sayfayı kapatmadan önce Word çıktılarını alın; görselleri küçültmek için bazılarını kaldırın.'); } } }
+function load() {
+  try {
+    var d = JSON.parse(localStorage.getItem(STORE) || 'null');
+    if (d && d.info) {
+      S.info = Object.assign(S.info, d.info);
+      S.docType = d.docType || 'soru';
+      S.q = d.q || []; S.crit = d.crit || []; S.stus = d.stus || [];
+    }
+  } catch (e) {}
+}
+function inf(k, v) { S.info[k] = v; save(); }
+
+/* ---------- genel yardımcılar ---------- */
+function busy(m) { $('ovT').textContent = m; $('ov').classList.add('show'); }
+function unbusy() { $('ov').classList.remove('show'); }
+function loadLib(check, urls) {
+  return new Promise(function (res, rej) {
+    if (check()) return res();
+    var i = 0;
+    (function next() {
+      if (i >= urls.length) return rej(new Error('Kütüphane yüklenemedi (internet bağlantısını kontrol edin).'));
+      var s = document.createElement('script');
+      s.src = urls[i++];
+      s.onload = function () { check() ? res() : next(); };
+      s.onerror = next;
+      document.head.appendChild(s);
+    })();
+  });
+}
+var DOCX_URLS = ['https://unpkg.com/docx@8.5.0/build/index.umd.js', 'https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js'];
+var MAM_URLS = ['https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js', 'https://unpkg.com/mammoth@1.6.0/mammoth.browser.min.js'];
+function download(blob, name) {
+  var u = URL.createObjectURL(blob), a = document.createElement('a');
+  a.href = u; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function () { URL.revokeObjectURL(u); }, 2000);
+}
+function safeName(s) { var tr = { 'ı': 'i', 'İ': 'I', 'ş': 's', 'Ş': 'S', 'ğ': 'g', 'Ğ': 'G', 'ü': 'u', 'Ü': 'U', 'ö': 'o', 'Ö': 'O', 'ç': 'c', 'Ç': 'C' }; return String(s || 'rubrik').replace(/[ıİşŞğĞüÜöÖçÇ]/g, function (c) { return tr[c]; }).replace(/[\\\/:*?"<>|]/g, '').trim().replace(/\s+/g, '_') || 'rubrik'; }
+function sumN(q) { return (q.noktalar || []).reduce(function (a, n) { return a + (+n.puan || 0); }, 0); }
+function totalPts() { return S.q.reduce(function (a, q) { return a + (+q.puan || 0); }, 0); }
+function qById(id) { for (var i = 0; i < S.q.length; i++) if (S.q[i].id === id) return S.q[i]; return null; }
+
+/* ==ISARET-BASLA== */
+/* ---------- altı çizili (__ifade__) ve kalın (**ifade**) işaretleri ---------- */
+/* Altı çizili: tam iki alt çizgi + boşluk/alt çizgi olmayan karakterle başlayıp biten içerik + tam iki alt çizgi.
+   "____" veya "_____ kelime _____" gibi boşluk doldurma çizgileri eşleşmez. Her çağrıda yeni düzenli ifade döner. */
+function ulRe() { return /__(?!_)([^\s_](?:[^_\r\n]*?[^\s_])?)__(?!_)/g; }
+/* Eşleşmenin hemen öncesinde bir alt çizgi varsa o üç+ alt çizgili bir dizinin parçasıdır; altı çizili sayılmaz. */
+function ulDegis(s, fn) {
+  return String(s == null ? '' : s).replace(ulRe(), function (m, c, off, str) { return off > 0 && str.charAt(off - 1) === '_' ? m : fn(c); });
+}
+function ulTopla(t) {
+  var re = ulRe(), m, out = []; t = String(t == null ? '' : t);
+  while ((m = re.exec(t))) {
+    if (m.index > 0 && t.charAt(m.index - 1) === '_') { re.lastIndex = m.index + 1; continue; }
+    out.push(m[1]);
+  }
+  return out;
+}
+/* Düz metin gereken yerlerde (özet tablosu, ipucu başlıkları) işaretleri kaldırır. */
+function duz(t) {
+  return ulDegis(t, function (c) { return c; }).replace(/\*\*([^*]+)\*\*/g, '$1');
+}
+/* İşaretli metni {t, b, u} parçalarına ayırır (Word çıktısı için). Kalın ve altı çizili iç içe olabilir. */
+function mdParcala(s, b, u, out) {
+  out = out || []; s = String(s == null ? '' : s);
+  var re = /\*\*([^*]+)\*\*|__(?!_)([^\s_](?:[^_\r\n]*?[^\s_])?)__(?!_)/g, last = 0, m;
+  while ((m = re.exec(s))) {
+    if (m[2] !== undefined && m.index > 0 && s.charAt(m.index - 1) === '_') { re.lastIndex = m.index + 1; continue; }
+    if (m.index > last) out.push({ t: s.slice(last, m.index), b: b, u: u });
+    if (m[1] !== undefined) mdParcala(m[1], true, u, out); else mdParcala(m[2], b, true, out);
+    last = re.lastIndex;
+  }
+  if (last < s.length) out.push({ t: s.slice(last), b: b, u: u });
+  return out;
+}
+
+/* ---------- Word (.docx) → işaretli düz metin ---------- */
+/* Biçimli parçanın işaretini koyar; baş/son boşluk işaretin dışında kalır. İçerik işaretle çakışıyorsa işaret konmaz. */
+function sar(s, mk) {
+  var m = /^(\s*)([\s\S]*?)(\s*)$/.exec(s), core = m[2];
+  if (!core) return s;
+  if (mk === '__' ? core.indexOf('_') >= 0 : core.indexOf('*') >= 0) return s;
+  return m[1] + mk + core + mk + m[3];
+}
+/* segs: [{t, b, u}]. Önce altı çizili düzeyinde, sonra kalın düzeyinde yan yana aynı türden parçaları birleştirir. */
+function mdYaz(segs, key) {
+  if (!key) return segs.map(function (s) { return s.t; }).join('');
+  var bos = function (s) { return !s.t.trim(); };
+  var fl = segs.map(function (s) { return !!s[key]; });
+  for (var i = 0; i < segs.length; i++) {
+    if (!fl[i] || !bos(segs[i])) continue;
+    var p = i - 1, n = i + 1;
+    while (p >= 0 && bos(segs[p])) p--;
+    while (n < segs.length && bos(segs[n])) n++;
+    fl[i] = p >= 0 && n < segs.length && !!segs[p][key] && !!segs[n][key];
+  }
+  var groups = [];
+  segs.forEach(function (s, i) {
+    var g = groups[groups.length - 1];
+    if (g && g.f === fl[i]) g.items.push(s); else groups.push({ f: fl[i], items: [s] });
+  });
+  var mk = key === 'u' ? '__' : '**', next = key === 'u' ? 'b' : null;
+  return groups.map(function (g) { var inner = mdYaz(g.items, next); return g.f ? sar(inner, mk) : inner; }).join('');
+}
+function segsToMd(segs) {
+  segs = segs.filter(function (s) { return s.t; }).map(function (s) { return { t: s.t, b: !!s.b, u: !!s.u }; });
+  return mdYaz(segs, 'u').replace(/[ \t]+$/, '');
+}
+var BLOK = /^(P|DIV|H[1-6]|BLOCKQUOTE|LI|UL|OL|PRE|SECTION|ARTICLE|HEADER|FOOTER|THEAD|TBODY|TFOOT|FIGURE|FIGCAPTION)$/;
+function domToMd(root) {
+  var lines = [], cur = [], inCell = false, cellLines = null;
+  function bosluk() { return { t: ' ', b: false, u: false }; }
+  function flush() {
+    var real = cur.some(function (s) { return !s.k && s.t.trim() !== ''; });
+    if (real) (inCell ? cellLines : lines).push(segsToMd(cur).replace(/[ \t]+/g, ' ').trim());
+    cur = [];
+  }
+  /* Hücre içindeki paragraf ve satır sonları korunur (şiir dizeleri tek satıra inmesin). */
+  function hucre(td) {
+    var keep = cur; cur = []; cellLines = []; inCell = true;
+    for (var i = 0; i < td.childNodes.length; i++) walk(td.childNodes[i], false, false);
+    flush(); inCell = false;
+    var s = cellLines; cellLines = null; cur = keep; return s;
+  }
+  function tablo(tb) {
+    flush();
+    var rows = tb.getElementsByTagName('tr');
+    for (var i = 0; i < rows.length; i++) {
+      var cells = [], ch = rows[i].childNodes;
+      for (var j = 0; j < ch.length; j++) {
+        var nm = String(ch[j].nodeName).toUpperCase();
+        if (ch[j].nodeType === 1 && (nm === 'TD' || nm === 'TH')) cells.push(hucre(ch[j]));
+      }
+      var dolu = cells.filter(function (c) { return c.length; });
+      if (!dolu.length) continue;
+      /* Hücreler tek satırsa "a | b | c"; çok satırlı hücre varsa her hücre kendi satırlarıyla alt alta yazılır. */
+      if (dolu.every(function (c) { return c.length === 1; })) lines.push(cells.map(function (c) { return c[0] || ''; }).join(' | '));
+      else dolu.forEach(function (c) { c.forEach(function (l) { lines.push(l); }); });
+    }
+  }
+  function walk(n, b, u) {
+    var t = n.nodeType;
+    if (t === 3) { var v = String(n.nodeValue || '').replace(/[\r\n]+/g, ' '); if (v) cur.push({ t: v, b: b, u: u }); return; }
+    if (t !== 1) return;
+    var nm = String(n.nodeName).toUpperCase();
+    if (nm === 'SCRIPT' || nm === 'STYLE' || nm === 'IMG') return;
+    if (nm === 'BR') { flush(); return; }
+    if (nm === 'TABLE') { if (!inCell) tablo(n); return; }
+    if (nm === 'STRONG' || nm === 'B') b = true;
+    if (nm === 'U') u = true;
+    var blok = BLOK.test(nm);
+    if (blok) flush();
+    if (nm === 'LI') cur.push({ t: '- ', b: false, u: false, k: 1 });
+    for (var i = 0; i < n.childNodes.length; i++) walk(n.childNodes[i], b, u);
+    if (blok) flush();
+  }
+  walk(root, false, false); flush();
+  return lines.join('\n');
+}
+function htmlToMd(html) {
+  var doc = new DOMParser().parseFromString(String(html || ''), 'text/html');
+  return domToMd(doc.body);
+}
+
+/* ---------- altı çizili denetimi (kodla) ---------- */
+/* Türkçe harflere duyarlı küçültme: İ→i, I→ı. */
+function trK(s) {
+  s = String(s == null ? '' : s);
+  if (s.normalize) s = s.normalize('NFC');
+  return s.replace(/İ/g, 'i').replace(/I/g, 'ı').toLowerCase().replace(/\u0307/g, '');
+}
+/* Karşılaştırma biçimi: küçük harf, harf/rakam dışı her şey tek boşluk, baş/son boşluk yok. */
+function ulNorm(s) { return trK(s).replace(/â/g, 'a').replace(/î/g, 'i').replace(/û/g, 'u').replace(/[^a-z0-9çğıöşü]+/g, ' ').trim(); }
+/* Soru metninde "altı çizili / altı çizilen / altı çizgili ..." geçiyor mu? (büyük-küçük harf ve Türkçe harf duyarsız) */
+function ulSozVar(s) {
+  var a = trK(s).replace(/ı/g, 'i').replace(/ç/g, 'c').replace(/ş/g, 's').replace(/ğ/g, 'g').replace(/ö/g, 'o').replace(/ü/g, 'u').replace(/â/g, 'a').replace(/î/g, 'i').replace(/û/g, 'u');
+  return /\balti(ni)?\s*ciz/.test(a);
+}
+/* kaynaklar: soru kâğıdı tarafındaki metinler (docx, txt, yapıştırılan). qs: çıkan sorular.
+   eksik: kaynakta __işaretli__ olup sorularda işaretli geçmeyen ifadeler.
+   sorular: metninde "altı çizili" geçtiği hâlde metin/parçada hiç __..__ olmayan soruların etiketleri. */
+function ulDenetle(kaynaklar, qs) {
+  var isaretli = [];
+  qs.forEach(function (q) {
+    ulTopla(q.metin).concat(ulTopla(q.parca)).forEach(function (x) { var n = ulNorm(x); if (n) isaretli.push(' ' + n + ' '); });
+  });
+  var eksik = [], gor = {};
+  kaynaklar.forEach(function (t) {
+    ulTopla(t).forEach(function (x) {
+      var n = ulNorm(x); if (!n || gor[n]) return; gor[n] = 1;
+      if (!isaretli.some(function (m) { return m.indexOf(' ' + n + ' ') >= 0; })) eksik.push(x.trim());
+    });
+  });
+  var sorular = qs.filter(function (q) { return ulSozVar(q.metin) && !ulTopla(q.metin).length && !ulTopla(q.parca).length; }).map(function (q) { return q.etiket; });
+  return { eksik: eksik, sorular: sorular };
+}
+/* ==ISARET-BITIR== */
+
+/* ---------- API anahtarı / model ---------- */
+function svKey(v) {
+  aKey = v.trim();
+  try { localStorage.setItem('gem_k', aKey); } catch (e) {}
+  var el = $('apiSt');
+  if (!aKey) { el.textContent = 'Girilmedi'; el.style.color = '#6b6860'; }
+  else if (aKey.indexOf('AIza') === 0) { el.textContent = '✓ Kaydedildi'; el.style.color = '#2e7d32'; }
+  else { el.textContent = '✓ Kaydedildi (farklı biçimde; çalışmazsa AI Studio\'dan yeniden kopyalayın)'; el.style.color = '#2e7d32'; }
+}
+function rstKey() {
+  if (!confirm('API anahtarı silinsin mi?')) return;
+  aKey = ''; try { localStorage.removeItem('gem_k'); } catch (e) {}
+  $('apiInp').value = ''; svKey('');
+}
+function svModel() { try { localStorage.setItem('gem_m', $('mdl').value); localStorage.setItem('gem_mc', $('mdlC').value.trim()); } catch (e) {} }
+function getModel() { return $('mdlC').value.trim() || $('mdl').value; }
+function checkKey() { if (!aKey) { alert('Lütfen Gemini API anahtarınızı girin (Google AI Studio → Get API key).'); return false; } return true; }
+
+/* ---------- Gemini çağrısı ---------- */
+var SYS = 'Sen deneyimli bir Türk Dili ve Edebiyatı öğretmenisin (MEB TYMM programı). Yanıtını yalnızca istenen JSON şemasında ve Türkçe ver. Emin olmadığın olgusal bilgiyi uydurma.';
+async function gem(parts, schema, maxTok) {
+  var m = getModel();
+  var body = {
+    systemInstruction: { parts: [{ text: SYS }] },
+    contents: [{ role: 'user', parts: parts }],
+    generationConfig: { temperature: 0.2, responseMimeType: 'application/json', responseSchema: schema, maxOutputTokens: maxTok || 16000 }
+  };
+  /* Yoğunlukta (429/5xx) önce aynı modeli sabırla dener, sonra yedek modellere geçer. */
+  var models = [m];
+  ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-3.1-flash-lite'].forEach(function (x) { if (models.indexOf(x) < 0) models.push(x); });
+  var last, waits = [4000, 8000, 15000], mi = 0, t = 0, jerr = 0, base = $('ovT').textContent;
+  while (mi < models.length) {
+    var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(models[mi]) + ':generateContent?key=' + encodeURIComponent(aKey);
+    var r, d, overload = false;
+    try {
+      r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      d = await r.json();
+    } catch (e) {
+      last = new Error('Bağlantı hatası: ' + e.message); overload = true;
+    }
+    if (!overload && !r.ok) {
+      var msg = (d && d.error && d.error.message) || ('HTTP ' + r.status);
+      if (r.status === 429 || r.status >= 500) { last = new Error(msg); overload = true; }
+      else if (r.status === 404 && mi > 0) { last = new Error(msg); t = waits.length; overload = true; }
+      else throw new Error(msg);
+    }
+    if (overload) {
+      if (t < waits.length) {
+        $('ovT').textContent = base + ' (Gemini yoğun, ' + Math.round(waits[t] / 1000) + ' sn sonra tekrar denenecek)';
+        await sleep(waits[t]); t++; continue;
+      }
+      mi++; t = 0;
+      if (mi < models.length) $('ovT').textContent = base + ' (yedek modele geçiliyor: ' + models[mi] + ')';
+      continue;
+    }
+    var c = d.candidates && d.candidates[0];
+    if (!c) throw new Error(d.promptFeedback && d.promptFeedback.blockReason ? 'İçerik engellendi: ' + d.promptFeedback.blockReason : 'Boş yanıt döndü.');
+    var txt = ((c.content && c.content.parts) || []).map(function (p) { return p.text || ''; }).join('').replace(/^\s*```json/i, '').replace(/```\s*$/, '').trim();
+    if (c.finishReason === 'MAX_TOKENS') throw new Error('Yanıt uzunluk sınırında kesildi. Belgeyi daha küçük parçalara bölün.');
+    try { return JSON.parse(txt); }
+    catch (e) { last = new Error('Model geçersiz JSON döndürdü.'); if (++jerr < 3) continue; throw last; }
+  }
+  throw new Error('Gemini şu an çok yoğun, üç model de yanıt veremedi. Birkaç dakika sonra "Eksikleri Üret"e tekrar basın. (' + (last ? last.message : '') + ')');
+}
+
+/* ---------- sekmeler ---------- */
+function goTab(n) {
+  for (var i = 1; i <= 5; i++) { $('p' + i).classList.toggle('act', i === n); $('t' + i).classList.toggle('act', i === n); }
+  if (n === 1) renQ();
+  if (n === 2) renKey();
+  if (n === 3) renRub();
+  if (n === 4) renSt();
+  if (n === 5) renRes();
+  window.scrollTo(0, 0);
+}
+function markTabs() {
+  $('t1').classList.toggle('dn2', S.q.length > 0);
+  $('t2').classList.toggle('dn2', S.q.length > 0 && S.q.every(function (q) { return q.ornek; }));
+  $('t3').classList.toggle('dn2', S.crit.length > 0);
+  $('t4').classList.toggle('dn2', S.stus.length > 0);
+}
+
+/* ---------- dosya girişi ---------- */
+function hDrop(e, role) { e.preventDefault(); $(role === 'anahtar' ? 'uplK' : 'uplA').classList.remove('drag'); hFiles(e.dataTransfer.files, role); }
+function readB64(f) {
+  return new Promise(function (res, rej) {
+    var r = new FileReader();
+    r.onload = function () { res(String(r.result).split(',')[1] || ''); };
+    r.onerror = function () { rej(new Error('Dosya okunamadı: ' + f.name)); };
+    r.readAsDataURL(f);
+  });
+}
+function readBuf(f) {
+  return new Promise(function (res, rej) {
+    var r = new FileReader();
+    r.onload = function () { res(r.result); };
+    r.onerror = function () { rej(new Error('Dosya okunamadı: ' + f.name)); };
+    r.readAsArrayBuffer(f);
+  });
+}
+/* Word dosyasını okur: önce biçimli (altı çizili/kalın korunur), olmazsa eski düz metin yolu. */
+async function readDocx(f) {
+  await loadLib(function () { return window.mammoth; }, MAM_URLS);
+  var buf = await readBuf(f), text = '';
+  try {
+    var opt = { styleMap: ['u => u'] };
+    if (window.mammoth.images && window.mammoth.images.imgElement) opt.convertImage = window.mammoth.images.imgElement(function () { return Promise.resolve({ src: '' }); });
+    var h = await window.mammoth.convertToHtml({ arrayBuffer: buf }, opt);
+    text = htmlToMd(h.value || '');
+  } catch (e) { text = ''; }
+  if (!text || text.trim().length < 5) {
+    var res = await window.mammoth.extractRawText({ arrayBuffer: buf });
+    text = res.value || '';
+  }
+  return text;
+}
+async function hFiles(list, role) {
+  role = role === 'anahtar' ? 'anahtar' : 'soru';
+  list = Array.prototype.slice.call(list || []);
+  for (var i = 0; i < list.length; i++) {
+    var f = list[i], nm = f.name.toLowerCase();
+    try {
+      if (f.size > 14 * 1024 * 1024) { alert(f.name + ' çok büyük (14 MB üstü). Daha küçük bir dosya kullanın.'); continue; }
+      if (nm.endsWith('.pdf')) {
+        files.push({ name: f.name, kind: 'inline', mime: 'application/pdf', data: await readB64(f), role: role });
+      } else if (/\.(png|jpe?g|webp|heic)$/.test(nm) || (f.type && f.type.indexOf('image/') === 0)) {
+        var mime = f.type || (nm.endsWith('.png') ? 'image/png' : nm.endsWith('.webp') ? 'image/webp' : nm.endsWith('.heic') ? 'image/heic' : 'image/jpeg');
+        files.push({ name: f.name, kind: 'inline', mime: mime, data: await readB64(f), role: role });
+      } else if (nm.endsWith('.docx')) {
+        var dtext = await readDocx(f);
+        if (!dtext || dtext.trim().length < 5) { alert(f.name + ': metin alınamadı (boş veya şifreli olabilir).'); continue; }
+        files.push({ name: f.name, kind: 'text', text: dtext, role: role });
+      } else if (nm.endsWith('.txt')) {
+        files.push({ name: f.name, kind: 'text', text: await new Promise(function (ok) { var r = new FileReader(); r.onload = function () { ok(r.result); }; r.readAsText(f, 'UTF-8'); }), role: role });
+      } else if (nm.endsWith('.doc')) {
+        alert(f.name + ': eski .doc biçimi desteklenmiyor. Word\'de "Farklı Kaydet → .docx" yapın veya PDF kullanın.');
+      } else {
+        alert(f.name + ': desteklenmeyen dosya türü.');
+      }
+    } catch (e) { alert(e.message); }
+  }
+  renChips();
+}
+function renChips() {
+  var h = { soru: '', anahtar: '' };
+  files.forEach(function (f, i) {
+    h[f.role === 'anahtar' ? 'anahtar' : 'soru'] += '<span class="chip">📎 ' + esc(f.name) + '<button onclick="rmFile(' + i + ')" title="Kaldır">×</button></span>';
+  });
+  $('chips').innerHTML = h.soru; $('chipsK').innerHTML = h.anahtar;
+}
+function rmFile(i) { files.splice(i, 1); renChips(); }
+
+/* ---------- şemalar ve istemler ---------- */
+var SCH_EXTRACT = {
+  type: 'OBJECT',
+  properties: {
+    sorular: {
+      type: 'ARRAY',
+      items: {
+        type: 'OBJECT',
+        properties: {
+          etiket: { type: 'STRING' },
+          metin: { type: 'STRING' },
+          parca: { type: 'STRING' },
+          puan: { type: 'NUMBER' },
+          ornek_cevap: { type: 'STRING' },
+          noktalar: { type: 'ARRAY', items: { type: 'OBJECT', properties: { nokta: { type: 'STRING' }, puan: { type: 'NUMBER' } }, required: ['nokta', 'puan'] } }
+        },
+        required: ['etiket', 'metin', 'puan']
+      }
+    }
+  },
+  required: ['sorular']
+};
+var SCH_KEY = {
+  type: 'OBJECT',
+  properties: {
+    ornek_cevap: { type: 'STRING' },
+    noktalar: { type: 'ARRAY', items: { type: 'OBJECT', properties: { nokta: { type: 'STRING' }, puan: { type: 'NUMBER' } }, required: ['nokta', 'puan'] } },
+    alternatifler: { type: 'STRING' },
+    yaygin_hatalar: { type: 'STRING' }
+  },
+  required: ['ornek_cevap', 'noktalar']
+};
+var SCH_RUB = {
+  type: 'OBJECT',
+  properties: { mukemmel: { type: 'STRING' }, iyi: { type: 'STRING' }, gelisiyor: { type: 'STRING' }, yetersiz: { type: 'STRING' } },
+  required: ['mukemmel', 'iyi', 'gelisiyor', 'yetersiz']
+};
+
+/* Altı çizili / kalın ifade kuralı: soru çıkarma istemlerinin ikisinde de kullanılır. */
+var UL_KURAL = 'ALTI ÇİZİLİ İFADELER (ÇOK ÖNEMLİ): Altı çizili sözcük ve ifadeler __ifade__ (iki alt çizgi) ile, kalın sözcük ve ifadeler **ifade** (iki yıldız) ile işaretlenir. ' +
+  'Belgede altı çizili olan HER sözcük veya ifade (PDF ve fotoğrafta görsel olarak; metin olarak gelen belgede zaten __...__ biçiminde) hem "metin" hem "parca" alanında __...__ ile AYNEN korunmalıdır. ' +
+  'Altı çizili ifade çoğu zaman sorunun sorduğu şeyin kendisidir; atlanırsa soru çözülemez. ' +
+  'Soru "altı çizili" diyorsa ve belgede hangi ifadenin altı çizili olduğu görülüyorsa mutlaka işaretle; görülemiyorsa uydurma, işaret koyma. ' +
+  'Metin olarak gelen belgedeki __...__ ve **...** işaretlerini de aynen taşı, silme. ' +
+  'Boşluk doldurma sorularındaki uzun alt çizgi dizilerini (_______) olduğu gibi bırak; onlar altı çizili ifade değildir.\n';
+
+function extractPrompt(isKey) {
+  return 'Sınıf: ' + (S.info.sinif || 'belirtilmedi') + '\n' +
+    'Yukarıdaki belge bir Türk Dili ve Edebiyatı yazılı sınavının ' + (isKey ? 'CEVAP ANAHTARIDIR' : 'SORU KAĞIDIDIR') + '.\n\n' +
+    'Görev: Belgedeki TÜM soruları sırayla çıkar. Hiçbirini atlama ve birleştirme.\n' +
+    UL_KURAL +
+    '- etiket: soru numarası ("1", "2"...). Soru A, B, C gibi alt maddelere bölünmüşse HER alt maddeyi ayrı kalem yap ve etiketini "3.A", "3.B" gibi ver.\n' +
+    '- metin: sorunun TAM ve AYNEN metni: yönerge cümlesi, tablo (satırları "sütun1 | sütun2 | sütun3" biçiminde alt alta yaz), şıklar, boşluklu cümleler, altı çizili sözcükler (__sözcük__ biçiminde) ve kalın sözcükler (**sözcük** biçiminde işaretle) dahil. Kısaltma, özetleme, yeniden yazma YAPMA. Alt maddede, anlaşılması için ana sorunun ortak kök cümlesini de başa ekle.\n' +
+    '- parca: soru bir okuma parçasına, şiire, alıntıya veya görsele dayanıyorsa o parçanın TAMAMI, harfi harfine (şiirde dize sonlarını satır sonu olarak koru; başlık ve yazar adı varsa dahil; altı çizili ve kalın ifadeleri işaretleriyle koru). Kesinlikle özetleme veya kısaltma. Görselse ayrıntılı betimle. Aynı parça birden çok alt maddede kullanılıyorsa HER alt maddede tekrar et. Parça yoksa boş bırak.\n' +
+    '- puan: kâğıtta açıkça yazan puan ("(15 puan)", "5x3=15" → 15). Alt maddelerin puanı ayrı yazıyorsa ayrı ver. Puan yazmıyorsa 0 yaz; uydurma.\n' +
+    (isKey
+      ? '- ornek_cevap: anahtardaki beklenen cevap, metne sadık kalarak.\n- noktalar: anahtarda puan kırılımı varsa (örn. "doğru tespit 3 puan, gerekçe 3 puan") her biri bir nokta olsun; toplamı sorunun puanına eşit olsun. Kırılım yoksa boş dizi ver.\n'
+      : '- ornek_cevap ve noktalar: boş bırak ("" ve []).\n') +
+    'Çoktan seçmeli veya boşluk doldurma sorusu varsa yine de listeye ekle.';
+}
+/* Soru kâğıdı ve cevap anahtarı birlikte yüklendiğinde kullanılan istem. */
+function extractPromptBoth() {
+  return 'Sınıf: ' + (S.info.sinif || 'belirtilmedi') + '\n' +
+    'Yukarıda iki ayrı belge var. "=== SORU KAĞIDI ===" ile başlayıp "=== SORU KAĞIDI SONU ===" ile biten bölüm SORU KAĞIDIDIR; "=== CEVAP ANAHTARI ===" ile başlayıp "=== CEVAP ANAHTARI SONU ===" ile biten bölüm aynı Türk Dili ve Edebiyatı yazılı sınavının CEVAP ANAHTARIDIR. Hangi parçanın hangi belgeye ait olduğuna dikkat et.\n\n' +
+    'Görev: SORU KAĞIDINDAKİ TÜM soruları sırayla çıkar. Hiçbirini atlama ve birleştirme. Cevap anahtarında olup soru kâğıdında bulunmayan soruyu listeye ekleme.\n' +
+    UL_KURAL +
+    '- etiket: soru numarası ("1", "2"...). Soru A, B, C gibi alt maddelere bölünmüşse HER alt maddeyi ayrı kalem yap ve etiketini "3.A", "3.B" gibi ver. Etiketi SORU KAĞIDINDAN al.\n' +
+    '- metin: SORU KAĞIDINDAKİ sorunun TAM ve AYNEN metni: yönerge cümlesi, tablo (satırları "sütun1 | sütun2 | sütun3" biçiminde alt alta yaz), şıklar, boşluklu cümleler, altı çizili sözcükler (__sözcük__ biçiminde) ve kalın sözcükler (**sözcük** biçiminde işaretle) dahil. Kısaltma, özetleme, yeniden yazma YAPMA. Alt maddede, anlaşılması için ana sorunun ortak kök cümlesini de başa ekle. Soru metnini cevap anahtarından alma.\n' +
+    '- parca: SORU KAĞIDINDA soru bir okuma parçasına, şiire, alıntıya veya görsele dayanıyorsa o parçanın TAMAMI, harfi harfine (şiirde dize sonlarını satır sonu olarak koru; başlık ve yazar adı varsa dahil; altı çizili ve kalın ifadeleri işaretleriyle koru). Kesinlikle özetleme veya kısaltma. Görselse ayrıntılı betimle. Aynı parça birden çok alt maddede kullanılıyorsa HER alt maddede tekrar et. Parça yoksa boş bırak.\n' +
+    '- puan: SORU KAĞIDINDA açıkça yazan puan ("(15 puan)", "5x3=15" → 15). Alt maddelerin puanı ayrı yazıyorsa ayrı ver. Soru kâğıdında puan yoksa ama CEVAP ANAHTARINDA o sorunun puanı yazıyorsa anahtardakini al. İkisinde de yoksa 0 yaz; uydurma.\n' +
+    '- ornek_cevap: CEVAP ANAHTARINDAN, soru numarası (etiket) eşleştirilerek, metne sadık kalarak al. Anahtar alt maddelere ayrılmamışsa yalnızca ilgili alt maddeye düşen kısmı yaz; hangi kısmın hangi alt maddeye ait olduğu anlaşılmıyorsa boş bırak. Anahtarda o sorunun cevabı YOKSA ornek_cevap "" (boş) olsun; cevap UYDURMA, kendi bilginle doldurma.\n' +
+    '- noktalar: yalnızca CEVAP ANAHTARINDA o soru için puan kırılımı varsa (örn. "doğru tespit 3 puan, gerekçe 3 puan") her biri bir nokta olsun; toplamı sorunun puanına eşit olsun. Anahtarda kırılım yoksa veya soru anahtarda yoksa boş dizi ([]) ver; uydurma.\n' +
+    'Çoktan seçmeli veya boşluk doldurma sorusu varsa yine de listeye ekle.';
+}
+function keyPrompt(q) {
+  return 'Sınıf: ' + (S.info.sinif || 'belirtilmedi') + '\nDers: Türk Dili ve Edebiyatı (MEB TYMM programı)\n' +
+    (S.info.baglam ? 'Öğretmenin kazanım / bağlam notu (cevap anahtarı buna uygun olmalı): ' + S.info.baglam + '\n' : '') +
+    (q.gorsel ? '\nSORUYA AİT GÖRSEL yukarıda ekli. Cevabı görseli dikkatle inceleyerek, görselde gerçekten görünenlere dayanarak yaz; görmediğin ayrıntıyı uydurma.\n' : '') +
+    (q.parca ? '\nSorunun dayandığı metin:\n' + q.parca + '\n' : '') +
+    '\nSORU ' + q.etiket + ' (' + q.puan + ' puan):\n' + q.metin + '\n\n' +
+    'Görev: Bu soru için bir öğretmenin doğrudan kâğıt okurken kullanabileceği, DETAYLI ve PROFESYONEL bir cevap anahtarı hazırla.\n' +
+    'ÖNEMLİ: Sorunun dayandığı metni/şiiri/tabloyu yukarıdan dikkatle oku; cevabı o metnin DİZELERİNE, CÜMLELERİNE ve SÖZCÜKLERİNE dayandır, metinden somut örnek göster. Genel geçer cevap yazma.\n' +
+    '- ornek_cevap: ' + (S.info.sinif || 'lise') + ' düzeyine uygun, eksiksiz, yazıya dökülmüş TAM cevap. Soru türüne göre:\n' +
+    '   * Tablo/karşılaştırma: tablonun HER hücresini doldur ("Satır adı: değer" biçiminde, alt alta).\n' +
+    '   * Edebî sanat/söz sanatı: bulunan HER sanatı adıyla ver ve metinden dizeyi/ifadeyi alıntılayarak gerekçelendir.\n' +
+    '   * Sözcük anlamı: HER sözcüğün bu metindeki bağlamsal anlamını yaz.\n' +
+    '   * Yazım/noktalama düzeltme: HER yanlışı "yanlış → doğru (kısa kural)" biçiminde listele; parçada hepsini tek tek tara, hiçbirini atlama.\n' +
+    '   * Tema/ileti: tema tek cümleyle, örtük/dolaylı iletiler dizeye dayanarak.\n' +
+    '   * Yaratıcı yazma/serbest üretim: tek bir örnek metin yerine beklenen nitelikleri (yazım-noktalama, özgünlük, yaratıcılık, biçim koşulları) ve kısa bir örnek yaz.\n' +
+    '- noktalar: öğrencinin puan kazandığı ayrı ayrı ölçülebilir ölçütler (genelde 2-6 adet). Her biri neyin doğru sayılacağını somut belirtsin (ör. "Mekânı belirtir: kasaba/konak"). Puanlarının toplamı TAM OLARAK ' + q.puan + ' olmalı.\n' +
+    '- alternatifler: puan verilebilecek diğer kabul edilebilir cevaplar/ifadeler (kısaca, madde madde). Yoksa boş bırak.\n' +
+    '- yaygin_hatalar: öğrencilerin bu soruda sık yaptığı hatalar ve puan kırılacak durumlar (kısaca, madde madde).\n' +
+    '- Yazar, eser, tarih, akım gibi olgusal bilgiden emin değilsen uydurma; o yere [KONTROL ET] yaz.\n' +
+    '- Soru ve metin içinde __...__ altı çizili ifadeyi, **...** kalın ifadeyi gösterir; altı çizili ifade sorunun sorduğu şeydir, cevabı ona göre yaz.\n' +
+    '- Çıktıdaki satır sonlarını \\n ile ver; madde işareti olarak "- " kullan.';
+}
+function rubPrompt(q, pts, ek) {
+  return 'Sınıf: ' + (S.info.sinif || 'belirtilmedi') + '\n' +
+    'SORU ' + q.etiket + ' (' + q.puan + ' puan):\n' + q.metin + '\n\n' +
+    'ÖĞRETMENİN CEVAP ANAHTARI (beklenen cevap):\n' + (String(q.ornek || '').replace(/\[KONTROL ET\]\s*/g, '') || '(yok)') + '\n\n' +
+    (q.alt && q.alt.trim() ? 'KABUL EDİLEBİLİR DİĞER CEVAPLAR:\n' + q.alt + '\n\n' : '') +
+    'PUANLANABİLİR NOKTALAR:\n' + (q.noktalar || []).map(function (n) { return '- ' + n.nokta + ' (' + n.puan + 'p)'; }).join('\n') + '\n\n' +
+    (q.gorsel ? 'Soruya ait görsel yukarıda ekli; açıklamalar görselde görünenlere dayanmalı.\n\n' : '') +
+    (q.parca ? 'SORUNUN DAYANDIĞI METİN:\n' + q.parca + '\n\n' : '') +
+    'ÖNEMLİ: Yukarıdaki ÖĞRETMENİN CEVAP ANAHTARI ve PUANLANABİLİR NOKTALAR esastır. Açıklamaları YALNIZCA bunlara dayandır; anahtarda geçmeyen bilgi, terim veya beklenti ekleme, anahtardaki bilgiyi değiştirme.\n\n' +
+    'Görev: Bu soru için dört başarı düzeyinin açıklamasını yaz. Puanlar sabittir: Mükemmel=' + pts[0] + ', İyi=' + pts[1] + ', Gelişiyor=' + pts[2] + ', Yetersiz=' + pts[3] + ', Boş/Yanlış=0.\n' +
+    'KURALLAR (çok önemli):\n' +
+    '- Öğretmen kâğıt okurken her düzey açıklamasına bakıp "öğrenci şunu yazmış mı?" diye işaretleyebilmeli. Bu yüzden her açıklama CEVAP ANAHTARINDAKİ SOMUT İÇERİĞİ anmalıdır: beklenen anlamı, tespiti, değeri, terimi, örneği anahtardaki sözcüklerle, tırnak içinde yaz (ör. \'... sözcüğüne "boyun eğmemek" anlamını vermiştir\').\n' +
+    '- Her düzeyde HANGİ noktaların karşılandığını ve HANGİSİNİN eksik/hatalı olduğunu adıyla ve içeriğiyle yaz. Karşılanan noktaların puan toplamı o düzeyin puanına yakın olsun.\n' +
+    '- Soru birden fazla parça istiyorsa (iki sözcük, iki cümle, iki çıkarım gibi) her parçayı ayrı ayrı adıyla an; "ifadelerden biri", "cümlelerden biri" deyip geçme, hangisi olabileceğini örnekle.\n' +
+    '- Cümle kurma, örnek verme, yaratıcı yazma gibi anahtarda tek doğru cevabı olmayan parçalarda neyin kabul edileceğini somut ölçütle yaz (ör. \'"göz yummak" deyimini "görmezden gelmek" anlamında kullanan, anlamca tutarlı bir cümle kurmuştur\').\n' +
+    '- YASAK ifadeler: "genel olarak doğru", "küçük bir anlatım bozukluğu", "kriterlerin tamamı karşılanmıştır", "temel mantığını anlamış", "doğru cevap verilmiştir", "eksik bilgi", "X puanlık performans/başarı sergilenmiştir". Açıklamada puanı tekrar yazma.\n' +
+    '- Anahtarda olmayan bilgi ekleme.\n' +
+    '- Metinde __...__ altı çizili ifadeyi, **...** kalın ifadeyi gösterir.\n' +
+    '- mukemmel: bütün noktaların karşılandığını, her birinin beklenen içeriğiyle yaz.\n- iyi: hangi tek nokta eksik veya zayıf, adıyla yaz; geri kalanların beklenen içeriğiyle karşılandığını belirt.\n- gelisiyor: hangi noktalar karşılanmış, hangileri eksik/hatalı, adıyla yaz.\n- yetersiz: karşılanan tek sınırlı noktayı adıyla yaz.\n' +
+    '- Her açıklama 1-4 cümle, resmî ve sade Türkçe.\n\n' +
+    'ÖRNEK (başka bir soru için, biçimi göstermek amacıyla): Soru: "Şiirin nazım birimini ve ölçüsünü yazınız." Anahtar: "Nazım birimi dörtlük; ölçü 11\'li hece ölçüsü (6+5)."\n' +
+    '  mukemmel: Nazım birimini "dörtlük", ölçüsünü "11\'li hece ölçüsü" olarak yazmış ve durağı "6+5" diye göstermiştir.\n' +
+    '  iyi: Nazım birimini "dörtlük", ölçüsünü "11\'li hece ölçüsü" olarak doğru yazmış; durağı (6+5) göstermemiştir.\n' +
+    '  gelisiyor: Nazım birimini "dörtlük" olarak doğru yazmış; ölçüyü yazmamış veya yanlış (ör. 8\'li hece, aruz) yazmıştır.\n' +
+    '  yetersiz: Yalnızca ölçünün "hece ölçüsü" olduğunu yazmış, hece sayısını ve nazım birimini verememiştir.' +
+    (ek ? '\n\n' + ek : '');
+}
+
+/* ---------- puan yardımcıları ---------- */
+function fitN(ns, P) {
+  ns = (ns || []).filter(function (n) { return n && n.nokta; }).map(function (n) { return { nokta: String(n.nokta), puan: Math.max(0, +n.puan || 0) }; });
+  if (!ns.length || !(P > 0)) return ns;
+  var s = ns.reduce(function (a, n) { return a + n.puan; }, 0);
+  if (s <= 0) ns.forEach(function (n) { n.puan = r05(P / ns.length); });
+  else if (Math.abs(s - P) > 0.01) ns.forEach(function (n) { n.puan = r05(n.puan * P / s); });
+  var s2 = ns.reduce(function (a, n) { return a + n.puan; }, 0);
+  var l = ns[ns.length - 1]; l.puan = Math.max(0, r05(l.puan + P - s2));
+  return ns;
+}
+function seviyePuan(P, noktalar) {
+  if (!(P > 0)) return [0, 0, 0, 0, 0];
+  var ps = (noktalar || []).map(function (n) { return +n.puan; }).filter(function (x) { return x > 0; });
+  var iy = ps.length >= 2 ? P - Math.min.apply(null, ps) : r05(P * 0.75);
+  if (iy >= P || iy <= 0) iy = r05(P * 0.75);
+  var ge = r05(P * 0.5), ye = r05(P * 0.2);
+  if (ge >= iy) ge = r05(iy * 0.6);
+  if (ye >= ge) ye = r05(ge * 0.4);
+  return [P, iy, ge, ye, 0];
+}
+
+/* ---------- Adım 1: soru çıkarma ---------- */
+/* Bir belge grubunun Gemini parçalarını ekler. baslik doluysa (ikisi birden yüklendiğinde) bölüm açıkça etiketlenir. */
+function addDocParts(parts, list, pasteText, baslik) {
+  if (baslik) parts.push({ text: '=== ' + baslik + ' ===\n(Bu başlıktan "' + baslik + ' SONU" satırına kadar olan her şey yalnızca ' + baslik + ' belgesine aittir.)' });
+  list.forEach(function (f) {
+    if (f.kind === 'inline') {
+      if (baslik) parts.push({ text: '--- ' + baslik + ' dosyası: ' + f.name + ' ---' });
+      parts.push({ inline_data: { mime_type: f.mime, data: f.data } });
+    } else parts.push({ text: '--- ' + f.name + ' ---\n' + f.text });
+  });
+  if (pasteText) parts.push({ text: '--- Yapıştırılan metin ---\n' + pasteText });
+  if (baslik) parts.push({ text: '=== ' + baslik + ' SONU ===' });
+}
+function inlineBytes() {
+  return files.reduce(function (a, f) { return a + (f.kind === 'inline' ? Math.floor((f.data || '').length * 3 / 4) : 0); }, 0);
+}
+function listeYaz(a) {
+  var k = a.slice(0, 15).map(function (x) { return '"' + x + '"'; }).join(', ');
+  return a.length > 15 ? k + ' (+' + (a.length - 15) + ' tane daha)' : k;
+}
+async function extractQ() {
+  var pasteS = $('paste').value.trim(), pasteK = $('pasteK').value.trim();
+  var fS = files.filter(function (f) { return f.role !== 'anahtar'; });
+  var fK = files.filter(function (f) { return f.role === 'anahtar'; });
+  var hasS = !!(fS.length || pasteS), hasK = !!(fK.length || pasteK), both = hasS && hasK;
+  if (!hasS && !hasK) { alert('Soru kağıdını yükleyin veya metnini yapıştırın. (Yalnızca cevap anahtarı yüklemek de mümkündür.)'); return; }
+  if (!checkKey()) return;
+  var by = inlineBytes();
+  if (by > 14 * 1024 * 1024) {
+    alert('PDF ve fotoğrafların toplamı yaklaşık ' + (by / 1048576).toFixed(1) + ' MB. Gemini\'ye tek seferde en fazla yaklaşık 14 MB dosya gönderilebilir. Bazı dosyaları kaldırın, fotoğrafları küçültün veya belgeyi Word/metin olarak verin.');
+    return;
+  }
+  if ((S.q.length || S.crit.length) && !confirm('Mevcut soru listesi, cevap anahtarı ve rubrik silinecek. Devam edilsin mi?')) return;
+  S.docType = both ? 'ikisi' : hasK ? 'anahtar' : 'soru';
+  var parts = [];
+  if (both) {
+    addDocParts(parts, fS, pasteS, 'SORU KAĞIDI');
+    addDocParts(parts, fK, pasteK, 'CEVAP ANAHTARI');
+    parts.push({ text: extractPromptBoth() });
+  } else {
+    addDocParts(parts, hasK ? fK : fS, hasK ? pasteK : pasteS, '');
+    parts.push({ text: extractPrompt(hasK) });
+  }
+  /* soru kâğıdı tarafında metin olarak okunan kaynaklar (altı çizili denetimi için) */
+  var kaynak = fS.filter(function (f) { return f.kind === 'text'; }).map(function (f) { return f.text; });
+  if (pasteS) kaynak.push(pasteS);
+  busy('Gemini belgeyi okuyor ve soruları çıkarıyor...');
+  try {
+    var d = await gem(parts, SCH_EXTRACT, 32000);
+    if (!d.sorular || !d.sorular.length) throw new Error('Belgeden soru çıkarılamadı. Belge okunaklı mı?');
+    S.q = d.sorular.map(function (s) {
+      var q = { id: uid(), etiket: String(s.etiket || ''), metin: s.metin || '', parca: s.parca || '', puan: +s.puan || 0, ornek: (hasK ? s.ornek_cevap : '') || '', noktalar: [], alt: '', hatalar: '', gorsel: '', hata: '' };
+      if (hasK && s.noktalar && s.noktalar.length) {
+        var ns = s.noktalar.map(function (n) { return { nokta: n.nokta, puan: +n.puan || 0 }; });
+        var sm = ns.reduce(function (a, n) { return a + n.puan; }, 0);
+        if (!(q.puan > 0)) q.puan = sm;
+        q.noktalar = Math.abs(sm - q.puan) > 0.01 ? fitN(ns, q.puan) : ns;
+      }
+      return q;
+    });
+    S.crit = [];
+    S.stus.forEach(function (st) { st.scores = {}; });
+    save();
+    renQ();
+    var msgs = [];
+    /* Tek seferde cevaplar kaçırıldıysa, cevapsız sorular için anahtar ayrı bir istekle yeniden okunur. */
+    if (both && S.q.some(function (q) { return !String(q.ornek || '').trim(); })) {
+      busy('Cevap anahtarı ayrıca okunuyor ve sorularla eşleştiriliyor...');
+      try {
+        var sn = await fillCore(fK, pasteK, S.q.filter(function (q) { return !String(q.ornek || '').trim(); }));
+        if (sn.denetsiz && sn.yerlesen.length) msgs.push('Anahtarınız PDF/fotoğraf olduğu için cevapların anahtarla örtüştüğü otomatik denetlenemedi; Adım 2\'de göz atın.');
+        if (sn.suphe.length) msgs.push('Şu soruların cevabı anahtarınızdaki metinle tam örtüşmüyor, [KONTROL ET] ile işaretlendi: ' + sn.suphe.join(', '));
+        save(); renQ();
+      } catch (e2) { msgs.push('Cevap anahtarı ikinci kez okunamadı (' + e2.message + '). Adım 2\'de "📥 Anahtardan Doldur" düğmesine basın.'); }
+    }
+    if (both) {
+      var cevapsiz = S.q.filter(function (q) { return !String(q.ornek || '').trim(); }).map(function (q) { return q.etiket; });
+      var m1 = (S.q.length - cevapsiz.length) + ' / ' + S.q.length + ' soruya cevap anahtarından cevap geldi.';
+      if (cevapsiz.length) m1 += ' Cevabı gelmeyen sorular: ' + cevapsiz.join(', ') + ' (anahtarınızda bu soruların cevabı var mı bakın; yoksa Adım 2\'de elle yazın veya "Eksikleri Üret" ile yapay zekâya yazdırın).';
+      msgs.push(m1);
+    }
+    var sifir = S.q.filter(function (q) { return !(q.puan > 0); }).length;
+    if (sifir) msgs.push(sifir + ' soruda puan bulunamadı: puanları kendiniz yazın veya "Puansızlara dağıt" düğmesini kullanın.');
+    var den = ulDenetle(kaynak, S.q);
+    if (den.eksik.length) msgs.push('Şu altı çizili ifadeler sorularda işaretlenmemiş, elle kontrol edin: ' + listeYaz(den.eksik));
+    if (den.sorular.length) msgs.push('Şu sorular altı çizili ifadeden söz ediyor ama işaret bulunamadı: ' + den.sorular.join(', ') + '. Soru metnine ifadeyi __böyle__ yazın.');
+    if (msgs.length) alert(S.q.length + ' soru çıkarıldı.\n\n' + msgs.join('\n\n'));
+  } catch (e) { alert('Hata: ' + e.message); }
+  unbusy();
+}
+
+/* ---------- cevap anahtarından doldurma (ayrı istek) ---------- */
+var SCH_FILL = {
+  type: 'OBJECT',
+  properties: {
+    cevaplar: {
+      type: 'ARRAY',
+      items: {
+        type: 'OBJECT',
+        properties: {
+          etiket: { type: 'STRING' },
+          ornek_cevap: { type: 'STRING' },
+          noktalar: { type: 'ARRAY', items: { type: 'OBJECT', properties: { nokta: { type: 'STRING' }, puan: { type: 'NUMBER' } }, required: ['nokta', 'puan'] } },
+          alternatifler: { type: 'STRING' }
+        },
+        required: ['etiket', 'ornek_cevap']
+      }
+    }
+  },
+  required: ['cevaplar']
+};
+/* Soru etiketini karşılaştırma biçimine getirir: "Soru 3.A" → "3a". */
+function etkNorm(s) { return trK(s).replace(/soru/g, '').replace(/[^a-z0-9çğıöşü]+/g, '.').replace(/^\.+|\.+$/g, ''); }
+function fillPrompt(qs) {
+  return 'Yukarıdaki belge bir Türk Dili ve Edebiyatı yazılı sınavının öğretmen tarafından hazırlanmış CEVAP ANAHTARIDIR.\n' +
+    'Aşağıda sınavın soruları listelenmiştir. Görev: her soru için cevap anahtarındaki cevabı bul ve aynen aktar.\n' +
+    '- Eşleştirmeyi önce soru numarasıyla yap; numaralar farklıysa sorunun içeriğine bakarak eşleştir.\n' +
+    '- etiket: aşağıdaki listedeki etiketi AYNEN yaz.\n' +
+    '- ornek_cevap: anahtardaki cevabı KELİMESİ KELİMESİNE, kısaltmadan ve yeniden yazmadan aktar. Anahtarda soru metni de tekrar ediliyorsa soru metnini değil yalnızca CEVABI yaz. Altı çizili (__...__) ve kalın (**...**) işaretlerini koru.\n' +
+    '- noktalar: anahtarda puan kırılımı varsa (ör. "anlam 2 puan, cümle 3 puan") her biri bir nokta; yoksa boş dizi [].\n' +
+    '- alternatifler: anahtarda "kabul edilir", "veya" gibi diğer doğru cevaplar yazıyorsa onlar; yoksa "".\n' +
+    '- Anahtarda bir sorunun cevabı YOKSA ornek_cevap "" ve noktalar [] ver. KESİNLİKLE kendin cevap yazma, bilgi ekleme, uydurma.\n' +
+    '- Metinde __ifade__ altı çizili, **ifade** kalın ifadeyi gösterir.\n\n' +
+    'SORULAR:\n' + qs.map(function (q) {
+      var m = duz(q.metin).replace(/\s+/g, ' ').trim(); if (m.length > 500) m = m.slice(0, 500) + '...';
+      return 'SORU ' + q.etiket + ' (' + q.puan + ' puan): ' + m;
+    }).join('\n');
+}
+/* Cevabın sözcüklerinin ne kadarı anahtar metninde geçiyor (0-1). Anahtar metni yoksa -1. */
+var BAG = ' bir ve ile için gibi olan olarak bu şu o da de ki çok daha en ya veya ama fakat ancak her hem ne mi mı mu mü ise kadar sonra önce göre ayrıca yani diye etmek olmak yapmak kendi ';
+function anahtarOrani(cevap, anahtarMetni) {
+  if (!anahtarMetni) return -1;
+  /* Anahtardaki sözcüklerin ilk 5 harfi (Türkçe ekler farklı olsa da eşleşsin). */
+  var kok = {};
+  ulNorm(duz(anahtarMetni)).split(' ').forEach(function (w) { if (w) kok[w.slice(0, 5)] = 1; });
+  var ws = ulNorm(duz(cevap)).split(' ').filter(function (w) { return w.length >= 3 && BAG.indexOf(' ' + w + ' ') < 0; });
+  if (!ws.length) return 1;
+  var var_ = ws.filter(function (w) { return kok[w.slice(0, 5)]; }).length;
+  return var_ / ws.length;
+}
+/* fK: anahtar dosyaları, pasteK: yapıştırılan anahtar, qs: doldurulacak sorular. Bulunan cevapları sorulara yazar. */
+async function fillCore(fK, pasteK, qs) {
+  var parts = [];
+  addDocParts(parts, fK, pasteK, '');
+  parts.push({ text: fillPrompt(qs) });
+  var d = await gem(parts, SCH_FILL, 32000);
+  var anahtarMetni = fK.filter(function (f) { return f.kind === 'text'; }).map(function (f) { return f.text; }).concat(pasteK ? [pasteK] : []).join('\n');
+  /* Yalnızca anahtar PDF/fotoğraftan oluşuyorsa metin karşılaştırması yapılamaz. PDF + yapıştırma karışıksa da denetim atlanır (yanlış alarm olmasın). */
+  if (fK.some(function (f) { return f.kind === 'inline'; })) anahtarMetni = '';
+  var yerlesen = [], yerlesenId = [], suphe = [];
+  qs.forEach(function (q) {
+    var c = (d.cevaplar || []).filter(function (x) { return etkNorm(x.etiket) === etkNorm(q.etiket) && String(x.ornek_cevap || '').trim(); })[0];
+    if (!c || !etkNorm(q.etiket)) return;
+    var ornek = String(c.ornek_cevap).trim();
+    var oran = anahtarOrani(ornek, anahtarMetni);
+    if (oran >= 0 && oran < 0.6) { ornek = '[KONTROL ET] ' + ornek; suphe.push(q.etiket); }
+    if (q.ornek !== ornek) q.hatalar = ''; /* eski cevaba göre yazılmış "yaygın hatalar" yeni cevapla uyuşmaz */
+    q.ornek = ornek;
+    var ns = (c.noktalar || []).filter(function (n) { return n && String(n.nokta || '').trim(); }).map(function (n) { return { nokta: String(n.nokta), puan: +n.puan || 0 }; });
+    if (ns.length) {
+      var sm = ns.reduce(function (a, n) { return a + n.puan; }, 0);
+      if (!(q.puan > 0)) q.puan = sm;
+      q.noktalar = Math.abs(sm - q.puan) > 0.01 ? fitN(ns, q.puan) : ns;
+    } else q.noktalar = [];
+    if (c.alternatifler && String(c.alternatifler).trim()) q.alt = String(c.alternatifler).trim();
+    q.hata = '';
+    yerlesen.push(q.etiket); yerlesenId.push(q.id);
+  });
+  return { yerlesen: yerlesen, yerlesenId: yerlesenId, suphe: suphe, denetsiz: !anahtarMetni };
+}
+async function fillFromKey() {
+  if (!S.q.length) { alert('Önce Adım 1\'de soruları çıkarın.'); return; }
+  var fK = files.filter(function (f) { return f.role === 'anahtar'; });
+  var pasteK = $('pasteK').value.trim();
+  if (!fK.length && !pasteK) {
+    alert('Yüklü cevap anahtarı yok. Açılacak pencereden cevap anahtarı dosyanızı seçin.');
+    $('fInpK2').click(); return;
+  }
+  if (!checkKey()) return;
+  var by = fK.reduce(function (a, f) { return a + (f.kind === 'inline' ? Math.floor((f.data || '').length * 3 / 4) : 0); }, 0);
+  if (by > 14 * 1024 * 1024) { alert('Dosyalar çok büyük (yaklaşık ' + (by / 1048576).toFixed(1) + ' MB). En fazla yaklaşık 14 MB gönderilebilir.'); return; }
+  var dolu = S.q.filter(function (q) { return String(q.ornek || '').trim(); }).length;
+  if (dolu && !confirm('Anahtarda bulunan cevaplar, ilgili soruların mevcut cevaplarının yerine yazılacak. Bu sorularda puan ölçütleri ve "sık yapılan hatalar" da (düzenlemeleriniz dahil) anahtara göre yenilenecek. Anahtarda cevabı bulunmayan sorulara dokunulmaz. Devam edilsin mi?')) return;
+  busy('Cevap anahtarı okunuyor ve sorularla eşleştiriliyor...');
+  try {
+    var r = await fillCore(fK, pasteK, S.q);
+    save(); unbusy(); renKey(); markTabs();
+    var bos = S.q.filter(function (q) { return r.yerlesenId.indexOf(q.id) < 0; }).map(function (q) { return q.etiket || '(numarasız)'; });
+    var m = r.yerlesen.length + ' / ' + S.q.length + ' soruya cevap anahtarınızdan cevap yazıldı.';
+    if (bos.length) m += '\n\nAnahtarda cevabı bulunamayan sorular: ' + bos.join(', ') + '. Bunlara dokunulmadı.';
+    if (r.suphe.length) m += '\n\nŞu soruların cevabı anahtarınızdaki metinle tam örtüşmüyor, [KONTROL ET] ile işaretlendi: ' + r.suphe.join(', ');
+    if (r.denetsiz && r.yerlesen.length) m += '\n\nAnahtarınız PDF/fotoğraf olduğu için cevapların anahtarla örtüştüğü otomatik denetlenemedi; lütfen göz atın.';
+    var kirilimsiz = S.q.filter(function (q) { return r.yerlesenId.indexOf(q.id) >= 0 && !q.noktalar.length; }).length;
+    if (kirilimsiz) m += '\n\n' + kirilimsiz + ' soruda anahtarda puan kırılımı yok. "Eksikleri Üret" bu sorularda sizin cevabınızı değiştirmeden yalnızca puan kırılımını çıkarır.';
+    if (S.crit.length) m += '\n\nRubrik eski cevaplara göre oluşturulmuştu: Adım 3\'te "Rubriği Oluştur" ile yeniden oluşturun.';
+    alert(m);
+  } catch (e) { unbusy(); alert('Hata: ' + e.message); }
+}
+
+function setImg(i, f) {
+  if (!f) return;
+  if (!/^image\//.test(f.type)) { alert('Lütfen bir görsel dosyası (JPG/PNG/WEBP) seçin.'); return; }
+  var r = new FileReader();
+  r.onload = function () {
+    var im = new Image();
+    im.onload = function () {
+      var mx = 1100, k = Math.min(1, mx / Math.max(im.width, im.height)), w = Math.round(im.width * k), h = Math.round(im.height * k);
+      var c = document.createElement('canvas'); c.width = w; c.height = h;
+      var x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, w, h); x.drawImage(im, 0, 0, w, h);
+      S.q[i].gorsel = c.toDataURL('image/jpeg', 0.85); S.q[i].gw = w; S.q[i].gh = h;
+      save(); renQ(); if ($('p2').classList.contains('act')) renKey();
+    };
+    im.onerror = function () { alert('Görsel açılamadı (HEIC gibi biçimleri JPG/PNG yapın).'); };
+    im.src = r.result;
+  };
+  r.readAsDataURL(f);
+}
+function rmImg(i) { S.q[i].gorsel = ''; save(); renQ(); }
+function imgPart(q) { return q.gorsel ? [{ inline_data: { mime_type: 'image/jpeg', data: q.gorsel.split(',')[1] } }] : []; }
+function rowsFor(t, mn, mx) { var n = String(t || '').split('\n').reduce(function (a, l) { return a + Math.max(1, Math.ceil(l.length / 95)); }, 0); return Math.max(mn, Math.min(mx, n + 1)); }
+function renQ() {
+  markTabs();
+  $('qCard').style.display = S.q.length ? 'block' : 'none';
+  $('qTot').textContent = totalPts();
+  $('qList').innerHTML = S.q.map(function (q, i) {
+    return '<div class="qbox"><div class="qrow"><input type="text" value="' + esc(q.etiket) + '" onchange="Q(' + i + ',\'etiket\',this.value)" placeholder="No">' +
+      '<textarea rows="' + rowsFor(q.metin, 2, 10) + '" onchange="Q(' + i + ',\'metin\',this.value)">' + esc(q.metin) + '</textarea>' +
+      '<input type="number" min="0" step="0.5" value="' + (q.puan || '') + '" placeholder="Puan" onchange="Q(' + i + ',\'puan\',this.value)">' +
+      '<button class="btn bd3 bsm" onclick="rmQ(' + i + ')" title="Sil">×</button></div>' +
+      '<div class="gors">' + (q.gorsel ? '<img src="' + q.gorsel + '" alt="Soru görseli"><button class="btn bd3 bsm" onclick="rmImg(' + i + ')">Görseli kaldır</button>' : '') +
+      '<label class="btn bs bsm gbtn">🖼 ' + (q.gorsel ? 'Görseli değiştir' : 'Bu soruya görsel ekle') + '<input type="file" accept="image/*" style="display:none" onchange="setImg(' + i + ',this.files[0]);this.value=\'\'"></label></div>' +
+      '<details class="pdet"' + (q.parca ? '' : '') + '><summary>📖 Soruya ait metin / şiir / görsel betimi ' + (q.parca ? '<span class="tag2">' + q.parca.length + ' karakter</span>' : '<span class="tag2 tg0">yok</span>') + '</summary>' +
+      '<textarea rows="' + rowsFor(q.parca, 3, 14) + '" placeholder="Soru bir metne veya şiire dayanıyorsa buraya yapıştırın; cevap anahtarı ve Word çıktısı bunu kullanır." onchange="Q(' + i + ',\'parca\',this.value);renQ()">' + esc(q.parca) + '</textarea></details></div>';
+  }).join('');
+}
+function Q(i, f, v) {
+  var q = S.q[i]; if (!q) return;
+  if (f === 'puan') {
+    q.puan = Math.max(0, parseFloat(v) || 0);
+    if (q.noktalar.length) q.noktalar = fitN(q.noktalar, q.puan);
+    var c = S.crit.filter(function (k) { return k.id === q.id; })[0];
+    if (c) { /* rubrik kriterini soruyla eşitle: ağırlık ve seviye puanları */
+      c.agirlik = q.puan;
+      var pp = seviyePuan(q.puan, q.noktalar);
+      c.duzeyler.forEach(function (d, j) { d.puan = pp[j]; });
+    }
+  } else q[f] = v;
+  save(); $('qTot').textContent = totalPts();
+}
+function addQ() { S.q.push({ id: uid(), etiket: String(S.q.length + 1), metin: '', parca: '', puan: 0, ornek: '', noktalar: [], alt: '', hatalar: '', gorsel: '', hata: '' }); save(); renQ(); }
+function rmQ(i) { if (!confirm('Soru silinsin mi?')) return; var id = S.q[i].id; S.q.splice(i, 1); S.crit = S.crit.filter(function (k) { return k.id !== id; }); save(); renQ(); }
+function distribute() {
+  var z = S.q.filter(function (q) { return !(q.puan > 0); });
+  if (!z.length) { alert('Puansız soru yok.'); return; }
+  var rem = 100 - (totalPts());
+  if (rem <= 0) { alert('Mevcut puanlar zaten 100 veya üzerinde. Önce "Toplamı 100\'e ölçekle"yi deneyin.'); return; }
+  var each = r05(rem / z.length), used = 0;
+  z.forEach(function (q, i) { q.puan = i === z.length - 1 ? r05(rem - used) : each; used += each; });
+  save(); renQ();
+}
+function scaleQ() {
+  var t = totalPts(); if (!(t > 0)) { alert('Önce puanları girin.'); return; }
+  S.q.forEach(function (q) { q.puan = r05(q.puan * 100 / t); if (q.noktalar.length) q.noktalar = fitN(q.noktalar, q.puan); });
+  var d = 100 - totalPts(); if (S.q.length && Math.abs(d) > 0.01) { S.q[S.q.length - 1].puan = Math.max(0, r05(S.q[S.q.length - 1].puan + d)); }
+  save(); renQ();
+}
+
+/* ---------- Adım 2: cevap anahtarı ---------- */
+function renKey() {
+  markTabs();
+  var w = $('keyList');
+  if (!S.q.length) { w.innerHTML = '<div class="al2 aw">Önce Adım 1\'de soruları ekleyin.</div>'; return; }
+  w.innerHTML = S.q.map(function (q, i) {
+    var sum = sumN(q), ok = Math.abs(sum - q.puan) < 0.01;
+    var flag = /\[KONTROL ET\]/i.test((q.ornek || '') + (q.alt || '') + (q.hatalar || '') + q.noktalar.map(function (n) { return n.nokta; }).join(' '));
+    return '<div class="ait"><div class="qh"><span class="qno">Soru ' + esc(q.etiket) + '</span><span class="tag">' + q.puan + ' puan</span>' +
+      (q.ornek ? '<span class="tag tg-ok">hazır</span>' : '<span class="tag tg-no">boş</span>') +
+      (flag ? '<span class="tag tg-w">[KONTROL ET] var</span>' : '') +
+      '<span class="sp1"></span><button class="btn bs bsm np" onclick="genKeyOne(' + i + ')">🤖 ' + (q.ornek ? 'Yeniden üret' : 'Üret') + '</button></div>' +
+      '<div class="lbl">Soru</div><div class="qt">' + bold(q.metin) + '</div>' +
+      (q.gorsel ? '<div class="lbl">Görsel</div><img class="qimg" src="' + q.gorsel + '" alt="Soru görseli">' : '') +
+      (q.parca ? '<div class="lbl">Metin / Şiir</div><div class="qt qp">' + bold(q.parca) + '</div>' : '') +
+      (q.hata ? '<div class="al2 aerr">⚠ ' + esc(q.hata) + '</div>' : '') +
+      '<div class="lbl">Beklenen cevap</div><textarea rows="' + rowsFor(q.ornek, 4, 18) + '" onchange="Q(' + i + ',\'ornek\',this.value);renKey()">' + esc(q.ornek) + '</textarea>' +
+      '<div class="lbl">Puanlama ölçütleri &mdash; toplam <span id="ks' + i + '" class="' + (ok ? 'sumok' : 'sumbad') + '">' + sum + ' / ' + q.puan + '</span></div>' +
+      q.noktalar.map(function (n, j) {
+        return '<div class="nr"><input type="text" value="' + esc(n.nokta) + '" onchange="N(' + i + ',' + j + ',\'nokta\',this.value)">' +
+          '<input type="number" min="0" step="0.5" value="' + n.puan + '" onchange="N(' + i + ',' + j + ',\'puan\',this.value)">' +
+          '<button class="btn bd3 bsm" onclick="rmN(' + i + ',' + j + ')">×</button></div>';
+      }).join('') +
+      '<button class="btn bs bsm" onclick="addN(' + i + ')">+ Ölçüt</button>' +
+      '<div class="lbl">Kabul edilebilir diğer cevaplar</div><textarea rows="' + rowsFor(q.alt, 2, 10) + '" onchange="Q(' + i + ',\'alt\',this.value)">' + esc(q.alt) + '</textarea>' +
+      '<div class="lbl">Sık yapılan hatalar / puan kırılacak durumlar</div><textarea rows="' + rowsFor(q.hatalar, 2, 10) + '" onchange="Q(' + i + ',\'hatalar\',this.value)">' + esc(q.hatalar) + '</textarea></div>';
+  }).join('');
+}
+function updKs(i) {
+  var q = S.q[i], el = $('ks' + i); if (!el) return;
+  var sum = sumN(q); el.textContent = sum + ' / ' + q.puan;
+  el.className = Math.abs(sum - q.puan) < 0.01 ? 'sumok' : 'sumbad';
+}
+function N(i, j, f, v) { var n = S.q[i].noktalar[j]; if (!n) return; if (f === 'puan') n.puan = Math.max(0, parseFloat(v) || 0); else n.nokta = v; save(); updKs(i); }
+function addN(i) { S.q[i].noktalar.push({ nokta: '', puan: 0 }); save(); renKey(); }
+function rmN(i, j) { S.q[i].noktalar.splice(j, 1); save(); renKey(); }
+async function genKeyCore(q, koru, koruN) {
+  if (!(q.puan > 0)) throw new Error('Önce bu sorunun puanını girin (Adım 1).');
+  if (!q.metin.trim()) throw new Error('Soru metni boş.');
+  /* koru: öğretmenin yüklediği cevap anahtarındaki cevap korunur; yalnızca puan kırılımı (ve boşsa alternatif/hata) üretilir. */
+  var ist = keyPrompt(q);
+  if (koru) ist += '\n\nÖNEMLİ: Bu sorunun cevabı öğretmenin kendi CEVAP ANAHTARINDAN alınmıştır:\n' + q.ornek + '\n' +
+    'Bu cevabı esas al; ornek_cevap alanına bu cevabı AYNEN yaz, değiştirme. noktalar alanını yalnızca bu cevapta beklenenlere göre çıkar; cevapta olmayan yeni bir beklenti ekleme.';
+  var d = await gem(imgPart(q).concat([{ text: ist }]), SCH_KEY, 20000);
+  if (!d.noktalar || !d.noktalar.length) throw new Error('Model puanlanabilir nokta döndürmedi.');
+  if (!koru) q.ornek = d.ornek_cevap || '';
+  if (!koru || !q.alt) q.alt = d.alternatifler || '';
+  if (!koru || !q.hatalar) q.hatalar = d.yaygin_hatalar || '';
+  if (!koruN) q.noktalar = fitN(d.noktalar, q.puan);
+  q.hata = '';
+}
+async function genKeyOne(i) {
+  if (!checkKey()) return;
+  var q = S.q[i];
+  if (q.ornek && !confirm('Bu sorunun mevcut cevap anahtarı (düzenlemeleriniz dahil) silinip yeniden üretilecek. Devam?')) return;
+  busy('Soru ' + q.etiket + ' için cevap anahtarı üretiliyor...');
+  try { await genKeyCore(q); } catch (e) { q.hata = e.message; }
+  save(); unbusy(); renKey();
+}
+async function genKeyAll() {
+  if (!checkKey()) return;
+  if (!S.q.length) { alert('Önce soruları ekleyin.'); return; }
+  var todo = S.q.filter(function (q) { return !q.ornek || !q.noktalar.length; });
+  if (!todo.length) { alert('Tüm soruların cevap anahtarı dolu. Tek tek "Yeniden üret" kullanabilirsiniz.'); return; }
+  var sifirdan = todo.filter(function (q) { return !String(q.ornek || '').trim(); }).map(function (q) { return q.etiket; });
+  if (sifirdan.length && !confirm('Şu soruların cevabını YAPAY ZEKÂ yazacak (sizin cevap anahtarınızdan değil): ' + sifirdan.join(', ') + '.\n\nCevap anahtarınız varsa önce "📥 Anahtardan Doldur" düğmesini kullanın.\n\nDevam edilsin mi?')) return;
+  var fail = 0;
+  for (var k = 0; k < todo.length; k++) {
+    busy('Cevap anahtarı üretiliyor: ' + (k + 1) + ' / ' + todo.length + ' (Soru ' + todo[k].etiket + ')');
+    try { await genKeyCore(todo[k], !!todo[k].ornek, todo[k].noktalar.length > 0); } catch (e) { todo[k].hata = e.message; fail++; }
+    save();
+  }
+  unbusy(); renKey();
+  if (fail) alert(fail + ' soruda hata oluştu (kırmızı uyarıya bakın). O sorular için "Üret" düğmesine tekrar basın.');
+}
+
+/* ---------- Adım 3: rubrik ---------- */
+function mkCrit(q, d, hata) {
+  var pts = seviyePuan(q.puan, q.noktalar);
+  var desc = d ? [d.mukemmel, d.iyi, d.gelisiyor, d.yetersiz] : ['Açıklama ekleyin.', 'Açıklama ekleyin.', 'Açıklama ekleyin.', 'Açıklama ekleyin.'];
+  return {
+    id: q.id, etiket: q.etiket, ad: q.metin, agirlik: q.puan, hata: hata || '',
+    duzeyler: LV.map(function (l, j) {
+      return { etiket: l, puan: pts[j], aciklama: j === 4 ? 'Soru boş bırakılmış veya tamamen yanlış cevaplanmıştır.' : desc[j] };
+    })
+  };
+}
+/* Rubrik açıklamaları cevap anahtarına dayanıyor mu? (kodla denetim)
+   Yasak kalıp varsa veya anahtara özgü sözcüklerden (soru metninde geçmeyen) hiçbiri açıklamalarda yoksa soyut sayılır. */
+var RUB_YASAK = /puanl[ıi]k (bir )?(performans|ba[şs]ar[ıi])|genel olarak do[ğg]ru|k[üu][çc][üu]k bir anlat[ıi]m bozuklu[ğg]u|kriterlerin (tamam[ıi]|t[üu]m[üu])|temel mant[ıi][ğg]|do[ğg]ru cevap verilmi[şs]tir/;
+var SOYUT_ON = 'Açıklamalar soyut olabilir';
+function rubSoyut(d, q) {
+  var hepsi = [d.mukemmel, d.iyi, d.gelisiyor, d.yetersiz].map(function (x) { return String(x || ''); }).join(' ');
+  var y = RUB_YASAK.exec(trK(hepsi));
+  /* Sözcükler ilk 4 harfle karşılaştırılır: Türkçe ekler ve ünsüz yumuşaması ("durak" ~ "durağı") eşleşsin. */
+  var P = 4;
+  var var_ = function (txt) { var a = {}; ulNorm(duz(txt)).split(' ').forEach(function (w) { if (w) a[w.slice(0, P)] = 1; }); return a; };
+  var soru = var_(q.metin + ' ' + (q.parca || ''));
+  var acik = var_(hepsi);
+  var ozel = [], gor = {};
+  ulNorm(duz(String(q.ornek || '').replace(/\[KONTROL ET\]/g, ''))).split(' ').forEach(function (w) {
+    var k = w.slice(0, P);
+    if (w.length >= 3 && BAG.indexOf(' ' + w + ' ') < 0 && !soru[k] && !gor[k]) { gor[k] = 1; ozel.push(w); }
+  });
+  /* 3 harfli sözcük, açıklamadaki bir sözcüğün başıysa da sayılır */
+  var gecer = function (map, w) { if (map[w.slice(0, P)]) return true; if (w.length >= P) return false; for (var x in map) if (x.indexOf(w) === 0) return true; return false; };
+  var bulunan = ozel.filter(function (w) { return gecer(acik, w); });
+  var mk = var_(d.mukemmel), mkVar = ozel.some(function (w) { return gecer(mk, w); });
+  var neden = '';
+  if (y) neden = 'soyut kalıp kullanılmış ("' + y[0] + '")';
+  else if (ozel.length && (bulunan.length < Math.min(2, ozel.length) || !mkVar)) neden = 'cevap anahtarındaki içerik açıklamalarda geçmiyor';
+  return { neden: neden, ozel: ozel.slice(0, 12) };
+}
+/* Tek istek. Soyut bulunursa kriter uyarıyla kaydedilir; öğretmen "Yeniden dene" ile düzeltme notlu ikinci istek gönderebilir (günlük istek hakkı korunur). */
+async function genRubCore(q, ek) {
+  var pts = seviyePuan(q.puan, q.noktalar);
+  var d = await gem(imgPart(q).concat([{ text: rubPrompt(q, pts, ek) }]), SCH_RUB, 8000);
+  var s = rubSoyut(d, q);
+  return mkCrit(q, d, s.neden ? SOYUT_ON + ' (' + s.neden + '). Kontrol edip düzeltin veya "Yeniden dene"ye basın.' : '');
+}
+function duzeltmeNotu(k, q) {
+  var d = { mukemmel: k.duzeyler[0].aciklama, iyi: k.duzeyler[1].aciklama, gelisiyor: k.duzeyler[2].aciklama, yetersiz: k.duzeyler[3].aciklama };
+  var s = rubSoyut(d, q);
+  return 'DÜZELTME: Önceki denemede açıklamalar soyut kaldı' + (s.neden ? ' (' + s.neden + ')' : '') + '. Yasak ifadeleri kullanma; her düzeyde cevap anahtarındaki somut içeriği tırnak içinde an' +
+    (s.ozel.length ? ' (anahtardaki şu sözcüklere dayan: ' + s.ozel.join(', ') + ')' : '') + '.';
+}
+async function genRubAll() {
+  if (!checkKey()) return;
+  if (!S.q.length) { alert('Önce soruları ekleyin.'); return; }
+  var eksik = S.q.filter(function (q) { return !q.ornek || !q.noktalar.length || !(q.puan > 0); });
+  if (eksik.length) { alert('Şu soruların cevap anahtarı/puanı eksik: ' + eksik.map(function (q) { return q.etiket; }).join(', ') + '. Önce Adım 2\'yi tamamlayın.'); return; }
+  if (S.crit.length && !confirm('Mevcut rubrik (düzenlemeleriniz dahil) silinip yeniden oluşturulacak. Devam?')) return;
+  var out = [], fail = 0;
+  for (var i = 0; i < S.q.length; i++) {
+    busy('Rubrik oluşturuluyor: ' + (i + 1) + ' / ' + S.q.length + ' (Soru ' + S.q[i].etiket + ')');
+    try { out.push(await genRubCore(S.q[i])); }
+    catch (e) { out.push(mkCrit(S.q[i], null, 'Açıklamalar üretilemedi: ' + e.message)); fail++; }
+  }
+  S.crit = out; save(); unbusy(); renRub();
+  var soyut = out.filter(function (k) { return k.hata.indexOf(SOYUT_ON) === 0; }).map(function (k) { return k.etiket; });
+  if (soyut.length) alert('Şu soruların açıklamaları cevap anahtarına yeterince dayanmıyor olabilir: ' + soyut.join(', ') + '.\n\nSoru altındaki ⚠ uyarısına bakın; elle düzeltebilir veya "Yeniden dene" ile tekrar ürettirebilirsiniz (her deneme bir Gemini isteği harcar).');
+  if (fail) alert(fail + ' soruda açıklama üretilemedi (kırmızı uyarı). Puanlar hazır; "Yeniden dene" ile açıklamayı üretebilir ya da elle yazabilirsiniz.');
+}
+async function genRubOne(i) {
+  if (!checkKey()) return;
+  var k = S.crit[i], q = qById(k.id);
+  if (!q || !q.ornek || !q.noktalar.length) { alert('Bu kriter için cevap anahtarı yok. Önce Adım 2.'); return; }
+  var dolu = k.duzeyler.slice(0, 4).some(function (d) { return d.aciklama && d.aciklama !== 'Açıklama ekleyin.'; });
+  if (dolu && !confirm('Soru ' + k.etiket + ' için açıklamalar ve düzey puanları (düzenlemeleriniz dahil) yeniden üretilecek. Devam edilsin mi?')) return;
+  var ek = k.hata && k.hata.indexOf(SOYUT_ON) === 0 ? duzeltmeNotu(k, q) : '';
+  busy('Soru ' + k.etiket + ' için açıklamalar üretiliyor...');
+  try { S.crit[i] = await genRubCore(q, ek); } catch (e) { k.hata = 'Açıklamalar üretilemedi: ' + e.message; }
+  save(); unbusy(); renRub();
+}
+function renRub() {
+  markTabs();
+  var w = $('rubTbl');
+  if (!S.crit.length) { w.innerHTML = '<div class="emp">Henüz rubrik yok. "🤖 Rubriği Oluştur"a basın.</div>'; updTot(); return; }
+  var h = '<div class="rw"><div class="rh"><div class="rhc">Soru</div>' + LV.map(function (l) { return '<div class="rhc">' + l + '</div>'; }).join('') + '<div class="rhc">Puan</div></div>';
+  S.crit.forEach(function (k, i) {
+    h += '<div class="rr"><div class="rc"><b style="color:var(--ac)">Soru ' + esc(k.etiket) + '</b>' +
+      '<div class="qs" contenteditable="true" onblur="CN(' + i + ',htmlToMd(this.innerHTML))">' + bold(k.ad).replace(/\r?\n/g, '<br>') + '</div>' +
+      (k.hata ? '<div class="cerr">⚠ ' + esc(k.hata) + '<br><button class="btn bs bsm np" style="margin-top:4px" onclick="genRubOne(' + i + ')">Yeniden dene</button></div>' : '') + '</div>';
+    k.duzeyler.forEach(function (d, j) {
+      var ro = (j === 0 || j === 4) ? ' readonly' : '';
+      h += '<div class="rc lv"><strong style="color:' + LC[j] + '">' + LV[j] + '</strong><input type="number" class="lp" step="0.5" min="0" max="' + k.agirlik + '" value="' + d.puan + '"' + ro + ' onchange="LP(' + i + ',' + j + ',this.value)">' +
+        '<div class="ld2" contenteditable="true" onblur="LD(' + i + ',' + j + ',this.textContent)">' + esc(d.aciklama) + '</div></div>';
+    });
+    h += '<div class="rc" style="text-align:center"><input type="number" class="wi" step="0.5" min="0" value="' + k.agirlik + '" onchange="setW(' + i + ',this.value)">' +
+      '<div style="margin-top:6px"><button class="btn bd3 bsm np" onclick="rmCrit(' + i + ')">Sil</button></div></div></div>';
+  });
+  w.innerHTML = h + '</div>'; updTot();
+}
+function CN(i, v) { S.crit[i].ad = v.trim(); save(); }
+function LD(i, j, v) {
+  var k = S.crit[i], yeni = v.trim();
+  if (k.duzeyler[j].aciklama === yeni) return;
+  k.duzeyler[j].aciklama = yeni;
+  /* öğretmen açıklamayı elle düzeltince "soyut olabilir" uyarısı kalkar */
+  if (k.hata && k.hata.indexOf(SOYUT_ON) === 0) { k.hata = ''; save(); renRub(); return; }
+  save();
+}
+function LP(i, j, v) { var k = S.crit[i]; k.duzeyler[j].puan = Math.min(k.agirlik, Math.max(0, parseFloat(v) || 0)); save(); }
+function setW(i, v) {
+  var k = S.crit[i], n = Math.max(0, parseFloat(v) || 0), old = k.agirlik || 1;
+  k.duzeyler.forEach(function (d, j) { d.puan = j === 0 ? n : j === 4 ? 0 : r05(d.puan * n / old); });
+  k.agirlik = n;
+  var q = qById(k.id); if (q) { q.puan = n; if (q.noktalar.length) q.noktalar = fitN(q.noktalar, n); }
+  save(); renRub();
+}
+function updTot() { var t = S.crit.reduce(function (a, k) { return a + (+k.agirlik || 0); }, 0); $('totW').textContent = t; }
+function scale100() {
+  var t = S.crit.reduce(function (a, k) { return a + k.agirlik; }, 0);
+  if (!(t > 0)) return;
+  S.crit.forEach(function (k, i) { setWsilent(k, r05(k.agirlik * 100 / t)); });
+  var d = 100 - S.crit.reduce(function (a, k) { return a + k.agirlik; }, 0);
+  if (Math.abs(d) > 0.01) setWsilent(S.crit[S.crit.length - 1], Math.max(0, r05(S.crit[S.crit.length - 1].agirlik + d)));
+  save(); renRub();
+}
+function setWsilent(k, n) {
+  var old = k.agirlik || 1;
+  k.duzeyler.forEach(function (d, j) { d.puan = j === 0 ? n : j === 4 ? 0 : r05(d.puan * n / old); });
+  k.agirlik = n;
+  var q = qById(k.id); if (q) { q.puan = n; if (q.noktalar.length) q.noktalar = fitN(q.noktalar, n); }
+}
+function rmCrit(i) { if (!confirm('Kriter silinsin mi? (Öğrenci puanları diğer sorulara kaymaz.)')) return; S.crit.splice(i, 1); save(); renRub(); }
+function addManual() {
+  var q = { id: uid(), etiket: 'Y' + (S.crit.length + 1), metin: 'Yeni soru', puan: 10, ornek: '', noktalar: [], parca: '', hata: '' };
+  S.q.push(q); S.crit.push(mkCrit(q, null, '')); save(); renRub();
+}
+
+/* ---------- Adım 4: puanlama ---------- */
+function addSt() { var inp = $('newSt'), nm = inp.value.trim(); if (!nm) return; S.stus.push({ name: nm, scores: {} }); inp.value = ''; save(); renSt(); }
+function bulkSt() {
+  var ns = prompt('Her satıra bir öğrenci adı yazın (listeyi yapıştırabilirsiniz):'); if (!ns) return;
+  ns.split('\n').map(function (n) { return n.trim(); }).filter(Boolean).forEach(function (n) { S.stus.push({ name: n, scores: {} }); });
+  save(); renSt();
+}
+function rmSt(i) { if (!confirm(S.stus[i].name + ' silinsin mi?')) return; S.stus.splice(i, 1); save(); renSt(); }
+function getTot(si) { var s = 0; S.crit.forEach(function (k) { s += (+S.stus[si].scores[k.id] || 0); }); return s; }
+function maxTot() { return S.crit.reduce(function (a, k) { return a + (+k.agirlik || 0); }, 0); }
+function pctOf(tot) { var m = maxTot(); return m > 0 ? tot / m * 100 : 0; }
+function getBdg(p) { if (p >= 85) return 'ba'; if (p >= 70) return 'bb'; if (p >= 50) return 'bc'; if (p > 0) return 'bdd'; return 'be'; }
+function harf(p) { return p >= 85 ? 'AA' : p >= 70 ? 'BB' : p >= 55 ? 'CC' : p >= 50 ? 'DD' : 'FF'; }
+function updSc(si, id, v) {
+  var k = S.crit.filter(function (x) { return x.id === id; })[0]; if (!k) return;
+  var sc = parseFloat(v); if (isNaN(sc)) sc = 0; sc = Math.min(k.agirlik, Math.max(0, sc));
+  S.stus[si].scores[id] = sc; save();
+  var tot = getTot(si), el = $('tot' + si);
+  if (el) { el.textContent = tot; el.className = 'bdg ' + getBdg(pctOf(tot)); }
+}
+function renSt() {
+  markTabs();
+  var w = $('stTbl');
+  if (!S.crit.length) { w.innerHTML = '<div class="al2 aw">Önce rubrik oluşturun (Adım 3).</div>'; return; }
+  if (!S.stus.length) { w.innerHTML = '<div class="emp">Henüz öğrenci eklenmedi.</div>'; return; }
+  var h = '<div class="stw"><table class="st"><thead><tr><th>Öğrenci</th>' +
+    S.crit.map(function (k) { return '<th title="' + esc(duz(k.ad)) + '">S' + esc(k.etiket) + ' (/' + k.agirlik + ')</th>'; }).join('') + '<th>Toplam</th><th class="np"></th></tr></thead><tbody>';
+  S.stus.forEach(function (s, si) {
+    var tot = getTot(si);
+    h += '<tr><td><strong>' + esc(s.name) + '</strong></td>' + S.crit.map(function (k) {
+      var v = s.scores[k.id];
+      return '<td><input type="number" class="si" min="0" max="' + k.agirlik + '" step="0.5" value="' + (v === undefined ? '' : v) + '" placeholder="0" oninput="updSc(' + si + ',\'' + k.id + '\',this.value)"></td>';
+    }).join('') + '<td><span id="tot' + si + '" class="bdg ' + getBdg(pctOf(tot)) + '">' + tot + '</span></td><td class="np"><button class="btn bd3 bsm" onclick="rmSt(' + si + ')">×</button></td></tr>';
+  });
+  w.innerHTML = h + '</tbody></table></div>';
+}
+
+/* ---------- Adım 5: sonuçlar ---------- */
+function renRes() {
+  markTabs();
+  var w = $('resCnt');
+  if (!S.crit.length || !S.stus.length) { w.innerHTML = '<div class="emp">Rubrik ve öğrenci puanları girildiğinde sonuçlar görünür.</div>'; return; }
+  var mx = maxTot();
+  var tots = S.stus.map(function (_, i) { return getTot(i); });
+  var pcts = tots.map(pctOf);
+  var avg = pcts.reduce(function (a, b) { return a + b; }, 0) / pcts.length;
+  var ps = pcts.filter(function (p) { return p >= 50; }).length;
+  $('phT').textContent = S.info.adi || 'Yazılı Sınav Değerlendirme Raporu';
+  $('phM').textContent = [S.info.sinif, S.info.tarih, S.info.ogretmen].filter(Boolean).join(' - ');
+  var h = '<div class="rg">' +
+    '<div class="sc"><div class="v">' + S.stus.length + '</div><div class="l">Öğrenci</div></div>' +
+    '<div class="sc"><div class="v">' + avg.toFixed(1) + '</div><div class="l">Ortalama (100 üzerinden)</div></div>' +
+    '<div class="sc"><div class="v">' + ps + '</div><div class="l">Geçen (%50+)</div></div>' +
+    '<div class="sc"><div class="v">' + Math.max.apply(null, pcts).toFixed(0) + ' / ' + Math.min.apply(null, pcts).toFixed(0) + '</div><div class="l">En yüksek / en düşük</div></div></div>';
+  var srt = S.stus.map(function (s, i) { return { s: s, tot: tots[i], p: pcts[i] }; }).sort(function (a, b) { return b.tot - a.tot; });
+  h += '<div class="card"><div class="ct">Öğrenci Sonuçları <span style="font-weight:400;font-size:12px;color:var(--mu)">(sınav toplamı ' + mx + ' puan)</span></div><div class="stw"><table class="st"><thead><tr><th>#</th><th>Öğrenci</th>' +
+    S.crit.map(function (k) { return '<th>S' + esc(k.etiket) + ' (' + k.agirlik + ')</th>'; }).join('') + '<th>Toplam</th><th>100\'lük</th><th>Harf</th></tr></thead><tbody>';
+  srt.forEach(function (r, rk) {
+    h += '<tr><td>' + (rk + 1) + '</td><td><strong>' + esc(r.s.name) + '</strong></td>' +
+      S.crit.map(function (k) { return '<td style="text-align:center">' + (+r.s.scores[k.id] || 0) + '</td>'; }).join('') +
+      '<td><span class="bdg ' + getBdg(r.p) + '">' + r.tot + '</span></td><td><strong>' + r.p.toFixed(0) + '</strong></td><td><strong>' + harf(r.p) + '</strong></td></tr>';
+  });
+  h += '<tr style="background:var(--sf)"><td></td><td><em>Sınıf başarı %</em></td>' + S.crit.map(function (k) {
+    var t = 0; S.stus.forEach(function (s) { t += (+s.scores[k.id] || 0); });
+    return '<td style="text-align:center"><em>' + (k.agirlik > 0 ? (t / S.stus.length / k.agirlik * 100).toFixed(0) : 0) + '%</em></td>';
+  }).join('') + '<td></td><td></td><td></td></tr></tbody></table></div></div>';
+  w.innerHTML = h;
+}
+function prt() { goTab(5); setTimeout(function () { window.print(); }, 150); }
+function dlCsv() {
+  if (!S.crit.length || !S.stus.length) { alert('Önce rubrik ve öğrenci puanları gerekli.'); return; }
+  var q = function (s) { return '"' + String(s).replace(/"/g, '""') + '"'; };
+  var rows = [['Öğrenci'].concat(S.crit.map(function (k) { return 'S' + k.etiket + ' (/' + k.agirlik + ')'; })).concat(['Toplam', "100'lük", 'Harf'])];
+  S.stus.forEach(function (s, i) {
+    var t = getTot(i), p = pctOf(t);
+    rows.push([s.name].concat(S.crit.map(function (k) { return +s.scores[k.id] || 0; })).concat([t, p.toFixed(0), harf(p)]));
+  });
+  var csv = '\ufeff' + rows.map(function (r) { return r.map(q).join(';'); }).join('\r\n');
+  download(new Blob([csv], { type: 'text/csv;charset=utf-8' }), safeName(S.info.adi || 'sinav') + '_sonuclar.csv');
+}
+
+/* ---------- arşiv ---------- */
+function gArsiv() { try { return JSON.parse(localStorage.getItem(ARCH) || '[]'); } catch (e) { return []; } }
+function sArsiv(l) { try { localStorage.setItem(ARCH, JSON.stringify(l)); } catch (e) { alert('Kaydedilemedi: tarayıcı depolaması kapalı.'); } }
+function svArsiv() {
+  if (!S.crit.length) { alert('Önce rubrik oluşturun.'); return; }
+  var sa = S.info.adi || 'İsimsiz';
+  var e = { id: Date.now(), info: JSON.parse(JSON.stringify(S.info)), sinavAdi: sa, sinif: S.info.sinif, tarih: S.info.tarih || new Date().toLocaleDateString('tr-TR'), kriterSayisi: S.crit.length, q: JSON.parse(JSON.stringify(S.q)), kriterler: JSON.parse(JSON.stringify(S.crit)) };
+  var l = gArsiv(); l.unshift(e); if (l.length > 50) l = l.slice(0, 50); sArsiv(l);
+  alert('"' + sa + '" arşive kaydedildi.');
+}
+function normalizeEntry(e) {
+  var crit = JSON.parse(JSON.stringify(e.kriterler || [])), q = JSON.parse(JSON.stringify(e.q || []));
+  crit.forEach(function (k, i) { if (!k.id) k.id = uid(); if (!k.etiket) k.etiket = String(i + 1); k.hata = k.hata || ''; });
+  return { crit: crit, q: q };
+}
+function ldArsiv(id) {
+  var l = gArsiv(), e = l.filter(function (x) { return x.id === id; })[0];
+  if (!e) { alert('Kayıt bulunamadı.'); return; }
+  if (!confirm('"' + e.sinavAdi + '" yüklensin mi? Mevcut sınav verisi ve öğrenci puanları silinir.')) return;
+  var n = normalizeEntry(e);
+  S.crit = n.crit; S.q = n.q; S.stus = [];
+  S.info = Object.assign({ sinif: '', adi: '', tarih: '', ogretmen: '', baglam: '' }, e.info || { sinif: e.sinif, adi: e.sinavAdi, tarih: e.tarih });
+  save(); fillInfo(); tgArsiv(); goTab(3);
+}
+function delArsiv(id) { if (!confirm('Silinsin mi?')) return; sArsiv(gArsiv().filter(function (e) { return e.id !== id; })); renArsiv(); }
+function expArsiv(id) {
+  var e = gArsiv().filter(function (x) { return x.id === id; })[0]; if (!e) return;
+  download(new Blob([JSON.stringify(e, null, 2)], { type: 'application/json' }), safeName(e.sinavAdi) + '.json');
+}
+function impArsiv() {
+  var inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.json';
+  inp.onchange = function (ev) {
+    var f = ev.target.files[0]; if (!f) return;
+    var r = new FileReader();
+    r.onload = function (x) {
+      try {
+        var en = JSON.parse(x.target.result); if (!en.kriterler) throw new Error('Geçersiz dosya');
+        en.id = Date.now(); var l = gArsiv(); l.unshift(en); sArsiv(l); renArsiv(); alert('İçeri aktarıldı.');
+      } catch (err) { alert('Hata: ' + err.message); }
+    };
+    r.readAsText(f);
+  };
+  inp.click();
+}
+function renArsiv() {
+  var l = gArsiv(), w = $('arsivList');
+  if (!l.length) { w.innerHTML = '<div class="emp">Henüz kayıtlı rubrik yok.</div>'; return; }
+  w.innerHTML = l.map(function (e) {
+    return '<div class="aitl"><div style="flex:1"><div class="ttl">' + esc(e.sinavAdi || 'İsimsiz') + '</div><div class="mt">' + esc([e.sinif, e.tarih, e.kriterSayisi + ' kriter'].filter(Boolean).join(' · ')) + '</div></div>' +
+      '<button class="btn bp bsm" onclick="ldArsiv(' + e.id + ')">Yükle</button>' +
+      '<button class="btn bs bsm" onclick="expArsiv(' + e.id + ')" title="JSON indir">📤</button>' +
+      '<button class="btn bd3 bsm" onclick="delArsiv(' + e.id + ')">Sil</button></div>';
+  }).join('');
+}
+function tgArsiv() { var p = $('arsivPanel'), v = p.style.display !== 'none'; p.style.display = v ? 'none' : 'block'; if (!v) renArsiv(); }
+
+/* ---------- yeni sınav ---------- */
+function newExam() {
+  if (!confirm('Tüm sınav verisi (sorular, anahtar, rubrik, öğrenciler) temizlensin mi? Arşiv etkilenmez.')) return;
+  S.q = []; S.crit = []; S.stus = []; S.info.adi = ''; S.info.tarih = ''; S.info.baglam = ''; S.docType = 'soru';
+  files = []; $('paste').value = ''; $('pasteK').value = ''; renChips(); save(); fillInfo(); goTab(1);
+}
+
+/* ---------- Word çıktıları ---------- */
+/* İşaretli metni (__altı çizili__, **kalın**) Word parçalarına çevirir. */
+function wRuns(D, t, o) {
+  o = o || {};
+  return mdParcala(t, false, false).map(function (p) {
+    return new D.TextRun({ text: p.t, bold: p.b || !!o.bold, underline: (p.u || (p.b && o.ulBold)) ? {} : undefined, italics: !!o.italics, size: o.size || 22, font: o.font || 'Calibri', color: o.color || '222222' });
+  });
+}
+async function dlWord() {
+  if (!S.crit.length) { alert('Önce rubrik oluşturun.'); return; }
+  try { await loadLib(function () { return window.docx; }, DOCX_URLS); } catch (e) { alert(e.message); return; }
+  var D = window.docx;
+  var sa = S.info.adi || 'Rubrik', si = S.info.sinif || '', tr = S.info.tarih || '', og = S.info.ogretmen || '';
+  var brd = { style: D.BorderStyle.SINGLE, size: 4, color: '2C5F8A' }, brds = { top: brd, bottom: brd, left: brd, right: brd };
+  var hb = { style: D.BorderStyle.SINGLE, size: 4, color: 'FFFFFF' }, hbs = { top: hb, bottom: hb, left: hb, right: hb };
+  var cm = { top: 80, bottom: 80, left: 110, right: 110 };
+  var ck = 3200, cd = 2200, cp = 1100, tw = ck + cd * 5 + cp;
+  var fills = ['EDF5E8', 'EBF3FA', 'FFF8E1', 'FDECEA', 'F5F5F5'], cols = ['2E7D32', '1565C0', 'E65100', 'C0392B', '555555'];
+  function hc(t, w) {
+    return new D.TableCell({ borders: hbs, width: { size: w, type: D.WidthType.DXA }, shading: { fill: '2C5F8A', type: D.ShadingType.CLEAR }, margins: cm, verticalAlign: D.VerticalAlign.CENTER,
+      children: [new D.Paragraph({ alignment: D.AlignmentType.CENTER, children: [new D.TextRun({ text: t, bold: true, color: 'FFFFFF', size: 16, font: 'Arial' })] })] });
+  }
+  var rows = [new D.TableRow({ tableHeader: true, children: [hc('SORU', ck)].concat(LV.map(function (l) { return hc(l.toUpperCase(), cd); })).concat([hc('PUAN', cp)]) })];
+  S.crit.forEach(function (k) {
+    var cells = [new D.TableCell({ borders: brds, margins: cm, width: { size: ck, type: D.WidthType.DXA }, shading: { fill: 'EBF3FA', type: D.ShadingType.CLEAR },
+      children: [new D.Paragraph({ spacing: { after: 40 }, children: [new D.TextRun({ text: 'Soru ' + k.etiket, bold: true, size: 18, font: 'Arial', color: '2C5F8A' })] }),
+        new D.Paragraph({ children: wRuns(D, k.ad, { size: 18, font: 'Arial', color: '333333' }) })] })];
+    k.duzeyler.forEach(function (d, j) {
+      cells.push(new D.TableCell({ borders: brds, margins: cm, width: { size: cd, type: D.WidthType.DXA }, shading: { fill: fills[j], type: D.ShadingType.CLEAR },
+        children: [new D.Paragraph({ spacing: { after: 40 }, children: [new D.TextRun({ text: d.etiket + ' (' + d.puan + ')', bold: true, size: 19, font: 'Arial', color: cols[j] })] }),
+          new D.Paragraph({ children: [new D.TextRun({ text: d.aciklama || '', size: 18, font: 'Arial', color: '333333' })] })] }));
+    });
+    cells.push(new D.TableCell({ borders: brds, margins: cm, width: { size: cp, type: D.WidthType.DXA }, verticalAlign: D.VerticalAlign.CENTER,
+      children: [new D.Paragraph({ alignment: D.AlignmentType.CENTER, children: [new D.TextRun({ text: String(k.agirlik), bold: true, size: 24, font: 'Arial', color: '2C5F8A' })] })] }));
+    rows.push(new D.TableRow({ children: cells }));
+  });
+  var tbl = new D.Table({ width: { size: tw, type: D.WidthType.DXA }, columnWidths: [ck, cd, cd, cd, cd, cd, cp], layout: D.TableLayoutType.FIXED, rows: rows });
+  var ch = [new D.Paragraph({ alignment: D.AlignmentType.CENTER, spacing: { after: 80 }, children: [new D.TextRun({ text: sa.toUpperCase(), bold: true, size: 28, font: 'Arial', color: '2C5F8A' })] })];
+  var ml = [si, tr, og].filter(Boolean).join('   |   ');
+  if (ml) ch.push(new D.Paragraph({ alignment: D.AlignmentType.CENTER, spacing: { after: 200 }, children: [new D.TextRun({ text: ml, size: 20, font: 'Arial', color: '555555' })] }));
+  ch.push(new D.Paragraph({ spacing: { after: 120 }, children: [new D.TextRun({ text: 'DEĞERLENDİRME RUBRİĞİ', bold: true, size: 22, font: 'Arial', color: '2C5F8A' })] }));
+  ch.push(tbl);
+  ch.push(new D.Paragraph({ spacing: { before: 160 }, alignment: D.AlignmentType.RIGHT, children: [new D.TextRun({ text: 'Toplam: ' + maxTot() + ' puan', bold: true, size: 20, font: 'Arial', color: '2C5F8A' })] }));
+  // Not: docx, LANDSCAPE verilince genişlik/yüksekliği kendisi çevirir; bu yüzden dikey ölçüler verilir.
+  var doc = new D.Document({ sections: [{ properties: { page: { size: { width: 11906, height: 16838, orientation: D.PageOrientation.LANDSCAPE }, margin: { top: 720, right: 720, bottom: 720, left: 720 } } }, footers: { default: wFooter(D, sa + ' - Değerlendirme Rubriği') }, children: ch }] });
+  try { download(await D.Packer.toBlob(doc), safeName(sa) + '_rubrik.docx'); } catch (e) { alert('Word oluşturulamadı: ' + e.message); }
+}
+function toPng(dataUrl) {
+  return new Promise(function (res, rej) {
+    var im = new Image();
+    im.onload = function () {
+      var c = document.createElement('canvas'); c.width = im.width; c.height = im.height; c.getContext('2d').drawImage(im, 0, 0);
+      c.toBlob(function (b) { if (!b) return rej(new Error('png')); var fr = new FileReader(); fr.onload = function () { res(new Uint8Array(fr.result)); }; fr.onerror = rej; fr.readAsArrayBuffer(b); }, 'image/png');
+    };
+    im.onerror = rej; im.src = dataUrl;
+  });
+}
+function wFooter(D, label) {
+  return new D.Footer({ children: [new D.Paragraph({ alignment: D.AlignmentType.CENTER, border: { top: { style: D.BorderStyle.SINGLE, size: 4, color: 'BBBBBB', space: 4 } },
+    children: [new D.TextRun({ text: label + '   |   Sayfa ', size: 16, font: 'Calibri', color: '777777' }), new D.TextRun({ children: [D.PageNumber.CURRENT], size: 16, font: 'Calibri', color: '777777' }),
+      new D.TextRun({ text: ' / ', size: 16, font: 'Calibri', color: '777777' }), new D.TextRun({ children: [D.PageNumber.TOTAL_PAGES], size: 16, font: 'Calibri', color: '777777' })] })] });
+}
+function wLines(D, text, o) {
+  o = o || {};
+  var out = [];
+  String(text || '').replace(/\r/g, '').split('\n').forEach(function (ln) {
+    var raw = ln.replace(/\s+$/, ''); if (!raw.trim() && !o.keepEmpty) return;
+    var bullet = /^\s*[-•*]\s+/.test(raw), t = raw.replace(/^\s*[-•*]\s+/, '');
+    var runs = wRuns(D, t, o);
+    out.push(new D.Paragraph({ spacing: { after: o.after == null ? 60 : o.after, line: o.line || 276 }, indent: bullet ? { left: 360, hanging: 220 } : undefined,
+      children: bullet ? [new D.TextRun({ text: '•  ', size: o.size || 22, font: 'Calibri', color: '2C5F8A', bold: true })].concat(runs) : runs }));
+  });
+  return out;
+}
+function wLabel(D, t) {
+  return new D.Paragraph({ keepNext: true, spacing: { before: 160, after: 60 }, children: [new D.TextRun({ text: t.toUpperCase(), bold: true, size: 17, font: 'Calibri', color: '6B6860', characterSpacing: 20 })] });
+}
+async function dlKeyWord() {
+  if (!S.q.length) { alert('Önce soruları ekleyin.'); return; }
+  try { await loadLib(function () { return window.docx; }, DOCX_URLS); } catch (e) { alert(e.message); return; }
+  var D = window.docx, sa = S.info.adi || 'Yazılı Sınav';
+  var W = 9900; /* A4 dikey, 1000 dxa kenar boşluğu → 9906 kullanılabilir */
+  var none = { style: D.BorderStyle.NONE, size: 0, color: 'FFFFFF' }, noB = { top: none, bottom: none, left: none, right: none };
+  var thin = { style: D.BorderStyle.SINGLE, size: 4, color: 'C8C6BE' }, thinB = { top: thin, bottom: thin, left: thin, right: thin };
+  var pngs = {};
+  for (var pi = 0; pi < S.q.length; pi++) { if (S.q[pi].gorsel) { try { pngs[S.q[pi].id] = await toPng(S.q[pi].gorsel); } catch (e) {} } }
+  var ch = [];
+  ch.push(new D.Paragraph({ alignment: D.AlignmentType.CENTER, spacing: { after: 40 }, children: [new D.TextRun({ text: sa.toUpperCase(), bold: true, size: 32, font: 'Cambria', color: '2C5F8A' })] }));
+  ch.push(new D.Paragraph({ alignment: D.AlignmentType.CENTER, spacing: { after: 60 }, children: [new D.TextRun({ text: 'CEVAP ANAHTARI VE PUANLAMA YÖNERGESİ', bold: true, size: 22, font: 'Calibri', color: '444444', characterSpacing: 30 })] }));
+  var ml = [S.info.sinif, S.info.tarih, S.info.ogretmen].filter(Boolean).join('   |   ');
+  ch.push(new D.Paragraph({ alignment: D.AlignmentType.CENTER, border: { bottom: { style: D.BorderStyle.SINGLE, size: 8, color: '2C5F8A', space: 8 } }, spacing: { after: 200 }, children: [new D.TextRun({ text: 'Türk Dili ve Edebiyatı' + (ml ? '   |   ' + ml : ''), size: 20, font: 'Calibri', color: '555555' })] }));
+  if (S.info.baglam) ch.push(new D.Paragraph({ spacing: { after: 160 }, children: [new D.TextRun({ text: 'Kazanım / not: ', bold: true, size: 19, font: 'Calibri', color: '2C5F8A' }), new D.TextRun({ text: S.info.baglam, size: 19, font: 'Calibri', color: '444444' })] }));
+
+  /* özet tablosu */
+  var sumRows = [new D.TableRow({ tableHeader: true, children: ['SORU', 'KONU (ilk satır)', 'PUAN'].map(function (t, j) {
+    return new D.TableCell({ width: { size: [1300, 7400, 1200][j], type: D.WidthType.DXA }, borders: noB, shading: { fill: '2C5F8A', type: D.ShadingType.CLEAR }, margins: { top: 60, bottom: 60, left: 110, right: 110 },
+      children: [new D.Paragraph({ alignment: j === 2 ? D.AlignmentType.CENTER : D.AlignmentType.LEFT, children: [new D.TextRun({ text: t, bold: true, size: 17, color: 'FFFFFF', font: 'Calibri' })] })] });
+  }) })];
+  S.q.forEach(function (q, i) {
+    var first = duz(q.metin || '').split('\n')[0]; if (first.length > 95) first = first.slice(0, 92) + '...';
+    var fill = i % 2 ? 'F6F5F1' : 'FFFFFF';
+    sumRows.push(new D.TableRow({ cantSplit: true, children: [String(q.etiket), first, String(q.puan)].map(function (t, j) {
+      return new D.TableCell({ width: { size: [1300, 7400, 1200][j], type: D.WidthType.DXA }, borders: thinB, shading: { fill: fill, type: D.ShadingType.CLEAR }, margins: { top: 50, bottom: 50, left: 110, right: 110 },
+        children: [new D.Paragraph({ alignment: j === 2 ? D.AlignmentType.CENTER : D.AlignmentType.LEFT, children: [new D.TextRun({ text: t, size: 19, bold: j !== 1, font: 'Calibri', color: j === 0 ? '2C5F8A' : '222222' })] })] });
+    }) }));
+  });
+  sumRows.push(new D.TableRow({ children: [new D.TableCell({ columnSpan: 2, width: { size: 8700, type: D.WidthType.DXA }, borders: thinB, shading: { fill: 'EBF3FA', type: D.ShadingType.CLEAR }, margins: { top: 50, bottom: 50, left: 110, right: 110 },
+    children: [new D.Paragraph({ alignment: D.AlignmentType.RIGHT, children: [new D.TextRun({ text: 'TOPLAM', bold: true, size: 19, font: 'Calibri', color: '2C5F8A' })] })] }),
+    new D.TableCell({ width: { size: 1200, type: D.WidthType.DXA }, borders: thinB, shading: { fill: 'EBF3FA', type: D.ShadingType.CLEAR }, margins: { top: 50, bottom: 50, left: 110, right: 110 },
+      children: [new D.Paragraph({ alignment: D.AlignmentType.CENTER, children: [new D.TextRun({ text: String(totalPts()), bold: true, size: 21, font: 'Calibri', color: '2C5F8A' })] })] })] }));
+  ch.push(new D.Table({ width: { size: W - 0, type: D.WidthType.DXA }, columnWidths: [1300, 7400, 1200], layout: D.TableLayoutType.FIXED, rows: sumRows }));
+
+  S.q.forEach(function (q, qi) {
+    /* soru başlık çubuğu */
+    ch.push(new D.Paragraph({ spacing: { before: 280 }, keepNext: true, children: [] }));
+    ch.push(new D.Table({ width: { size: W, type: D.WidthType.DXA }, columnWidths: [8100, 1800], layout: D.TableLayoutType.FIXED, rows: [new D.TableRow({ cantSplit: true, children: [
+      new D.TableCell({ width: { size: 8100, type: D.WidthType.DXA }, borders: noB, shading: { fill: '2C5F8A', type: D.ShadingType.CLEAR }, margins: { top: 90, bottom: 90, left: 160, right: 110 }, verticalAlign: D.VerticalAlign.CENTER,
+        children: [new D.Paragraph({ keepNext: true, children: [new D.TextRun({ text: 'SORU ' + q.etiket, bold: true, size: 25, font: 'Cambria', color: 'FFFFFF' })] })] }),
+      new D.TableCell({ width: { size: 1800, type: D.WidthType.DXA }, borders: noB, shading: { fill: '1F4A6E', type: D.ShadingType.CLEAR }, margins: { top: 90, bottom: 90, left: 110, right: 160 }, verticalAlign: D.VerticalAlign.CENTER,
+        children: [new D.Paragraph({ keepNext: true, alignment: D.AlignmentType.RIGHT, children: [new D.TextRun({ text: q.puan + ' PUAN', bold: true, size: 22, font: 'Calibri', color: 'FFFFFF' })] })] })] })] }));
+
+    ch.push(wLabel(D, 'Soru'));
+    wLines(D, q.metin, { size: 21, italics: false, color: '111111' }).forEach(function (p) { ch.push(p); });
+
+    if (q.gorsel) {
+      try {
+        var u8 = pngs[q.id]; if (!u8) throw new Error('png yok');
+        var mw = 520, sc = Math.min(1, mw / (q.gw || 800)), iw = Math.round((q.gw || 800) * sc), ih = Math.round((q.gh || 600) * sc);
+        if (ih > 520) { var s2 = 520 / ih; iw = Math.round(iw * s2); ih = 520; }
+        ch.push(new D.Paragraph({ alignment: D.AlignmentType.CENTER, keepNext: true, spacing: { before: 120, after: 120 }, children: [new D.ImageRun({ data: u8, transformation: { width: iw, height: ih } })] }));
+      } catch (e) { /* görsel eklenemezse çıktı yine de oluşur */ }
+    }
+    if (q.parca) {
+      ch.push(wLabel(D, 'Metin / Şiir'));
+      var inner = wLines(D, q.parca, { size: 20, font: 'Cambria', italics: true, color: '333333', after: 20, line: 264, keepEmpty: true });
+      ch.push(new D.Table({ width: { size: W, type: D.WidthType.DXA }, columnWidths: [W], layout: D.TableLayoutType.FIXED, rows: [new D.TableRow({ children: [new D.TableCell({ width: { size: W, type: D.WidthType.DXA },
+        borders: { top: none, bottom: none, right: none, left: { style: D.BorderStyle.SINGLE, size: 24, color: 'C9B26B' } }, shading: { fill: 'FBF8EE', type: D.ShadingType.CLEAR }, margins: { top: 110, bottom: 110, left: 220, right: 160 }, children: inner })] })] }));
+    }
+
+    ch.push(wLabel(D, 'Beklenen cevap'));
+    var ans = wLines(D, q.ornek || '(Cevap anahtarı henüz hazırlanmadı.)', { size: 21 });
+    ans.forEach(function (p) { ch.push(p); });
+
+    if (q.noktalar && q.noktalar.length) {
+      ch.push(wLabel(D, 'Puanlama ölçütleri'));
+      var rows = [new D.TableRow({ tableHeader: true, children: [['ÖLÇÜT', 8400], ['PUAN', 1500]].map(function (c, j) {
+        return new D.TableCell({ width: { size: c[1], type: D.WidthType.DXA }, borders: thinB, shading: { fill: 'E8F0F7', type: D.ShadingType.CLEAR }, margins: { top: 50, bottom: 50, left: 110, right: 110 },
+          children: [new D.Paragraph({ alignment: j ? D.AlignmentType.CENTER : D.AlignmentType.LEFT, children: [new D.TextRun({ text: c[0], bold: true, size: 17, font: 'Calibri', color: '2C5F8A' })] })] });
+      }) })];
+      q.noktalar.forEach(function (n) {
+        rows.push(new D.TableRow({ cantSplit: true, children: [
+          new D.TableCell({ width: { size: 8400, type: D.WidthType.DXA }, borders: thinB, margins: { top: 50, bottom: 50, left: 110, right: 110 }, children: wLines(D, n.nokta, { size: 20, after: 0 }) }),
+          new D.TableCell({ width: { size: 1500, type: D.WidthType.DXA }, borders: thinB, margins: { top: 50, bottom: 50, left: 110, right: 110 }, verticalAlign: D.VerticalAlign.CENTER,
+            children: [new D.Paragraph({ alignment: D.AlignmentType.CENTER, children: [new D.TextRun({ text: String(n.puan), bold: true, size: 21, font: 'Calibri', color: '2C5F8A' })] })] })] }));
+      });
+      rows.push(new D.TableRow({ cantSplit: true, children: [
+        new D.TableCell({ width: { size: 8400, type: D.WidthType.DXA }, borders: thinB, shading: { fill: 'F6F5F1', type: D.ShadingType.CLEAR }, margins: { top: 50, bottom: 50, left: 110, right: 110 },
+          children: [new D.Paragraph({ alignment: D.AlignmentType.RIGHT, children: [new D.TextRun({ text: 'Toplam', bold: true, size: 19, font: 'Calibri' })] })] }),
+        new D.TableCell({ width: { size: 1500, type: D.WidthType.DXA }, borders: thinB, shading: { fill: 'F6F5F1', type: D.ShadingType.CLEAR }, margins: { top: 50, bottom: 50, left: 110, right: 110 },
+          children: [new D.Paragraph({ alignment: D.AlignmentType.CENTER, children: [new D.TextRun({ text: String(sumN(q)), bold: true, size: 21, font: 'Calibri', color: '2C5F8A' })] })] })] }));
+      ch.push(new D.Table({ width: { size: W, type: D.WidthType.DXA }, columnWidths: [8400, 1500], layout: D.TableLayoutType.FIXED, rows: rows }));
+    }
+    if (q.alt && q.alt.trim()) { ch.push(wLabel(D, 'Kabul edilebilir diğer cevaplar')); wLines(D, q.alt, { size: 20 }).forEach(function (p) { ch.push(p); }); }
+    if (q.hatalar && q.hatalar.trim()) { ch.push(wLabel(D, 'Sık yapılan hatalar / puan kırılacak durumlar')); wLines(D, q.hatalar, { size: 20 }).forEach(function (p) { ch.push(p); }); }
+  });
+
+  ch.push(new D.Paragraph({ spacing: { before: 480, after: 0 }, keepNext: true, alignment: D.AlignmentType.RIGHT, children: [new D.TextRun({ text: S.info.ogretmen || '', bold: true, size: 20, font: 'Calibri', color: '333333' })] }));
+  ch.push(new D.Paragraph({ alignment: D.AlignmentType.RIGHT, children: [new D.TextRun({ text: 'Türk Dili ve Edebiyatı Öğretmeni', size: 19, font: 'Calibri', color: '666666' })] }));
+  var doc = new D.Document({
+    creator: S.info.ogretmen || 'Öğretmen', title: sa + ' - Cevap Anahtarı',
+    styles: { default: { document: { run: { font: 'Calibri', size: 22 } } } },
+    sections: [{ properties: { page: { size: { width: 11906, height: 16838 }, margin: { top: 1000, right: 1000, bottom: 1000, left: 1000 } } }, footers: { default: wFooter(D, sa + ' - Cevap Anahtarı') }, children: ch }]
+  });
+  try { download(await D.Packer.toBlob(doc), safeName(sa) + '_cevap_anahtari.docx'); } catch (e) { alert('Word oluşturulamadı: ' + e.message); }
+}
+
+/* ---------- başlangıç ---------- */
+function fillInfo() {
+  $('sinif').value = S.info.sinif || ''; $('sinavAdi').value = S.info.adi || ''; $('tarih').value = S.info.tarih || '';
+  $('ogretmen').value = S.info.ogretmen || ''; $('baglam').value = S.info.baglam || '';
+}
+function init() {
+  load(); fillInfo();
+  try { var k = localStorage.getItem('gem_k') || ''; if (k) { aKey = k; $('apiInp').value = k; svKey(k); } } catch (e) {}
+  try {
+    var m = localStorage.getItem('gem_m'); if (m) $('mdl').value = m;
+    var mc = localStorage.getItem('gem_mc'); if (mc) $('mdlC').value = mc;
+  } catch (e) {}
+  renQ(); renKey(); renRub(); renSt(); markTabs();
+}
+init();
+</script>
+</body>
+</html>

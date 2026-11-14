@@ -1,0 +1,1485 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Oku-Yorum, Yazı-Yorum Rehberi</title>
+<style>
+:root{--navy:#0f2f5f;--tan:#c49a6c;--tan2:#ecdfd0;--cream:#faf6f0;--ink:#1d2433;--mut:#6b7280;--ok:#2e7d4f;--warn:#b45309;--bad:#b42318;--card:#fff;--line:#e5d9c9}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--cream);color:var(--ink);line-height:1.5}
+header{background:var(--navy);color:#fff;padding:14px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+header h1{font-size:18px;margin:0}
+header small{color:#d8c3a5}
+.layout{display:flex;min-height:calc(100vh - 62px)}
+nav{width:200px;background:#fff;border-right:1px solid var(--line);padding:10px;flex-shrink:0}
+nav a{display:block;padding:9px 12px;border-radius:8px;color:var(--ink);text-decoration:none;font-size:14px;margin-bottom:2px}
+nav a:hover{background:var(--tan2)}
+nav a.on{background:var(--navy);color:#fff}
+main{flex:1;padding:20px;max-width:1000px;min-width:0}
+h2{margin:0 0 4px;color:var(--navy)}
+h3{margin:18px 0 8px;color:var(--navy)}
+.sub{color:var(--mut);margin:0 0 16px;font-size:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
+.card.hl{border-color:var(--tan);box-shadow:0 0 0 2px #c49a6c33}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12px;background:var(--tan2);color:#6b4a22}
+.badge.red{background:#fde8e6;color:var(--bad)}.badge.green{background:#e3f4ea;color:var(--ok)}.badge.navy{background:#e3eaf6;color:var(--navy)}
+.task{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px dashed var(--line);cursor:pointer}
+.task:last-child{border:none}
+.task input{margin-top:4px;width:18px;height:18px;flex-shrink:0}
+.task small{display:block;color:var(--mut);font-size:12.5px;margin-top:2px}
+.task input:checked + span b{text-decoration:line-through;color:var(--mut)}
+.bar{height:8px;background:var(--tan2);border-radius:9px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ok)}
+button,.btn{background:var(--navy);color:#fff;border:0;border-radius:8px;padding:8px 14px;font-size:14px;cursor:pointer}
+button.alt{background:#fff;color:var(--navy);border:1px solid var(--navy)}
+button.sm{padding:4px 10px;font-size:12.5px}
+input[type=text],input[type=search],input[type=number],input[type=password],textarea,select{width:100%;padding:8px 10px;border:1px solid #d6c8b4;border-radius:8px;font:inherit;background:#fff}
+textarea{min-height:80px;resize:vertical}
+label.f{display:block;font-size:12.5px;color:var(--mut);margin-bottom:8px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+th{background:var(--tan2);color:#4a3418}
+.scroll{overflow-x:auto}
+details{background:#fff;border:1px solid var(--line);border-radius:10px;margin-bottom:8px}
+details.cur{border-color:var(--tan);box-shadow:0 0 0 2px #c49a6c33}
+details.past{opacity:.75}
+summary{padding:11px 14px;cursor:pointer;font-weight:600;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+details .in{padding:0 14px 12px}
+.tip{background:#fff8e6;border-left:4px solid var(--tan);padding:9px 12px;border-radius:6px;font-size:14px;margin:10px 0}
+.warn{background:#fdeee8;border-left:4px solid var(--bad);padding:9px 12px;border-radius:6px;font-size:14px;margin:10px 0}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.tabs2{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.tabs2 button{background:#fff;color:var(--navy);border:1px solid var(--line)}
+.tabs2 button.on{background:var(--navy);color:#fff}
+pre.letter{white-space:pre-wrap;font-family:Georgia,"Times New Roman",serif;font-size:14.5px;background:#fffdf9;border:1px solid var(--line);border-radius:8px;padding:14px}
+.paper{background:#fff;color:#000;font-family:"Times New Roman",serif;font-size:14px;padding:26px 30px;border:1px solid #999;line-height:1.7}
+.paper h3{text-align:center;color:#000;margin:0 0 14px}
+.paper p{margin:4px 0}
+#printRoot{display:none}
+#pv{display:none;position:fixed;inset:0;background:rgba(15,47,95,.6);z-index:50;overflow:auto;padding:12px}
+#pvIn{max-width:820px;margin:0 auto}
+#pvBar{position:sticky;top:0;background:var(--cream);padding:8px;border-radius:8px;margin-bottom:10px;display:flex;gap:8px;z-index:2}
+.paper.pg{margin-bottom:14px}
+.paper table{width:100%;border-collapse:collapse;font-size:13px}
+.paper th,.paper td{border:1px solid #555;padding:5px 7px;text-align:left;vertical-align:top}
+.paper th{background:#eee;color:#000}
+.paper ol,.paper ul{margin:4px 0 8px 22px}
+.paper h4{margin:12px 0 4px;font-size:14.5px}
+.linkcard{display:block;text-decoration:none;color:inherit}
+.linkcard:hover{border-color:var(--navy);background:#f6f9ff}
+.an{display:inline-block;background:#e3eaf6;color:#0f2f5f;border-radius:4px;font-size:11px;padding:1px 6px;font-family:system-ui,sans-serif;margin-right:6px;vertical-align:1px}
+.hit{background:#fff2a8}
+.mini{font-size:12.5px;color:var(--mut)}
+.ans{white-space:pre-wrap;background:#fffdf9;border:1px solid var(--line);border-radius:8px;padding:12px;margin-top:10px}
+@media(max-width:760px){
+ .layout{display:block}
+ nav{width:auto;display:flex;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line);padding:6px;position:sticky;top:0;z-index:5}
+ nav a{white-space:nowrap;margin:0 3px 0 0}
+ main{padding:14px}
+}
+@media print{
+ .pg{page-break-after:always}
+ .pg:last-child{page-break-after:auto}
+ body>*:not(#printRoot){display:none!important}
+ #printRoot{display:block!important}
+ .paper{border:0;padding:0}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>“Oku-Yorum, Yazı-Yorum” Rehberi</h1>
+  <small>Siyasetname/Ütopyalar teması · 2026-2027</small>
+</header>
+<div class="layout">
+  <nav id="nav"></nav>
+  <main id="main"></main>
+</div>
+<div id="printRoot"></div>
+<div id="pv"><div id="pvIn"><div id="pvBar"><button data-act="pvprint">Yazdır</button> <button class="alt" data-act="pvword">Word olarak indir</button> <button class="alt" data-act="pvclose">Kapat</button></div><div id="pvBody"></div></div></div>
+
+<script>
+"use strict";
+/* ================= YARDIMCILAR ================= */
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const AYLAR = ["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
+const toD = s => { const [y,m,d] = s.split("-").map(Number); return new Date(y, m-1, d); };
+const fmt = d => d.getDate() + " " + AYLAR[d.getMonth()] + (d.getFullYear() !== 2026 ? " " + d.getFullYear() : "");
+const today = () => { const n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate()); };
+const daysTo = d => Math.round((d - today()) / 864e5);
+const KEY = "oku_yorum_rehber_v1";
+
+/* ================= VERİ: SABİTLER ================= */
+const OKUL = "Okul Adı";
+const KOORD = "Ahmet Cevdet Paşa Sosyal Bilimler Lisesi (Aksaray / Merkez)";
+const KOORD_KISA = "Ahmet Cevdet Paşa Sosyal Bilimler Lisesi";
+const MUDUR = "Okul Müdürü";
+const OGRT = "Danışman Öğretmen";
+
+const ASAMALAR = ["Konu seçimi","Okuma","Bildiri planı","İlk taslak","Düzeltme","Teslim edildi","İl panelinde","Hikâye yazımı"];
+
+/* Kesin tarihli işler (kılavuz Madde 8) */
+const KRITIK = [
+  {d:"2026-11-06", t:"Katılımcı öğrenci ve danışman listesi koordinatör okula iletilir", ben:true, m:"Tablo 1 / 2. satır (02-06 Kasım)"},
+  {d:"2027-01-18", t:"Bildiriler ve il paneline katılacak öğrenci/danışman bilgileri koordinatör okula iletilir", ben:true, m:"Tablo 1 / 5. satır"},
+  {d:"2027-02-01", t:"Şubat: İl paneli (kesin gün koordinatör okuldan öğrenilecek)", ben:true, m:"Tablo 1 / 6. satır"},
+  {d:"2027-03-01", t:"Koordinatör okul, ilin seçtiği bildiriyi Genel Müdürlüğe gönderir (01-03 Mart)", ben:false, m:"Tablo 1 / 7. satır — kılavuzda yıl “2026” yazılmış, büyük ihtimalle 2027"},
+  {d:"2027-05-10", t:"Okulun 1. seçilen hikâyesi koordinatör okula iletilir (10-11 Mayıs)", ben:true, m:"Tablo 1 / 10. satır"},
+  {d:"2027-05-24", t:"Koordinatör okulda il birincisi hikâye belirlenir (24-25 Mayıs)", ben:false, m:"Tablo 1 / 11. satır"},
+  {d:"2027-05-27", t:"İl/ilçe MEM katılım belgelerini düzenler (27-31 Mayıs)", ben:false, m:"Tablo 1 / 13. satır"},
+  {d:"2027-06-01", t:"Haziran: Türkiye dereceleri ilan edilir, Ankara'da Türkiye Paneli", ben:false, m:"Tablo 1 / 14-15. satır"}
+];
+
+/* ================= VERİ: HAFTALAR ================= */
+const W = [
+ {s:"2026-10-26", e:"2026-11-01", ph:"Hazırlık", title:"Kadro ve izinler", tasks:[
+  {id:"w1a", t:"Okul müdürüyle görüş, projeye katılımı onaylat", why:"Madde 7: Proje paydaşı okul, işleri müdür yardımcısı ve danışman öğretmen eliyle yürütür."},
+  {id:"w1b", t:"Bir müdür yardımcısı ve bir danışman öğretmen (siz) görevlendirilsin", why:"Madde 7, 1. madde işareti. “Hazır Yazılar” sekmesinde görevlendirme talebi taslağı var."},
+  {id:"w1c", t:"3 öğrenciyi ve 2 eseri (Siyasetname + Hükümdar) kesinleştir; “Öğrencilerim” sekmesine bilgileri gir", why:"Kılavuz, Doğu-Batı karşılaştırması bekliyor. Siyasetname (Doğu) + Hükümdar (Batı) bunu karşılıyor."},
+  {id:"w1d", t:"Öğrencilere ve velilere projeyi anlat; EK-4, EK-5, EK-6 formlarını imzaya ver", why:"Ürünler Genel Müdürlüğe bu üç belgeyle gider (Madde 13). “Ekler” sekmesinde bilgileri dolu olarak yazdırabilirsiniz."},
+  {id:"w1e", t:"“Sorularım” sekmesine bak, koordinatör okula soracaklarını gözden geçir", why:"Kılavuzun net olmadığı yerler orada listelendi."}
+ ], tip:"Bu hafta yazışma yok, hazırlık haftası. Asıl iş 6 Kasım'a kadar listeyi göndermek."},
+
+ {s:"2026-11-02", e:"2026-11-08", ph:"Liste", title:"SON TARİH 6 Kasım: listeler koordinatör okula", fixed:true, tasks:[
+  {id:"w2a", t:"Öğrenci ve danışman listesini iletişim bilgileriyle koordinatör okula gönder", why:"Tablo 1, 2. satır. Koordinatör okulunuz: "+KOORD+" (EK-1, 69. sıra)."},
+  {id:"w2b", t:"Yazıda “Siyasetname/Ütopya” çalışmasını yapacağınızı ve iki eseri belirt", why:"Okul, hangi çalışmayı yapacağını bu tarihte bildirir. Anadolu liseleri için tema Siyasetname/Ütopyalar (Madde 5/3)."},
+  {id:"w2c", t:"Aynı yazıda açık soruları sor (bildiri sayfa sayısı, seçme bölümler, akademisyen eğitimi...)", why:"“Sorularım” sekmesinde hazır soru metni var."},
+  {id:"w2d", t:"Okuma sürecini başlat: Hükümdar'ı öğrencilere ver", why:"Eleştirel okuma süreci 2 Kasım'da başlıyor (Tablo 1, 4. satır)."},
+  {id:"w2e", t:"Velilerden imzalı EK-4, EK-5, EK-6 belgelerini topla ve dosyala", why:"Sonra telaş olmasın."}
+ ], tip:"Liste yazısı “Hazır Yazılar” sekmesinde hazır. Öğrenci bilgilerini girdiyseniz otomatik dolar."},
+
+ {s:"2026-11-09", e:"2026-11-15", ph:"Hazırlık", title:"Hazırlık I: eleştirel okuma nedir?", tasks:[
+  {id:"w3a", t:"Eleştirel okumayı bir örnek bölümle göster: yazar ne diyor, neden diyor, ben katılıyor muyum?", why:"Amaç (Madde 2): nesnel/öznel eleştiri, bireysel özgün bakış açısı, anahtar kavramları fark etme."},
+  {id:"w3b", t:"Nizâmülmülk ve Machiavelli'yi, yaşadıkları dönemleri birer sayfalık notla tanıt", why:"EK-2 Hazırlık satırı ve 1. oturum bunu bekliyor. “Eserler” sekmesinde başlangıç notları var."},
+  {id:"w3c", t:"Hükümdar'ın ilk bölümlerini okutmaya başla; her öğrenci bir okuma günlüğü tutsun", why:"Hükümdar kısa bir eser (26 bölüm), ısınma için uygun."},
+  {id:"w3d", t:"“Bildiri nedir?” konusunu anlat (Eserler sekmesi)", why:"Öğrenciler kompozisyon ile bildiriyi karıştırabilir."}
+ ], tip:"10. sınıf için eserlerin sadeleştirilmiş baskısını seçin; eski Türkçe çeviriler yorar."},
+
+ {s:"2026-11-16", e:"2026-11-22", ph:"Hazırlık", title:"Hazırlık II: söyleşi ve Siyasetname", tasks:[
+  {id:"w4a", t:"Akademisyen/eğitimci söyleşisi ayarla (çevrim içi olabilir)", why:"EK-2 Hazırlık satırları: siyasetname/ütopya eleştirel okuma eğitimi ve söyleşiler. Kimin organize edeceği kılavuzda yazmıyor; koordinatör okula sorun."},
+  {id:"w4b", t:"Siyasetname'den seçme bölümleri okutmaya başla", why:"Tamamı uzun; konulara göre seçin: adalet, vezir, halk, ordu, casuslar."},
+  {id:"w4c", t:"Koordinatör okuldan, listelerin Genel Müdürlüğe iletildiğini teyit et (isteğe bağlı)", why:"Bu hafta koordinatör okullar birleştirilmiş listeleri gönderir (16-20 Kasım). Sizin göreviniz değil."}
+ ], tip:"Söyleşi bulamazsanız okul içi bir tartışma oturumu yapın; resmi planı “Sorularım”da teyit edin."},
+
+ {s:"2026-11-23", e:"2026-11-29", ph:"Oturum", title:"1. Oturum: tür, yazar, eser, dönem", tasks:[
+  {id:"w5a", t:"1. oturumu yap: tür (üslup) özellikleri, yazar ve eser, yazıldığı dönemin siyasi-kültürel-ekonomik-sosyal-felsefi özellikleri", why:"EK-2, 1. Oturum."},
+  {id:"w5b", t:"Karşılaştırma tablosunun (Eserler sekmesi) ilk iki satırını birlikte doldurun", why:"Tablo, bildirinin iskeleti olacak."},
+  {id:"w5c", t:"Öğrencilerin okuma günlüklerine bak", why:""}
+ ]},
+
+ {s:"2026-11-30", e:"2026-12-06", ph:"Oturum", title:"2. Oturum: biçim, anlatım, metafor", tasks:[
+  {id:"w6a", t:"2. oturumu yap: seçilen eserleri biçim, anlatım, metafor bakımından karşılaştır", why:"EK-2, 2. Oturum."},
+  {id:"w6b", t:"Her öğrenci bildiri konusunu seçsin; üç konu birbirinden farklı olsun ve yazılı kayda geçsin", why:"Öğrencilerim sekmesinde bildiri konusu alanı var. Madde 7'deki örnek konular rehber olur."},
+  {id:"w6c", t:"Öğrencilerim sekmesinde aşamayı “Okuma”dan “Bildiri planı”na çek", why:""}
+ ]},
+
+ {s:"2026-12-07", e:"2026-12-13", ph:"Oturum", title:"3. Oturum: devletin amacı ve meşruiyeti", tasks:[
+  {id:"w7a", t:"3. oturumu yap: devletlerin var olma amaçları ve meşruiyet kaynakları", why:"EK-2, 3. Oturum."},
+  {id:"w7b", t:"Her öğrenciden 1 sayfalık bildiri planı iste: başlık, özet, anahtar kavramlar, ana fikir", why:"EK-7'deki ilk kriterler: başlık, özet, anahtar kavramlar."},
+  {id:"w7c", t:"Planlara dönüt ver", why:"“Yapay Zekâ Dönüt” sekmesi planı da değerlendirebilir (ama öğrencinin metnini o yazmaz)."}
+ ]},
+
+ {s:"2026-12-14", e:"2026-12-20", ph:"Oturum", title:"4. Oturum: yönetici tipleri ve adalet düzenleri", tasks:[
+  {id:"w8a", t:"4. oturumu yap: yönetici tipleri ve adalet düzenlerinin karşılıklı değerlendirilmesi", why:"EK-2, 4. Oturum."},
+  {id:"w8b", t:"Öğrencilerin alıntı topladığı bir tablo tutmasını iste (sayfa/bölüm numarasıyla)", why:"EK-7: alıntı, atıf ve özgünlük ayrı bir kriter."}
+ ]},
+
+ {s:"2026-12-21", e:"2026-12-27", ph:"Oturum", title:"5. Oturum: halk ve halkın rolü", tasks:[
+  {id:"w9a", t:"5. oturumu yap: halk ve halkın rolü, siyaset ve sosyoloji bağlamında", why:"EK-2, 5. Oturum."},
+  {id:"w9b", t:"Yarıyıl tatili tarihini kontrol et; teslim haftalarını buna göre öne çekmeniz gerekebilir", why:"Tatil tarihi bu rehberde tanımlı değil; kendi okul takviminize bakın."}
+ ]},
+
+ {s:"2026-12-28", e:"2027-01-03", ph:"Oturum", title:"6. Oturum: günümüz siyaset teorilerine bakış", tasks:[
+  {id:"w10a", t:"6. oturumu yap: adalet, düzen, yönetim, halk-otorite ilişkisi bakımından günümüz siyaset teorilerine bakış", why:"EK-2, 6. Oturum. Son oturum; sonuç bölümünde öğrencinin kendi yorumu buradan beslenir."},
+  {id:"w10b", t:"Öğrencilere ilk taslak için son tarih ver", why:""}
+ ]},
+
+ {s:"2027-01-04", e:"2027-01-10", ph:"Yazım", title:"Bildiri ilk taslakları", tasks:[
+  {id:"w11a", t:"Her öğrenci ilk taslağı yazsın (yüz yüze tartışarak ilerleyin)", why:"Özgünlük için taslağı öğrenciyle konuşun; kendi cümlelerini sözlü anlatabilmeli."},
+  {id:"w11b", t:"Taslaklara EK-7 kriterlerine göre dönüt ver (Ekler sekmesinde işaretleme tablosu)", why:"Kılavuzda puan değerleri yok; üst puanı siz belirlersiniz."},
+  {id:"w11c", t:"İsterseniz “Yapay Zekâ Dönüt”ten ek bir okuma al", why:"Metni yeniden yazmaz, sadece eksikleri söyler."}
+ ]},
+
+ {s:"2027-01-11", e:"2027-01-17", ph:"Yazım", title:"Düzeltme ve teslim hazırlığı", tasks:[
+  {id:"w12a", t:"Düzeltmeleri tamamlat: imla, noktalama, atıf, kaynakça", why:"EK-7 son iki kriter."},
+  {id:"w12b", t:"Biçimi kontrol et: Times New Roman, 12 punto, 1,5 satır aralığı, PDF", why:"Madde 9/3."},
+  {id:"w12c", t:"Hedef: 14 Ocak civarında 3 bildiri de sizde olsun", why:"Son güne bırakmayın."},
+  {id:"w12d", t:"Bildirilerin yasaklı unsur içermediğini kontrol et: siyasi/ahlaka aykırı unsur, telif, kurum-firma-marka-kişi reklamı", why:"Madde 5/5: sorumluluk danışman öğretmen ve okul yönetiminde."}
+ ]},
+
+ {s:"2027-01-18", e:"2027-01-24", ph:"Teslim", title:"18 OCAK: bildirileri gönder", fixed:true, tasks:[
+  {id:"w13a", t:"3 bildiriyi PDF olarak koordinatör okula ilet", why:"Madde 7: okuldan en fazla 3 bildiri. Sizin 3 öğrenciniz olduğundan üçü de gider."},
+  {id:"w13b", t:"İl paneline katılacak öğrenci ve danışman bilgilerini de ekle", why:"Tablo 1, 5. satır."},
+  {id:"w13c", t:"Öğrencilerim sekmesinde aşamayı “Teslim edildi” yap", why:""}
+ ]},
+
+ {s:"2027-01-25", e:"2027-02-28", ph:"Panel", title:"Şubat: il paneli", tasks:[
+  {id:"w14a", t:"Koordinatör okuldan il panelinin tarihini, yerini ve sunum biçimini öğren", why:"Kılavuzda panelin işleyişi ayrıntılı değil (“Sorularım”a eklendi)."},
+  {id:"w14b", t:"Öğrencileri sunuma hazırla", why:"Bildiri sunum için yazılmış bir metin."},
+  {id:"w14c", t:"Panele gidiş için okul izni ve veli bilgilendirmesi yap", why:"Madde 4: Sosyal Etkinlik İzinleri Yönergesi dayanak."},
+  {id:"w14d", t:"Sonuçları öğren: ilden Genel Müdürlüğe 1 öğrenci seçilir", why:"Tablo 1, 7. satır."}
+ ]},
+
+ {s:"2027-03-01", e:"2027-03-14", ph:"Hikâye", title:"1-3 Mart: Genel Müdürlüğe gönderim, hikâye hazırlığı", tasks:[
+  {id:"w15a", t:"Koordinatör okul, ilin seçtiği bildiriyi Genel Müdürlüğe gönderir (sizin işiniz yok, takip edin)", why:"Tablo 1, 7. satır. Kılavuzda “2026” yazılmış; muhtemelen 2027."},
+  {id:"w15b", t:"Yaratıcı yazarlık atölyesini planlamaya başla: yazar/akademisyen buluşması, çevrim içi eğitim, kütüphane söyleşisi", why:"Madde 7: 2. dönemde okul bu etkinlikleri planlayıp gerçekleştirir."}
+ ]},
+
+ {s:"2027-03-15", e:"2027-04-11", ph:"Hikâye", title:"Yaratıcı yazarlık atölyesi", tasks:[
+  {id:"w16a", t:"Atölye etkinliklerini yap (Mart-Nisan)", why:"Tablo 1, 8. satır."},
+  {id:"w16b", t:"Hikâyelerin teması, okuduğunuz Siyasetname/Ütopya bağlamında olmalı", why:"Madde 7 son madde: eleştirel okuma yapılan eserlerle bağlantı kurulmalı."},
+  {id:"w16c", t:"Hikâye kriterlerini (EK-8) öğrencilerle paylaş", why:"Kurgu, özgünlük, sıralama, etkileyicilik, imla, söz varlığı, hikâye unsurları."}
+ ]},
+
+ {s:"2027-04-12", e:"2027-05-09", ph:"Hikâye", title:"Hikâye yazımı", tasks:[
+  {id:"w17a", t:"Öğrenciler hikâyelerini yazsın (Nisan-Mayıs)", why:"Tablo 1, 9. satır."},
+  {id:"w17b", t:"Biçim: Times New Roman, 12 punto, 1,5 satır aralığı, PDF; sayfada isim YOK, kişisel bilgiler ayrı sayfada", why:"Madde 9/3 ve 9/4."},
+  {id:"w17c", t:"Okul içinde en iyi hikâyeyi seçecek bir değerlendirme yap (EK-8 tablosuyla)", why:"Okuldan 1 hikâye gider. Kimin yazdığı ismi görmeden değerlendirilsin."}
+ ]},
+
+ {s:"2027-05-10", e:"2027-05-16", ph:"Teslim", title:"10-11 MAYIS: okulun hikâyesi koordinatöre", fixed:true, tasks:[
+  {id:"w18a", t:"Okulun 1. seçilen hikâyesini koordinatör okula ilet", why:"Tablo 1, 10. satır."},
+  {id:"w18b", t:"Hikâyenin yanında EK-4, EK-5, EK-6 imzalı belgelerini ve kişisel bilgi sayfasını ilet", why:"Madde 13."}
+ ]},
+
+ {s:"2027-05-17", e:"2027-05-23", ph:"Bekleme", title:"Koordinatör okulda değerlendirme beklenir", tasks:[
+  {id:"w19a", t:"Sizden iş yok; koordinatör okulla iletişimde kalın", why:"İl değerlendirmesi 24-25 Mayıs."}
+ ]},
+
+ {s:"2027-05-24", e:"2027-05-30", ph:"Sonuç", title:"24-26 Mayıs: il birincisi ve katılım belgeleri", tasks:[
+  {id:"w20a", t:"İl birincisi hikâye belirlenir (24-25 Mayıs); koordinatör okul 26 Mayıs'ta Genel Müdürlüğe gönderir", why:"Tablo 1, 11-12. satır."},
+  {id:"w20b", t:"İl/ilçe MEM, katılım belgelerini düzenler (27-31 Mayıs); belgelerin ilçe MEM'den geldiğini takip edin", why:"Tablo 1, 13. satır."}
+ ]},
+
+ {s:"2027-05-31", e:"2027-06-30", ph:"Sonuç", title:"Haziran: Türkiye dereceleri ve Ankara paneli", tasks:[
+  {id:"w21a", t:"Genel Müdürlük Türkiye derecelerini ilan eder; Ankara'da Türkiye Paneli yapılır", why:"Tablo 1, 14-15. satır. Seçici kurul kararı kesin, itiraz edilemez (Madde 12/c)."},
+  {id:"w21b", t:"Katılım belgelerini öğrencilere ver; proje dosyasını arşivle", why:""}
+ ]}
+];
+
+/* ================= VERİ: KILAVUZ ================= */
+const GUIDE = [
+ {m:"Sunuş", k:"Amaç ve ruh", b:"Projenin dayandığı anlayış: Türkiye Yüzyılı Maarif Modeli. Hedef; okuyan, düşünen, sorgulayan, yorumlayan, yazan gençler. Safahat ve Siyasetname/Ütopyalar “kuşaklar arası köprü” olarak öğrencilerle buluşturulacak."},
+ {m:"Madde 1", k:"Konu", b:"Proje, Ortaöğretim Genel Müdürlüğüne bağlı fen, sosyal bilimler ve Anadolu liselerinde eleştirel okuma becerisi geliştirmek, okuma alışkanlığı kazandırmak ve yazma stratejilerini doğru kullanarak genç yazarların yetişmesine katkı sunmak içindir."},
+ {m:"Madde 2", k:"Amaç (iki aşama)", b:"1. aşama “Oku-Yorum”: eleştirel okuma. Öğrenci nesnel ve öznel eleştiri yapabilmeli, eski ve yeni bilgiyi sentezleyebilmeli, parçalar arasındaki ilişkiyi belirleyebilmeli, özgün bakış açısı geliştirebilmeli, anahtar kavramları sezerek kullanabilmeli.\n2. aşama “Yazı-Yorum”: yaratıcı yazarlığı iç disiplin hâline getirmek; öz disiplin ve öz güven kazandırmak; tanınmış şair/yazar ve akademisyenlerin atölye dersleriyle yeni kalemler yetiştirmek."},
+ {m:"Madde 3", k:"Kapsam", b:"MEB Ortaöğretim Genel Müdürlüğüne bağlı fen, sosyal bilimler ve Anadolu liselerinin hazırlık, 9, 10, 11 ve 12. sınıflarındaki tüm öğrenciler katılabilir."},
+ {m:"Madde 4", k:"Dayanak", b:"1 sayılı Cumhurbaşkanlığı Kararnamesi, 5846 sayılı Fikir ve Sanat Eserleri Kanunu, 6769 sayılı Sınai Mülkiyet Kanunu, MEB Ortaöğretim Kurumları Yönetmeliği, Eğitim Kurumları Sosyal Etkinlikler Yönetmeliği, 1739 sayılı Millî Eğitim Temel Kanunu, Sosyal Etkinlik İzinleri Yönergesi."},
+ {m:"Madde 5", k:"Esaslar ve çıktılar", b:"1) Faaliyetler EK-1 listesindeki il koordinatörü okulların koordinesinde yürür.\n2) 2026-2027'de iki tema: “Siyasetnameler/Ütopyalar” (Siyasetname-Nizâmülmülk, El-Medinetül Fazıla-Farabi, Devlet-Platon, Hükümdar/Prens-Machiavelli, Ütopya-Thomas More) ve “Safahat” (Mehmet Âkif Ersoy).\n3) Fen ve Anadolu liseleri: Siyasetname/Ütopyalar. Sosyal bilimler liseleri: Safahat.\n4) İki aşama: seçilen esere yönelik “eleştirel okuma” ve “hikâye türünde ürün oluşturma”.\n5) Ürünler siyasi, genel ahlaka ve toplum yapısına aykırı unsurlardan uzak olmalı; telif içermemeli; kurum, kuruluş, firma, marka ve kişi reklamı olmamalı. Sorumluluk danışman öğretmen ve okul yönetiminde.\n6) Fikrî/sınai mülkiyet ihlâlinden doğan her türlü sorumluluk ihlâl edene aittir; MEB Merkez Teşkilatının sorumluluğu yoktur.\n7) Ürünlerin gelişim düzeyine ve pedagojik esaslara uygunluğu danışman öğretmen ve okul yönetiminin sorumluluğundadır.\n8) Özel eğitim ihtiyacı olan bireylerin katılımını kolaylaştırıcı tedbirler alınır."},
+ {m:"Madde 6", k:"Sorumlu birimler", b:"Düzenleyen ve kaynak birim: Ortaöğretim Genel Müdürlüğü. Destek: il millî eğitim müdürlükleri ve MEB öğretmenleri. Uygulama: il MEM'ler ile fen, sosyal bilimler ve Anadolu liseleri müdürlükleri."},
+ {m:"Madde 7", k:"Okulların görevleri (sizin görevleriniz)", b:"• Bir müdür yardımcısı + bir danışman öğretmen görevlendirmek\n• Danışman öğretmenle öğrencileri bilgilendirmek, katılımcıları belirleyip liste yapmak\n• Öğrenci ve danışman listesini iletişim bilgisiyle koordinatör okula iletmek\n• Genel Müdürlükçe planlanan 1. dönem etkinliklerini (Siyasetname/Ütopya Oku-Yorum, EK-2) “Dilimizin Zenginlikleri” ve “Okulun Kalbi Kütüphaneler” projeleriyle ilişkilendirerek yapabilir\n• Beş eser arasından tercih yaparken Doğu-Batı ekseninde ve türler arası karşılaştırmaya imkân verecek şekilde seçim planlamak\n• Öğrencilerin bildiri metinlerini oluşturma sürecini yürütmek (örnek konular: ideal toplum yapısı; Siyasetname ile Hükümdar'ın biçim, metafor, devlet yönetimi ve hükümdara öğütler yönünden karşılaştırması; siyasetname ve ütopya türünün karşılaştırması; Doğu-Batı devlet/siyaset geleneği; adalet, liderlik, din, halk temaları)\n• Öğrencilerin bildirileri arasından seçilen 3 bildiri metnini koordinatör okula iletmek\n• 2. dönemde yaratıcı yazarlık faaliyetlerini planlayıp gerçekleştirmek (çevrim içi eğitim, yazar/akademisyen buluşması, kütüphane söyleşisi)\n• Yıl sonunda hikâyeler arasından ilk üçe değer görülen eserleri il koordinatörü okula iletmek (hikâye teması “Safahat-Siyasetname/Ütopya” bağlamında olmalı)"},
+ {m:"Madde 7 (devam)", k:"Koordinatör okulların görevleri", b:"Kendi okulunda faaliyetleri yürütür; okullardan gelen listeleri birleştirip istatistiksel bilgilerle (okul adı, sınıf, kız-erkek sayıları, il toplamı) ogm.kultursanat@meb.gov.tr adresine iletir; il paneli için öğretmenlerden seçici komisyon kurar; Siyasetname/Ütopya ve Safahat için ayrı il paneli yapar; il panelindeki en başarılı öğrenci ve bildiriyi Genel Müdürlüğe iletir; yıl sonunda ilin dereceye değer hikâyesini iletir."},
+ {m:"Madde 7 (devam)", k:"İl/ilçe MEM görevi", b:"Projede çalışan katılımcılara “katılım belgesi” düzenlenir."},
+ {m:"Madde 8", k:"Çalışma takvimi", b:"Ayrıntılı tarihler için “Yol Haritası” sekmesi ve ana sayfadaki “Kritik tarihler” bölümü. Not: Tablo 1, 7. satırda tarih “01-03 Mart 2026” yazılmış; sıralamaya göre 2027 olmalı."},
+ {m:"Madde 9", k:"Katılım şartları (yarışma şartnamesi)", b:"1) Genel Müdürlüğe bağlı fen, sosyal bilimler ve Anadolu lisesi öğrencilerinin tümü katılır.\n2) Ürünlerin hukuki ve bilimsel sorumluluğu yazarına aittir. Gönderilen ürünler iade edilmez.\n3) Ürünler Times New Roman, 12 punto, 1,5 satır aralığında elektronik ortamda hazırlanır, PDF olarak iletilir.\n4) 2. dönem yaratıcı yazarlık eserlerinde sayfa üzerinde isim bilgisi bulunmaz; kişisel bilgiler ek bir sayfada iletilir."},
+ {m:"Madde 10", k:"Duyuru", b:"Etkinlikler il MEM'ler aracılığıyla resmî yazışmayla duyurulur."},
+ {m:"Madde 11", k:"Değerlendirme", b:"İl birincilerine ait ürünler Genel Müdürlükçe oluşturulacak seçici kurulca değerlendirilir."},
+ {m:"Madde 12", k:"OGM Değerlendirme Kurulu", b:"Kurulda Türk dili ve edebiyatı öğretmenleri, dil uzmanları ve yaratıcı yazarlık atölyelerinde eğitim veren yazarlar görev alır. Gizlilik esastır. Kurulun kararı kesindir, itiraz edilemez."},
+ {m:"Madde 13", k:"Ekler (belgeler)", b:"Etkinliklerin sonunda Genel Müdürlüğe ürünler EK-4 (veli izin), EK-5 (telif taahhütnamesi), EK-6 (aydınlatma metni ve açık rıza) belgeleriyle iletilir."},
+ {m:"Madde 14", k:"Örnek değerlendirme kriterleri", b:"Bildiriler için EK-7, hikâyeler için EK-8 örnek tablo olarak eklenmiş. Tablolarda puan değerleri yok."},
+ {m:"İletişim", k:"Merkez Yürütme Kurulu", b:"Millî Eğitim Bakanlığı Ortaöğretim Genel Müdürlüğü, Emniyet Mah. Gazeteci Yazar Muammer Yaşar Bostancı Cd. Ek Hizmet Binası H-Blok Kat:1 Yenimahalle/ANKARA\nTelefon: 0 312 413 57 00\ne-Posta: ogm.kultursanat@meb.gov.tr\nİnternet: http://ogm.meb.gov.tr"}
+];
+
+const SSS = [
+ ["Hangi tema bize ait?", "Siyasetname/Ütopyalar. Anadolu liseleri için bu tema belirlenmiş; Safahat sosyal bilimler liselerine ayrılmış (Madde 5/3)."],
+ ["Tek eser mi okuyacağız?", "Hayır. Kılavuz karşılaştırma bekliyor; sizin seçiminiz Siyasetname (Nizâmülmülk) + Hükümdar (Machiavelli). Bu ikisi Doğu-Batı karşılaştırmasına uygun. İkisi de siyasetname türünden olduğu için ütopya türüyle tür karşılaştırması yapılmayacak; bu bir eksiklik değil (Madde 7)."],
+ ["Eserlerin tamamını okumak şart mı?", "Kılavuzda “tam okunacak” diye bir zorunluluk yok. 10. sınıf için Hükümdar'ı tam, Siyasetname'yi seçme bölümlerle okumak makul. Emin olmak için “Sorularım”dan koordinatör okula sorun."],
+ ["Bildiri nedir?", "Okunan eserleri karşılaştırıp öğrencinin kendi yorumunu ortaya koyduğu, 3. tekil kişi ve resmî üslupla yazılmış kısa bilimsel yazı. Kitabın özeti değildir. Ayrıntılar “Eserler” sekmesinde."],
+ ["Her öğrenci bildiri yazacak mı?", "Evet, her öğrenci kendi konusunda bireysel bildiri yazar. Okuma ve tartışma ortak yapılır. Okuldan en fazla 3 bildiri gider; sizin 3 öğrenciniz olduğu için üçü de gider."],
+ ["1. dönemde ne bekleniyor?", "Sadece Oku-Yorum: listeleri 6 Kasım'a kadar göndermek, 6 oturumu yapmak, bildirileri yazdırmak ve 18 Ocak'ta koordinatör okula iletmek. Hikâye (Yazı-Yorum) 2. dönemde."],
+ ["Bildiriden sonra ne olur?", "Şubat'ta il paneli. İlde her tema için en başarılı öğrenci Genel Müdürlüğe gönderilir. Haziran'da Türkiye dereceleri ve Ankara'da Türkiye Paneli."],
+ ["Hikâyeyi kimler yazar?", "Madde 9'a göre faaliyetlere okuldaki tüm öğrenciler katılabilir; hikâye aşamasını sadece bu 3 öğrencinin mi yoksa daha geniş bir grubun mu yapacağı kılavuzda net değil. “Sorularım”da var."],
+ ["Yapay zekâ kullanımı?", "Kılavuzda yapay zekâ ile ilgili bir hüküm yok. Ancak EK-7'de “özgünlük” ayrı bir kriter. Bu uygulamadaki YZ yalnızca dönüt verir, metin yazmaz."]
+];
+
+/* ================= VERİ: EK-1 ================= */
+const EK1_RAW = `ADANA|CEYHAN|Ceyhan Ticaret Borsası Sosyal Bilimler Lisesi
+ADIYAMAN|MERKEZ|Altınşehir Anadolu Lisesi
+AFYONKARAHİSAR|MERKEZ|TOKİ Sosyal Bilimler Lisesi
+AĞRI|MERKEZ|Türk Telekom Sosyal Bilimler Lisesi
+AMASYA|MERKEZ|Amasya Sosyal Bilimler Lisesi
+ANKARA|ÇANKAYA|Ankara Türk Telekom Sosyal Bilimler Lisesi
+ANTALYA|KEPEZ|Neriman-Erol Yılmaz Sosyal Bilimler Lisesi
+ARTVİN|MERKEZ|Artvin Sosyal Bilimler Lisesi
+AYDIN|EFELER|Aydın Sosyal Bilimler Lisesi
+BALIKESİR|KARESİ|İstanbulluoğlu Sosyal Bilimler Lisesi
+BİLECİK|MERKEZ|Ertuğrulgazi Lisesi
+BİNGÖL|MERKEZ|Yunus Emre Anadolu Lisesi
+BİTLİS|TATVAN|Sadullah Gencer Sosyal Bilimler Lisesi
+BOLU|MERKEZ|Bolu Sosyal Bilimler Lisesi
+BURDUR|MERKEZ|Mehmet Uzal Sosyal Bilimler Lisesi
+BURSA|OSMANGAZİ|BTSO Ali Osman Sönmez Sosyal Bilimler Lisesi
+ÇANAKKALE|MERKEZ|Çanakkale TOBB Sosyal Bilimler Lisesi
+ÇANKIRI|MERKEZ|Nevzat Ayaz Sosyal Bilimler Lisesi
+ÇORUM|MERKEZ|Özejder Sosyal Bilimler Lisesi
+DENİZLİ|MERKEZEFENDİ|İbrahim Cinkaya Sosyal Bilimler Lisesi
+DİYARBAKIR|YENİŞEHİR|Diyarbakır Sosyal Bilimler Lisesi
+EDİRNE|MERKEZ|Edirne Sosyal Bilimler Lisesi
+ELAZIĞ|MERKEZ|Elazığ Ahmet Yesevi Sosyal Bilimler Lisesi
+ERZİNCAN|MERKEZ|Erzincan Sosyal Bilimler Lisesi
+ERZURUM|AZİZİYE|Ilıca Borsa İstanbul Yavuz Selim Sosyal Bilimler Lisesi
+ESKİŞEHİR|ODUNPAZARI|Eskişehir Eti Sosyal Bilimler Lisesi
+GAZİANTEP|ŞEHİTKAMİL|Gaziantep Sabahattin Zaim Sosyal Bilimler Lisesi
+GİRESUN|MERKEZ|Giresun Sosyal Bilimler Lisesi
+GÜMÜŞHANE|MERKEZ|Mareşal Çakmak Sosyal Bilimler Lisesi
+HAKKÂRİ|MERKEZ|Türk Telekom Sosyal Bilimler Lisesi
+HATAY|ANTAKYA|Karlısu Sosyal Bilimler Lisesi
+ISPARTA|MERKEZ|Isparta Gazi Sosyal Bilimler Lisesi
+MERSİN|YENİŞEHİR|Mehmet Akif Ersoy Sosyal Bilimler Lisesi
+İSTANBUL (ANADOLU)|PENDİK|Gönüllü Hizmet Vakfı İnal Aydınoğlu Sosyal Bilimler Lisesi
+İSTANBUL (AVRUPA)|BAHÇELİEVLER|Prof. Dr. Mümtaz Turhan Sosyal Bilimler Lisesi
+İZMİR|BUCA|Buca Mehmet Akif Ersoy Sosyal Bilimler Lisesi
+KARS|MERKEZ|Hasan Harakani Anadolu Lisesi
+KASTAMONU|MERKEZ|Prof. Dr. Saime İnal Savi Sosyal Bilimler Lisesi
+KAYSERİ|MELİKGAZİ|Kayseri Kilim Sosyal Bilimler Lisesi
+KIRKLARELİ|MERKEZ|Kırklareli TOBB Sosyal Bilimler Lisesi
+KIRŞEHİR|MERKEZ|Kırşehir Sosyal Bilimler Lisesi
+KOCAELİ|GEBZE|Kanuni Sosyal Bilimler Lisesi
+KONYA|KARATAY|Konya Türk Telekom Sosyal Bilimler Lisesi
+KÜTAHYA|MERKEZ|Aysel-Selahattin Erkasap Sosyal Bilimler Lisesi
+MALATYA|BATTALGAZİ|Niyazi Mısri Sosyal Bilimler Lisesi
+MANİSA|YUNUSEMRE|Manisa Sosyal Bilimler Lisesi
+KAHRAMANMARAŞ|ONİKİŞUBAT|Kahramanmaraş Sosyal Bilimler Lisesi
+MARDİN|ARTUKLU|Mardin Borsa İstanbul Sosyal Bilimler Lisesi
+MUĞLA|MENTEŞE|Menteşe Sosyal Bilimler Lisesi
+MUŞ|MERKEZ|TOBB Sosyal Bilimler Lisesi
+NEVŞEHİR|MERKEZ|Nevşehir Cemil Meriç Sosyal Bilimler Lisesi
+NİĞDE|MERKEZ|Niğde Yunus Emre Anadolu Lisesi
+ORDU|PERŞEMBE|Ordu Sosyal Bilimler Lisesi
+RİZE|MERKEZ|Rize Sosyal Bilimler Lisesi
+SAKARYA|ADAPAZARI|Sakarya Cemil Meriç Sosyal Bilimler Lisesi
+SAMSUN|İLKADIM|Samsun İbrahim Tanrıverdi Sosyal Bilimler Lisesi
+SİİRT|MERKEZ|Siirt Sosyal Bilimler Lisesi
+SİNOP|MERKEZ|Sinop Sarı Saltuk Anadolu Lisesi
+SİVAS|MERKEZ|Prof. Dr. Necati Erşen Sosyal Bilimler Lisesi
+TEKİRDAĞ|SÜLEYMANPAŞA|Tekirdağ Belediyesi Mehmet Serez Sosyal Bilimler Lisesi
+TOKAT|MERKEZ|Tokat Borsa İstanbul Sosyal Bilimler Lisesi
+TRABZON|ORTAHİSAR|Trabzon Sosyal Bilimler Lisesi
+TUNCELİ|MERKEZ|Tunceli Anadolu Lisesi
+ŞANLIURFA|HALİLİYE|Şanlıurfa Sosyal Bilimler Lisesi
+UŞAK|EŞME|Şehit Cemalettin Avcı Sosyal Bilimler Lisesi
+VAN|ERCİŞ|Erciş Sosyal Bilimler Lisesi
+YOZGAT|MERKEZ|Şehit Fuat Bahadır Buharalıoğlu Anadolu Lisesi
+ZONGULDAK|MERKEZ|Saime Toptan Sosyal Bilimler Lisesi
+AKSARAY|MERKEZ|Ahmet Cevdet Paşa Sosyal Bilimler Lisesi
+BAYBURT|MERKEZ|Bayburt Milli İrade Anadolu Lisesi
+KARAMAN|MERKEZ|Karaman Necip Fazıl Kısakürek Sosyal Bilimler Lisesi
+KIRIKKALE|MERKEZ|Kırıkkale Atatürk Anadolu Lisesi
+BATMAN|MERKEZ|Batman Sosyal Bilimler Lisesi
+ŞIRNAK|MERKEZ|Şırnak Fatih Sosyal Bilimler Lisesi
+BARTIN|MERKEZ|Bartın Lisesi
+ARDAHAN|GÖLE|Nilüfer Göle Sosyal Bilimler Lisesi
+IĞDIR|MERKEZ|Mehmet Murat İşler Sosyal Bilimler Lisesi
+YALOVA|MERKEZ|Yalova Necmettin Erbakan Sosyal Bilimler Lisesi
+KARABÜK|MERKEZ|Demir Çelik Anadolu Lisesi
+KİLİS|MERKEZ|Mübeccel-Suphi Yavaşça Sosyal Bilimler Lisesi
+OSMANİYE|MERKEZ|Tosçelik Sosyal Bilimler Lisesi
+DÜZCE|AKÇAKOCA|Akçakoca Sosyal Bilimler Lisesi`;
+const EK1 = EK1_RAW.split("\n").map((l,i)=>{const p=l.split("|");return {n:i+1,il:p[0],ilce:p[1],kurum:p[2]};});
+
+const EK2 = [
+ ["Hazırlık","Siyasetname/ütopya eleştirel okuma eğitiminin akademisyen/eğitimci iş birliği ile çevrim içi olarak gerçekleştirilmesi"],
+ ["Hazırlık","Siyasetname/ütopya çerçevesinde kavramsal, sosyolojik, karşılaştırmalı, yapısalcı ve eleştirel okumaya yönelik yüz yüze, çevrim içi akademisyen söyleşileri vb. etkinliklerin gerçekleştirilmesi"],
+ ["1. Oturum","Tür (Üslup) özellikleri ile yazar ve eser bakımından, eserlerin yazıldığı dönemin siyasi, kültürel, ekonomik, sosyal ve felsefi özellikleri bakımından değerlendirilmesi"],
+ ["2. Oturum","Seçilen eserlerin biçim, anlatım, metafor vs. bakımından karşılaştırmalı olarak değerlendirilmesi"],
+ ["3. Oturum","Seçilen eserlerdeki devletlerin var olma amaçları ve meşruiyet kaynaklarının karşılaştırmalı olarak değerlendirilmesi"],
+ ["4. Oturum","Seçilen eserlerde geçen yönetici tiplerinin ve adalet düzenlerinin karşılıklı olarak değerlendirilmesi"],
+ ["5. Oturum","Seçilen eserlerdeki halk ve halkın rolünün siyaset ve sosyoloji bağlamında karşılaştırmalı olarak değerlendirilmesi"],
+ ["6. Oturum","Seçilen eserlerden hareketle adalet, düzen, yönetim, halk-otorite ilişkisi bakımından günümüz siyaset teorilerine bakış"]
+];
+
+const C7 = ["Başlık ve genel özet bölümünün yer alması","Anahtar kavramlara yer verilmesi","3. tekil kişi ağzıyla yazılması / resmî üslup","Alıntılara, atıflara yer verilmesi; özgünlük","Bildiri metninin konu ile uyumlu olması","Sonuç ve değerlendirme bölümlerinin yer alması ve bildirinin ana fikrini oluşturması","Cümlelerin açık ve net olması, Türkçenin doğru kullanımı","Yazım ve noktalama kurallarına uygunluk"];
+const C8 = ["Metnin genel özelliği (başlık, paragraf, yazı tipi vb.)","Kurgunun etkililiği ve özgünlüğü","Tutarlı bir sıralama yapılması","Etkileyicilik, merak uyandırma, sürükleyici bir anlatım benimsemesi","İmla ve noktalamanın doğru kullanımı","Dilimizin zenginliklerinden izler ve kelime dağarcığı","Hikâye unsurlarını içerme"];
+
+/* ================= VERİ: ESERLER KARŞILAŞTIRMA ================= */
+const CMP = [
+ {id:"c1", k:"Yazar ve dönem", q:"Yazar kim, hangi dönemde ve hangi konumda yazdı?", h1:"Selçuklu veziri Nizâmülmülk, 11. yüzyıl; Sultan Melikşah dönemi.", h2:"Floransalı devlet görevlisi ve düşünür; 1513 dolayında yazıldı, Rönesans İtalyası."},
+ {id:"c2", k:"Yazılış amacı", q:"Kime, ne için yazıldı?", h1:"Hükümdara devlet yönetimi konusunda öğüt.", h2:"Bir hükümdara iktidarı kazanma ve koruma üzerine tavsiye."},
+ {id:"c3", k:"İdeal hükümdar", q:"Yazar, hükümdarın nasıl olması gerektiğini söylüyor?", h1:"", h2:""},
+ {id:"c4", k:"Adalet", q:"Adalet devletin neresinde duruyor?", h1:"Adalet devletin temeli olarak sıkça vurgulanır (kendi okumanla doğrula).", h2:"Bölümler ağırlıkla iktidarı kazanma/koruma üzerine; adaletin yeri nasıl?"},
+ {id:"c5", k:"Meşruiyet", q:"Hükümdarın gücü neye dayanıyor?", h1:"Hükümdarın Tanrı tarafından seçilmesi fikri öne çıkar (doğrula).", h2:"Başarı, güç ve iktidarı koruma becerisi (virtù, fortuna kavramlarına bak)."},
+ {id:"c6", k:"Din", q:"Din ile devlet ilişkisi nasıl kurulmuş?", h1:"Din ve devlet ilişkisi, mezhep ve sapkınlık konuları işlenir (doğrula).", h2:"Dinin yönetimdeki yeri (özellikle Bölüm 11 ve 18'e bak)."},
+ {id:"c7", k:"Halkın rolü", q:"Halk nasıl görülüyor? Hükümdar halka karşı ne yapmalı?", h1:"Halkın hâli ve şikâyetlerinin dinlenmesi (doğrula).", h2:"Halkın desteği (Bölüm 9), sevilmek mi korkulmak mı (Bölüm 17)."},
+ {id:"c8", k:"Vezir ve danışmanlar", q:"Hükümdarın çevresindekiler hakkında ne söylüyor?", h1:"Vezirin görevi ve nitelikleri (yazar bizzat vezir).", h2:"Bölüm 22-23: danışmanlar ve dalkavuklardan kaçınma."},
+ {id:"c9", k:"Ordu ve güç", q:"Ordu ve güç kullanımı nasıl ele alınıyor?", h1:"Ordu ve askerin düzeni ayrı bölümlerde (doğrula).", h2:"Bölüm 12-14: paralı/yardımcı asker eleştirisi, kendi ordusunun önemi."},
+ {id:"c10", k:"Biçim ve anlatım", q:"Metin nasıl kurulmuş? Örnek mi var, doğrudan öğüt mü?", h1:"Konuları tarihî hikâye ve örneklerle anlatma geleneği (doğrula).", h2:"Kısa, doğrudan, tez-kanıt biçiminde."},
+ {id:"c11", k:"Metaforlar", q:"Hangi benzetmeler ve kavramlar öne çıkıyor?", h1:"", h2:"Aslan ve tilki benzetmesi (Bölüm 18); talih/fortuna (Bölüm 25)."},
+ {id:"c12", k:"Bugüne bakış", q:"Bugünkü siyasete ve toplumsal yaşama ne söylüyor?", h1:"", h2:""}
+];
+
+/* ================= VERİ: SORULAR ================= */
+const QS = [
+ {id:"q1", q:"Katılımcı listesi hangi yolla gönderilecek (resmî yazı mı, e-posta mı) ve hangi biçimde?", t:"Koordinatör okula iletilecek listelerin hangi yolla (resmî yazı / e-posta) ve hangi biçimde gönderilmesi gerektiğini öğrenmek istiyoruz."},
+ {id:"q2", q:"Bildirinin sayfa sınırı veya kelime sayısı var mı?", t:"Bildirilerin asgari/azami sayfa veya kelime sayısı için bir sınırlama var mıdır?"},
+ {id:"q3", q:"Öğrenciler seçilen eserleri baştan sona mı okumalı, seçme bölümlerle çalışabilir mi?", t:"Siyasetname ve Hükümdar eserlerinin tamamının okunması gerekli midir; bildiri konusuna uygun seçme bölümlerle çalışılabilir mi?"},
+ {id:"q4", q:"Eser seçimini nasıl bildireceğiz? İki eser (ikisi de siyasetname türü) yeterli mi?", t:"Okulumuz Siyasetname (Nizâmülmülk) ve Hükümdar (Machiavelli) eserlerini seçmiştir. Seçimi ayrıca bildirmemiz gerekiyor mu; iki eserin yeterliliği konusunda bir sınırlama var mı?"},
+ {id:"q5", q:"Hazırlık aşamasındaki akademisyen/eğitimci eğitimini kim organize edecek? Çevrim içi katılabilir miyiz?", t:"Eleştirel okuma eğitimi ve akademisyen söyleşilerini kim organize edecektir; Genel Müdürlük veya koordinatör okul çevrim içi bir program planlıyor mu?"},
+ {id:"q6", q:"Kılavuzda 7. satır tarihi “01-03 Mart 2026” yazıyor; 2027 mi?", t:"Çalışma takviminin 7. satırındaki “01-03 Mart 2026” tarihinin 2027 olarak anlaşılması doğru mudur?"},
+ {id:"q7", q:"İl paneli ne zaman, nerede ve hangi biçimde olacak? Bildiri sunulacak mı?", t:"Şubat 2027'deki il panelinin tarihi, yeri ve işleyişi (sunum süresi, sunum yapılıp yapılmayacağı) hakkında bilgi alabilir miyiz?"},
+ {id:"q8", q:"Hikâye aşamasını sadece bu 3 öğrenci mi yapacak, okuldan başka öğrenciler de katılabilir mi?", t:"2. dönemdeki hikâye çalışmasına, bildiri sürecine katılmayan öğrenciler de dâhil edilebilir mi?"},
+ {id:"q9", q:"Alıntı ve kaynakça biçimi için beklenen bir yazım stili var mı?", t:"Bildirilerde atıf ve kaynakça için belirli bir yazım stili (APA vb.) bekleniyor mu?"},
+ {id:"q10", q:"Katılım belgeleri öğretmenlere de düzenlenecek mi?", t:"Kılavuzda katılımcılara katılım belgesi düzenleneceği yazıyor; danışman öğretmenlere de belge verilecek midir?"}
+];
+
+/* ================= DURUM ================= */
+function blankStudent(i){
+  const topics = [
+    "Siyasetname ve Hükümdar'ın biçim, anlatım ve metaforlar yönünden karşılaştırılması",
+    "Siyasetname ve Hükümdar'da hükümdara öğütler ve devlet yönetimi",
+    "Siyasetname ve Hükümdar'da adalet, din ve halk temalarının Doğu-Batı devlet geleneği bağlamında karşılaştırılması"
+  ];
+  return {kod:"Öğrenci "+(i+1), ad:"", sinif:"10", baba:"", dogum:"", veli:"", tel:"", adres:"", baslik:"", konu:topics[i], bolumler:"", asama:"Konu seçimi", ek4:false, ek5:false, ek6:false, notlar:""};
+}
+function defaults(){
+  return {done:{}, students:[0,1,2].map(blankStudent), cmp:{}, sc7:{}, sc8:{}, max7:10, max8:10, q:{}, set:{apiKey:"", model:"gemini-2.5-flash"}};
+}
+let S;
+function load(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(raw){ const o = JSON.parse(raw); const d = defaults(); return Object.assign(d, o, {set:Object.assign(d.set, o.set||{})}); }
+  }catch(e){}
+  return defaults();
+}
+let saveT;
+function save(){ clearTimeout(saveT); saveT = setTimeout(()=>{ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }, 150); }
+S = load();
+
+function setPath(obj, path, val){
+  const p = path.split("."); let o = obj;
+  for(let i=0;i<p.length-1;i++){ if(o[p[i]] == null || typeof o[p[i]] !== "object") o[p[i]] = {}; o = o[p[i]]; }
+  o[p[p.length-1]] = val;
+}
+function getPath(obj, path){ return path.split(".").reduce((o,k)=> o==null ? undefined : o[k], obj); }
+
+/* ================= HAFTA HESAPLARI ================= */
+function curWeekIdx(){
+  const t = today();
+  if(t < toD(W[0].s)) return 0;
+  for(let i=0;i<W.length;i++){ if(t >= toD(W[i].s) && t <= toD(W[i].e)) return i; }
+  return W.length-1;
+}
+function weekState(i){
+  const t = today(), s = toD(W[i].s), e = toD(W[i].e);
+  if(t < s) return "future"; if(t > e) return "past"; return "cur";
+}
+function weekProgress(i){
+  const tt = W[i].tasks; const n = tt.filter(x=>S.done[x.id]).length;
+  return {n, total:tt.length};
+}
+let viewWeek = null;
+const openWeeks = new Set();
+
+/* ================= GÖRÜNÜMLER ================= */
+const TABS = [
+  ["home","Bu Hafta"],["cikti","Tüm Çıktılar"],["road","Yol Haritası"],["students","Öğrencilerim"],["more","Bilgi ve Kılavuz"],["settings","Ayarlar"]
+];
+const SUBPAGES = new Set(["guide","ekler","works","qs","texts","ai"]);
+
+function taskHTML(t){
+  return `<label class="task"><input type="checkbox" data-task="${t.id}" ${S.done[t.id]?"checked":""}><span><b>${esc(t.t)}</b>${t.why?`<small>${esc(t.why)}</small>`:""}</span></label>`;
+}
+
+function taskSimple(t){
+  return `<label class="task"><input type="checkbox" data-task="${t.id}" ${S.done[t.id]?"checked":""}><span><b>${esc(t.t)}</b></span></label>`;
+}
+function vHome(){
+  const ci = curWeekIdx();
+  const vi = viewWeek == null ? ci : viewWeek;
+  const w = W[vi], st = weekState(vi), pr = weekProgress(vi);
+  const t0 = today();
+  const nk = KRITIK.filter(k=> toD(k.d) >= t0)[0];
+  const stTxt = st==="cur" ? "Şu an bu haftadasınız" : st==="past" ? "Geçmiş hafta" : "Gelecek hafta";
+  return `
+  <h2>Bu hafta ne yapacağım?</h2>
+  <p class="sub">Bugün: ${fmt(t0)} ${t0.getFullYear()} · Hafta ${vi+1} / ${W.length}</p>
+  <div class="card hl">
+    <div class="row" style="justify-content:space-between">
+      <span class="badge ${st==="cur"?"green":""}">${stTxt}</span>
+      <div class="row"><button class="alt sm" data-act="wk" data-d="-1" ${vi===0?"disabled":""}>← Önceki hafta</button><button class="alt sm" data-act="wk" data-d="1" ${vi===W.length-1?"disabled":""}>Sonraki hafta →</button>${vi!==ci?`<button class="sm" data-act="wk0">Bu haftaya dön</button>`:""}</div>
+    </div>
+    <h3 style="margin-top:10px">${esc(w.title)}</h3>
+    <p class="mini">${fmt(toD(w.s))} – ${fmt(toD(w.e))} · ${pr.n}/${pr.total} iş tamam</p>
+    <div class="bar"><i style="width:${pr.total?Math.round(pr.n/pr.total*100):0}%"></i></div>
+    <p style="margin:12px 0 2px"><b>Yapılacaklar</b> <span class="mini">(bitirince kutuyu işaretleyin)</span></p>
+    ${w.tasks.map(taskSimple).join("")}
+    ${w.tip?`<div class="tip">${esc(w.tip)}</div>`:""}
+  </div>
+  ${docsBlock(vi)}
+  ${nk?`<div class="card"><b>Sıradaki önemli tarih:</b> ${fmt(toD(nk.d))} (${daysTo(toD(nk.d))} gün kaldı)<br>${esc(nk.t)}</div>`:""}`;
+}
+
+function vRoad(){
+  const ci = curWeekIdx();
+  const total = W.reduce((a,w)=>a+w.tasks.length,0), done = W.reduce((a,w)=>a+weekProgress(W.indexOf(w)).n,0);
+  return `<h2>Yol Haritası</h2>
+  <p class="sub">Ekim 2026'dan Haziran 2027'ye kadar bütün haftalar. Toplam ilerleme: ${done}/${total} görev.</p>
+  <div class="bar" style="margin-bottom:10px"><i style="width:${Math.round(done/total*100)}%"></i></div>
+  <div class="row" style="margin-bottom:12px"><button class="alt" data-act="printroad">Yol haritasını yazdır</button></div>
+  ${W.map((w,i)=>{
+    const st = weekState(i), pr = weekProgress(i);
+    const isOpen = openWeeks.has(i) || (st==="cur" && !openWeeks.has("x"+i));
+    return `<details class="${st==="cur"?"cur":st==="past"?"past":""}" data-wk="${i}" ${isOpen?"open":""}>
+      <summary><span class="badge navy">${i+1}</span> ${esc(w.title)} <span class="mini">${fmt(toD(w.s))} – ${fmt(toD(w.e))}</span>
+      ${w.fixed?`<span class="badge red">kesin tarih</span>`:""}${st==="cur"?`<span class="badge green">şimdi</span>`:""}<span class="badge">${pr.n}/${pr.total}</span></summary>
+      <div class="in">${w.tasks.map(taskHTML).join("")}${docsBlock(i)}${w.tip?`<div class="tip">${esc(w.tip)}</div>`:""}</div></details>`;
+  }).join("")}`;
+}
+
+let guideQ = "";
+function vGuide(){
+  const q = guideQ.toLowerCase();
+  const list = GUIDE.filter(g => !q || (g.m+" "+g.k+" "+g.b).toLowerCase().includes(q));
+  return `<h2>Kılavuz</h2>
+  <p class="sub">“Oku-Yorum, Yazı-Yorum” Projesi Uygulama Kılavuzu (Ekim 2026), sade özetiyle. Madde numaraları orijinaldeki gibi.</p>
+  <h3>Aklınıza takılabilecek sorular</h3>
+  ${SSS.map(s=>`<details><summary>${esc(s[0])}</summary><div class="in">${esc(s[1])}</div></details>`).join("")}
+  <h3>Kılavuz maddeleri</h3>
+  <input type="search" id="gsearch" placeholder="Kılavuzda ara (örn. telif, PDF, panel, itiraz)" value="${esc(guideQ)}">
+  <div id="glist" style="margin-top:10px">${list.length?list.map(g=>`<div class="card"><span class="badge navy">${esc(g.m)}</span> <b>${esc(g.k)}</b><div style="white-space:pre-wrap;margin-top:6px">${esc(g.b)}</div></div>`).join(""):"<p>Sonuç yok.</p>"}</div>`;
+}
+
+let eklerTab = "ek1", ek1q = "";
+let formKind = "ek4", formStu = 0;
+function vEkler(){
+  const tabs = [["ek1","EK-1 İl koordinatör okulları"],["ek2","EK-2 Oturum planı"],["form","EK-4, 5, 6 Belgeler"],["ek7","EK-7 Bildiri kriterleri"],["ek8","EK-8 Hikâye kriterleri"]];
+  let body = "";
+  if(eklerTab==="ek1"){
+    body = `<p class="sub">82 ilin koordinatör okulu. Okulunuzun ili: <b>Aksaray</b>.</p>
+    <input type="search" id="ek1q" placeholder="İl, ilçe veya okul adı ara" value="${esc(ek1q)}">
+    <div class="scroll" style="margin-top:10px"><table><thead><tr><th>#</th><th>İl</th><th>İlçe</th><th>Kurum adı</th></tr></thead><tbody id="ek1b">${ek1Rows()}</tbody></table></div>`;
+  }
+  else if(eklerTab==="ek2"){
+    body = `<p class="sub">EK-2: Siyasetname/Ütopya Oku-Yorum faaliyet planı. (EK-3 Safahat planı bu rehbere alınmadı, çünkü Anadolu liseleri için geçerli değil.)</p>
+    <div class="scroll"><table><tr><th>Bölüm</th><th>İçerik</th></tr>${EK2.map(r=>`<tr><td><b>${r[0]}</b></td><td>${esc(r[1])}</td></tr>`).join("")}</table></div>`;
+  }
+  else if(eklerTab==="form"){
+    body = `<p class="sub">Öğrencilerim sekmesindeki bilgilerle dolu hâlde önizleyip yazdırabilirsiniz. Boş bırakılan alanlar noktalı çıkar. Velinin imzası ve tarih elle atılır.</p>
+    <div class="row" style="margin-bottom:10px">
+      <select id="fkind" style="width:auto"><option value="ek4" ${formKind==="ek4"?"selected":""}>EK-4 Veli İzin Belgesi</option><option value="ek5" ${formKind==="ek5"?"selected":""}>EK-5 Telif Hakları Taahhütnamesi</option><option value="ek6" ${formKind==="ek6"?"selected":""}>EK-6 MEB Aydınlatma Metni ve Açık Rıza</option></select>
+      <select id="fstu" style="width:auto">${S.students.map((s,i)=>`<option value="${i}" ${formStu===i?"selected":""}>${esc(s.ad||s.kod)}</option>`).join("")}</select>
+      <button data-act="printform">Yazdır</button>
+    </div>
+    <div class="paper" id="paperPrev">${formHTML(formKind, S.students[formStu])}</div>
+    <p class="mini">Not: Madde 13'e göre ürünler Genel Müdürlüğe bu üç belgeyle birlikte gider; belgeleri “Öğrencilerim”de tikleyin.</p>`;
+  }
+  else if(eklerTab==="ek7"){
+    body = `<p class="sub">EK-7 örnek bildiri değerlendirme kriterleri. Kılavuzdaki tabloda puan değerleri yok; her ölçüt için üst puanı siz belirlersiniz.</p>
+    <label class="f">Her ölçütün üst puanı <input type="number" min="1" max="100" data-p="max7" value="${S.max7}" style="width:90px"></label>
+    ${scoreTable("sc7", C7, S.max7)}`;
+  }
+  else {
+    body = `<p class="sub">EK-8 örnek hikâye değerlendirme kriterleri. Hikâyeler isimsiz değerlendirilir (Madde 9/4); “Hikâye 1, 2, 3” diye numaralandırabilirsiniz.</p>
+    <label class="f">Her ölçütün üst puanı <input type="number" min="1" max="100" data-p="max8" value="${S.max8}" style="width:90px"></label>
+    ${scoreTable("sc8", C8, S.max8)}`;
+  }
+  return `<h2>Ekler</h2>
+  <div class="tabs2">${tabs.map(t=>`<button data-act="ekt" data-v="${t[0]}" class="${eklerTab===t[0]?"on":""}">${t[1]}</button>`).join("")}</div>${body}`;
+}
+function ek1Rows(){
+  const q = ek1q.toLowerCase();
+  return EK1.filter(r=>!q||(r.il+" "+r.ilce+" "+r.kurum).toLowerCase().includes(q))
+    .map(r=>`<tr ${r.il==="AKSARAY"?'style="background:#fff2a8"':""}><td>${r.n}</td><td>${esc(r.il)}</td><td>${esc(r.ilce)}</td><td>${esc(r.kurum)}${r.il==="AKSARAY"?" <span class='badge green'>sizin koordinatör okulunuz</span>":""}</td></tr>`).join("");
+}
+function scoreTable(key, crit, max){
+  return `<div class="scroll"><table><tr><th>Öğrenci / Metin</th>${crit.map((c,i)=>`<th>${i+1}. ${esc(c)}</th>`).join("")}<th>Toplam</th></tr>
+  ${S.students.map((s,si)=>`<tr><td><b>${esc(s.ad||s.kod)}</b></td>${crit.map((c,ci)=>`<td><input type="number" min="0" max="${max}" data-p="${key}.${si}.${ci}" value="${esc(getPath(S,key+"."+si+"."+ci)??"")}" style="width:64px"></td>`).join("")}<td><b id="tot_${key}_${si}">${scoreTotal(key,si,crit.length)}</b> / ${crit.length*max}</td></tr>`).join("")}</table></div>`;
+}
+function scoreTotal(key, si, n){
+  let t = 0; for(let i=0;i<n;i++){ const v = Number(getPath(S,key+"."+si+"."+i)); if(!isNaN(v)) t += v; } return t;
+}
+
+function dotted(v){ return v ? `<b>${esc(v)}</b>` : "……………………………"; }
+function formHTML(kind, st){
+  const info = `<p>Katılımcının;</p><p>Adı ve Soyadı: ${dotted(st.ad)}</p><p>Baba Adı: ${dotted(st.baba)}</p><p>Doğum Yeri ve Yılı: ${dotted(st.dogum)}</p><p>Okulu: <b>${OKUL}</b></p><p>Sınıfı: ${dotted(st.sinif)}</p>`;
+  const sig = `<p style="margin-top:26px;text-align:right;padding-right:40px">…../…../…….<br>Adı ve Soyadı: ${st.veli?`<b>${esc(st.veli)}</b>`:"………………"}<br>İmza</p><p>Adres: ${dotted(st.adres)}</p><p>Telefon: ${dotted(st.tel)}</p>`;
+  if(kind==="ek4") return `<h3>VELİ İZİN BELGESİ</h3>${info}<p style="text-align:center;margin:22px 0 10px">${OKUL} Müdürlüğüne</p>
+  <p style="text-indent:30px;text-align:justify">Velisi bulunduğum ve yukarıda açık kimliği yazılı oğlum/kızım ${dotted(st.ad)}'ın Ortaöğretim Genel Müdürlüğünce yapılması planlanan “Oku-Yorum, Yazı-Yorum” projesi çalışmalarına katılmasına izin veriyorum.</p><p style="text-indent:30px">Arz ederim.</p>${sig}`;
+  if(kind==="ek5") return `<h3>TELİF HAKLARI TAAHHÜTNAMESİ</h3>${info}<p style="text-align:center;margin:22px 0 10px">${OKUL} Müdürlüğüne</p>
+  <p style="text-indent:30px;text-align:justify">Oku-Yorum, Yazı-Yorum projesi kapsamında tarafınıza iletilen eserin velisi bulunduğum ve yukarıda açık kimliği yazılı oğlum/kızım ${dotted(st.ad)}'a ait olduğunu, bahse konu eserin son halini gördüğümü ve onayladığımı, eserin başka bir yerde basılmadığını ve basılmak için sunulmadığını, eserin diğer şahıslara ait olan telif haklarını ihlal etmediğini, telif hakkı tarafımızda saklı kalmak koşuluyla eserin Millî Eğitim Bakanlığı tarafından Bakanlığın faaliyetleri çerçevesinde oğlumun/kızımın ismine yer verilerek basılmasına, yayımlanmasına, paylaşılmasına, internet yoluyla iletimine ve Bakanlığa ait her türlü mecrada sergilenmesine izin verdiğimi, bu kapsamda herhangi bir maddi talebim olmayacağını kabul, beyan ve taahhüt ederim.</p>${sig}`;
+  return `<h3>MİLLÎ EĞİTİM BAKANLIĞI<br>AYDINLATMA METNİ</h3>
+  <p style="text-indent:30px;text-align:justify">Millî Eğitim Bakanlığı tarafından, katılımcıların, velilerinin onayı ve/veya öğretmenlerinin bilgisi kapsamında, gönüllü olarak sunulan kişisel verileri, Kişisel Verilerin Korunması Kanunu kapsamında, “veri sorumlusu” sıfatıyla işleyebilecek olup, yasal zorunluluklar (örneğin bir mahkeme kararı ile talep edilmesi hali) dışında açıklanmayacaktır.</p>
+  <p style="text-indent:30px;text-align:justify">Bakanlığımız; bu verileri satmayacak, kiralamayacak ve/veya hiçbir şekilde 3. kişilerle paylaşmayacaktır. Etkinlik sona erdiği zaman otomatik olarak silecektir.</p>
+  <p style="text-indent:30px;text-align:justify">Yarışma sonuçları hakkında bildirimde bulunmak, ödülleri teslim etmek, yarışma kapsamındaki iletişimi sağlamak, yazışmalar göndermek, ilerleyen dönemlerde yarışmayı daha da etkin kılmak adına ve katılımcılara daha iyi hizmet verebilmek amacıyla, istatistiksel bilgileri (tarayıcı tipi, coğrafi konum, yaş, cinsiyet, vb.) edinmek ve genel olarak katılımcı profilini belirlemek gibi amaçlarla, yasal mevzuatın zorunlu kıldığı ve izin verdiği ölçüde kullanacaktır.</p>
+  <p style="text-indent:30px;text-align:justify">Söz konusu Kanunun “İlgili kişinin hakları”nı düzenleyen 11 inci maddesi kapsamındaki taleplerinizi “Veri Sorumlusuna Başvuru Usul ve Esasları Hakkında Tebliğe” göre Millî Eğitim Bakanlığının Atatürk Bulvarı No: 98 Bakanlıklar-Çankaya/ANKARA adresine yazılı olarak iletebilirsiniz.</p>
+  <p style="margin-top:16px"><b>AÇIK RIZA ONAYI</b></p>
+  <p style="text-indent:30px;text-align:justify">6698 sayılı Kişisel Verilerin Korunması Kanunu kapsamında tarafıma gerekli bilgilendirme yapılmıştır. Bu doğrultuda, işlendiği belirtilen bana ve ${OKUL}'nde öğrenim gören velisi / birinci derece yakını bulunduğum ${dotted(st.ad)} adlı öğrenciye ait görsel ve işitsel kişisel verilerimiz; eğitim ve öğretim süreçleri kapsamında düzenlenen faaliyet/etkinliklerin kamuoyu ile paylaşımı ve tanıtımı amacıyla, öğrencimin öğrenim gördüğü eğitim kurumu dâhil Bakanlığın merkez ve taşra teşkilatı siteleri ile sosyal medya hesaplarında paylaşılmasına;</p>
+  <p>☐ Onay veriyorum &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ☐ Onay vermiyorum</p>
+  <p style="margin-top:16px">…../…../…….<br>Velisinin/1. Derece Yakının Adı Soyadı: ${st.veli?`<b>${esc(st.veli)}</b>`:"………………………"}<br>İmzası: ……………………</p>
+  <p>Öğrencinin;<br>Adı Soyadı: ${dotted(st.ad)}<br>Okulu: <b>${OKUL}</b><br>Sınıfı: ${dotted(st.sinif)}</p>`;
+}
+
+function vStudents(){
+  return `<h2>Öğrencilerim</h2>
+  <p class="sub">Bu bilgiler sadece bu bilgisayarın tarayıcısında saklanır. Veli bilgileri EK-4, 5, 6 formlarını doldurur; liste yazısına da öğrenci adı ve iletişim bilgisi buradan gelir.</p>
+  ${S.students.map((s,i)=>{
+    const p = k=>`data-p="students.${i}.${k}"`;
+    return `<div class="card"><div class="row" style="justify-content:space-between"><b>${esc(s.ad||s.kod)}</b><span class="badge navy">${esc(s.asama)}</span></div>
+    <div class="grid" style="margin-top:10px">
+      <label class="f">Ad Soyad<input type="text" ${p("ad")} value="${esc(s.ad)}"></label>
+      <label class="f">Sınıf / şube<input type="text" ${p("sinif")} value="${esc(s.sinif)}"></label>
+      <label class="f">Baba adı<input type="text" ${p("baba")} value="${esc(s.baba)}"></label>
+      <label class="f">Doğum yeri ve yılı<input type="text" ${p("dogum")} value="${esc(s.dogum)}"></label>
+      <label class="f">Veli adı soyadı<input type="text" ${p("veli")} value="${esc(s.veli)}"></label>
+      <label class="f">Veli / iletişim telefonu<input type="text" ${p("tel")} value="${esc(s.tel)}"></label>
+    </div>
+    <label class="f">Adres<input type="text" ${p("adres")} value="${esc(s.adres)}"></label>
+    <label class="f">Bildiri konusu (öneri hazır, değiştirebilirsiniz)<textarea ${p("konu")} style="min-height:56px">${esc(s.konu)}</textarea></label>
+    <label class="f">Bildiri başlığı<input type="text" ${p("baslik")} value="${esc(s.baslik)}"></label>
+    <label class="f">Okuyacağı bölümler / okuma notları<textarea ${p("bolumler")}>${esc(s.bolumler)}</textarea></label>
+    <div class="row"><label class="f" style="flex:1;min-width:180px">Aşama<select ${p("asama")}>${ASAMALAR.map(a=>`<option ${a===s.asama?"selected":""}>${a}</option>`).join("")}</select></label>
+      <label class="task" style="border:0"><input type="checkbox" ${p("ek4")} ${s.ek4?"checked":""}><span>EK-4 veli izin imzalı</span></label>
+      <label class="task" style="border:0"><input type="checkbox" ${p("ek5")} ${s.ek5?"checked":""}><span>EK-5 telif imzalı</span></label>
+      <label class="task" style="border:0"><input type="checkbox" ${p("ek6")} ${s.ek6?"checked":""}><span>EK-6 aydınlatma/rıza imzalı</span></label></div>
+    <label class="f">Notlar<textarea ${p("notlar")}>${esc(s.notlar)}</textarea></label></div>`;}).join("")}`;
+}
+
+let wtab = "bildiri";
+function vWorks(){
+  const tabs = WTABS;
+  let body = "";
+  if(wtab==="bildiri"){
+    body = `<div class="card"><b>Bildiri</b>, bir konuyu okuyup araştırarak ortaya koyduğunuz kısa, resmî dille yazılmış bilimsel yazıdır. Makaleye benzer; çoğunlukla bir panelde sunulmak için hazırlanır. Kitabın özeti değil, eserleri karşılaştırıp öğrencinin <b>kendi yorumunu</b> ortaya koyduğu metindir.</div>
+    <div class="scroll"><table><tr><th>Kompozisyon / özet</th><th>Bildiri</th></tr>
+    <tr><td>“Ben bu kitabı okudum, şunları anlattı”</td><td>“Bu çalışmada iki eser şu açıdan karşılaştırılmıştır”</td></tr>
+    <tr><td>Duygu ve izlenim yazılabilir</td><td>Kanıta dayanır; kitaptan örnek ve alıntı verilir</td></tr>
+    <tr><td>“Ben” diye yazılır</td><td>3. tekil kişi: “incelenmiştir”, “görülmektedir”</td></tr>
+    <tr><td>Serbest üslup</td><td>Resmî, akademik üslup</td></tr></table></div>
+    <h3>Bölümleri (EK-7'ye göre)</h3>
+    <ol><li><b>Başlık</b>: konuyu anlatan kısa ad</li><li><b>Özet</b>: 4-5 cümle; ne yapıldı, ne bulundu</li><li><b>Anahtar kavramlar</b>: 4-5 kelime (adalet, meşruiyet, hükümdar, devlet...)</li><li><b>Giriş</b>: konu, eserler, yazarlar, amaç</li><li><b>Gelişme</b>: karşılaştırma; alıntı ve atıflar</li><li><b>Sonuç ve değerlendirme</b>: ulaşılan sonuç, öğrencinin yorumu, ana fikir</li><li><b>Kaynakça</b></li></ol>
+    <div class="tip"><b>Örnek cümle farkı</b><br>Özet tarzı: “Nizâmülmülk kitabında adaletten çok bahsediyor.”<br>Bildiri tarzı: “Nizâmülmülk, Siyasetname'de adaleti devletin devamlılığının temel şartı olarak ele almaktadır.”</div>
+    <p class="mini">Biçim: Times New Roman, 12 punto, 1,5 satır aralığı, PDF (Madde 9/3). Sayfa sınırı kılavuzda yok; 10. sınıf için 3-5 sayfa makul bir hedef olabilir, “Sorularım”dan teyit edin.</p>
+    <h3>Örnek bildiri konuları (Madde 7)</h3>
+    <ul><li>Siyasetname (Nizâmülmülk) ve Hükümdar (Machiavelli) eserlerinin biçim ve metaforlar ile devlet yönetimi, hükümdara öğütler yönünden karşılaştırmalı incelenmesi</li><li>Seçilen eserler üzerinden siyasetname ve ütopya türünün karşılaştırılması</li><li>Seçilen eserler üzerinden Doğu-Batı devlet/siyaset geleneğinin karşılaştırılması</li><li>Seçilen eserler üzerinden adalet, liderlik, din, halk gibi temaların karşılaştırılması</li></ul>`;
+  }
+  else if(wtab==="cmp"){
+    body = `<p class="sub">Oturumlarda birlikte doldurulacak tablo; bildirinin iskeleti olur. “İpucu” sütunları sadece başlangıç içindir; her birini kendi okumanızla doğrulayın, doğrulamadan bildiriye yazmayın.</p>
+    ${CMP.map(r=>`<div class="card"><b>${esc(r.k)}</b> <span class="mini">— ${esc(r.q)}</span>
+      <div class="grid" style="margin-top:8px">
+        <label class="f">Siyasetname (Nizâmülmülk)${r.h1?`<br><i>İpucu: ${esc(r.h1)}</i>`:""}<textarea data-p="cmp.${r.id}.a">${esc(getPath(S,"cmp."+r.id+".a")||"")}</textarea></label>
+        <label class="f">Hükümdar (Machiavelli)${r.h2?`<br><i>İpucu: ${esc(r.h2)}</i>`:""}<textarea data-p="cmp.${r.id}.b">${esc(getPath(S,"cmp."+r.id+".b")||"")}</textarea></label>
+      </div>
+      <label class="f">Benzerlik ve farklar<textarea data-p="cmp.${r.id}.c" style="min-height:56px">${esc(getPath(S,"cmp."+r.id+".c")||"")}</textarea></label></div>`).join("")}`;
+  }
+  else if(wtab==="kaynak"){ body = kaynakHTML(); }
+  else if(WDOC[wtab]){
+    body = `<div class="row" style="margin-bottom:10px"><button data-act="docprint" data-d="${WDOC[wtab]}">Yazdır</button><button class="alt" data-act="docword" data-d="${WDOC[wtab]}">Word olarak indir</button><span class="mini">Aşağıdaki sayfalar aynen yazdırılır / indirilir.</span></div>` + DOCS[WDOC[wtab]].f();
+  }
+  else { body = ""; }
+  return `<h2>Eserler ve Bildiri</h2><div class="tabs2">${tabs.map(t=>`<button data-act="wt" data-v="${t[0]}" class="${wtab===t[0]?"on":""}">${t[1]}</button>`).join("")}</div>${body}`;
+}
+
+function vQs(){
+  return `<h2>Sorularım</h2>
+  <p class="sub">Kılavuzda net olmayan noktalar. Her birinin altında koordinatör okula sorulabilecek hazır cümle var. Cevap aldıkça işaretleyip not düşün. “Hazır Yazılar” sekmesi bu soruların hepsini tek yazıda toplar.</p>
+  ${QS.map(q=>{
+    const d = !!(S.q[q.id]&&S.q[q.id].done);
+    return `<div class="card"><label class="task" style="border:0"><input type="checkbox" data-p="q.${q.id}.done" ${d?"checked":""}><span><b>${esc(q.q)}</b></span></label>
+    <p class="mini">Hazır soru: ${esc(q.t)}</p>
+    <label class="f">Cevap / not<textarea data-p="q.${q.id}.n" style="min-height:56px">${esc((S.q[q.id]&&S.q[q.id].n)||"")}</textarea></label></div>`;}).join("")}`;
+}
+
+/* ===== Hazır yazılar ===== */
+let ttab = "gorev";
+function todayStr(){ const d = today(); return String(d.getDate()).padStart(2,"0")+"."+String(d.getMonth()+1).padStart(2,"0")+"."+d.getFullYear(); }
+function stuLines(){
+  return S.students.map((s,i)=>`${i+1}. ${s.ad||"……………………"} – ${s.sinif||"10"}. sınıf – ${s.tel||"…………"}`).join("\n");
+}
+function textBody(k){
+  const d = todayStr();
+  if(k==="gorev") return `${d}
+
+OKUL MÜDÜRLÜĞÜNE
+
+Konu: “Oku-Yorum, Yazı-Yorum” Projesi Görevlendirmesi
+
+Millî Eğitim Bakanlığı Ortaöğretim Genel Müdürlüğünce yürütülen “Oku-Yorum, Yazı-Yorum” Projesi Uygulama Kılavuzu (Ekim 2026) gereğince okulumuz 2026-2027 eğitim öğretim yılında “Siyasetname/Ütopyalar” teması kapsamında projeye katılacaktır.
+
+Kılavuzun 7. maddesi uyarınca proje yürütücüsü olarak bir müdür yardımcısı ile bir danışman öğretmenin görevlendirilmesi gerekmektedir. Danışman öğretmen olarak Türk Dili ve Edebiyatı Öğretmeninin görevlendirilmesini, müdür yardımcısı görevlendirmesinin de yapılmasını arz ederim.
+
+${OGRT}
+Türk Dili ve Edebiyatı Öğretmeni`;
+  if(k==="liste") return `${d}
+
+${KOORD_KISA.toUpperCase()} MÜDÜRLÜĞÜNE
+(Aksaray / Merkez)
+
+Konu: “Oku-Yorum, Yazı-Yorum” Projesi Katılımcı Listesi
+
+Ortaöğretim Genel Müdürlüğünün “Oku-Yorum, Yazı-Yorum” Projesi Uygulama Kılavuzu (Ekim 2026) kapsamında okulumuz (${OKUL}) 2026-2027 eğitim öğretim yılında “Siyasetname/Ütopyalar” çalışmasına katılacaktır. Çalışmada, Nizâmülmülk'ün Siyasetname'si ile Machiavelli'nin Hükümdar (Prens) adlı eserleri seçilmiştir.
+
+Danışman öğretmen: ${OGRT}, Türk Dili ve Edebiyatı Öğretmeni
+Proje yürütücüsü müdür yardımcısı: ……………………………
+Danışman öğretmen iletişim: ……………………………
+
+Katılımcı öğrenciler:
+${stuLines()}
+
+Bilgilerinize arz ederim.
+
+${OGRT}                                ${MUDUR}
+Türk Dili ve Edebiyatı Öğretmeni        Okul Müdürü`;
+  if(k==="sorular"){
+    const open = QS.filter(q=>!(S.q[q.id]&&S.q[q.id].done));
+    return `${d}
+
+${KOORD_KISA.toUpperCase()} MÜDÜRLÜĞÜNE
+(Aksaray / Merkez)
+
+Konu: “Oku-Yorum, Yazı-Yorum” Projesi Hakkında Bilgi Talebi
+
+“Oku-Yorum, Yazı-Yorum” Projesi Uygulama Kılavuzu kapsamında aşağıdaki hususlarda bilgi almak istiyoruz:
+
+${open.map((q,i)=>`${i+1}. ${q.t}`).join("\n")}
+
+Gereğini arz ederim.
+
+${OGRT}
+Türk Dili ve Edebiyatı Öğretmeni`;
+  }
+  if(k==="veli") return `Sayın Veli,
+
+Millî Eğitim Bakanlığı Ortaöğretim Genel Müdürlüğü tarafından yürütülen “Oku-Yorum, Yazı-Yorum” Projesi'nin ilk aşaması olan “Oku-Yorum” çalışmasına okulumuzdan 3 öğrenci katılacaktır. Çocuğunuz bu çalışma için seçilmiştir.
+
+Çalışmada öğrenciler, Nizâmülmülk'ün Siyasetname'si ile Machiavelli'nin Hükümdar adlı eserlerini okuyup karşılaştıracak, kendi yorumlarını içeren bir bildiri yazacaktır. İkinci dönemde yaratıcı yazarlık çalışması (hikâye) yapılacaktır. Çalışmalar okul saatleri ve planlı oturumlarla yürütülecek, öğrencilerin ürünleri il paneline ve proje takvimine göre Genel Müdürlüğe iletilebilecektir.
+
+Proje kapsamında sizden üç belge rica ediyoruz: Veli İzin Belgesi (EK-4), Telif Hakları Taahhütnamesi (EK-5), Aydınlatma Metni ve Açık Rıza Onayı (EK-6). Belgeleri okuyup imzalayarak çocuğunuzla birlikte okula iletmenizi rica ederiz.
+
+${OGRT}
+Türk Dili ve Edebiyatı Öğretmeni`;
+  return `Sevgili öğrenciler,
+
+“Oku-Yorum, Yazı-Yorum” Projesi'nde okulumuzu temsil edeceksiniz. Projede iki eseri karşılaştıracaksınız: Nizâmülmülk'ün Siyasetname'si ve Machiavelli'nin Hükümdar'ı.
+
+Yapacaklarımız:
+• Kasım-Aralık: eserleri okuyacağız ve 6 oturumda tartışacağız
+• Ocak: her biriniz kendi konusunda bir bildiri yazacak
+• 18 Ocak 2027: bildirileriniz il koordinatör okula gidecek
+• Şubat: il paneli
+• Mart-Mayıs: yaratıcı yazarlık atölyesi ve hikâye yazımı
+
+Bildiri bir özet ya da kompozisyon değil; okuduklarınızı karşılaştırıp kendi yorumunuzu yazdığınız resmî dilde bir metin olacak. İlk oturum tarihini sizinle ayrıca paylaşacağım.
+
+${OGRT}`;
+}
+function vTexts(){
+  const tabs = [["gorev","Görevlendirme talebi"],["liste","Liste yazısı (koordinatör okula)"],["sorular","Sorular yazısı"],["veli","Veli bilgilendirme"],["ogr","Öğrenci duyurusu"]];
+  return `<h2>Hazır Yazılar</h2>
+  <p class="sub">Öğrenci bilgilerini “Öğrencilerim”e girince liste yazısı otomatik dolar. Eksik yerleri (müdür yardımcısı adı, telefon) kopyaladıktan sonra tamamlayın.</p>
+  <div class="tabs2">${tabs.map(t=>`<button data-act="tt" data-v="${t[0]}" class="${ttab===t[0]?"on":""}">${t[1]}</button>`).join("")}</div>
+  <div class="row" style="margin-bottom:8px"><button data-act="copytext">Kopyala</button><button class="alt" data-act="printtext">Yazdır</button><span id="copied" class="mini"></span></div>
+  <pre class="letter" id="letterBox">${esc(textBody(ttab))}</pre>`;
+}
+
+/* ===== Yapay zekâ dönüt ===== */
+let aiStu = 0, aiDraft = "", aiOut = "", aiBusy = false;
+function vAi(){
+  return `<h2>Yapay Zekâ Dönütü</h2>
+  <p class="sub">Öğrenci taslağını EK-7 kriterlerine göre değerlendirir; <b>metni yeniden yazmaz</b> ve cümle önermez, sadece dönüt verir (özgünlük kriteri nedeniyle).</p>
+  <div class="warn"><b>Gizlilik:</b> Taslak metin dışarıdaki bir yapay zekâ servisine (Gemini) gönderilir. Servise öğrencinin adı yerine kod (“${esc(S.students[aiStu].kod)}”) gider ve metindeki öğrenci adı otomatik silinir; yine de metne okul veya kişisel bilgi yazılmadığından emin olun.</div>
+  <div class="card">
+    <label class="f">Öğrenci<select id="aistu">${S.students.map((s,i)=>`<option value="${i}" ${aiStu===i?"selected":""}>${esc(s.ad||s.kod)}</option>`).join("")}</select></label>
+    <label class="f">Taslak metin (bildiri veya bildiri planı)<textarea id="aidraft" style="min-height:220px">${esc(aiDraft)}</textarea></label>
+    <div class="row"><button data-act="aigo" ${aiBusy?"disabled":""}>${aiBusy?"Değerlendiriliyor...":"Dönüt al"}</button><span class="mini">API anahtarı “Ayarlar”da.</span></div>
+    <div id="aiout" class="ans" style="${aiOut?"":"display:none"}">${aiOut}</div>
+  </div>`;
+}
+function mdLite(t){
+  return esc(t).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/^#{1,4}\s*(.+)$/gm,"<b>$1</b>");
+}
+async function aiRun(){
+  const key = (S.set.apiKey||"").trim();
+  if(!key){ alert("Önce Ayarlar sekmesine Gemini API anahtarını girin."); return; }
+  let txt = ($("#aidraft").value||"").trim();
+  if(txt.length < 80){ alert("Taslak çok kısa."); return; }
+  aiDraft = txt;
+  const s = S.students[aiStu];
+  (s.ad||"").split(/\s+/).filter(w=>w.length>2).forEach(w=>{ txt = txt.replace(new RegExp(w.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),"gi"),"[ad]"); });
+  const sys = `Sen bir Türk Dili ve Edebiyatı öğretmeninin yardımcısısın. 10. sınıf öğrencisinin yazdığı bildiri taslağını MEB “Oku-Yorum, Yazı-Yorum” projesinin EK-7 ölçütlerine göre değerlendireceksin. Konu: Nizâmülmülk'ün Siyasetname'si ile Machiavelli'nin Hükümdar eserlerinin karşılaştırılması.
+KURALLAR: Metni yeniden yazma. Düzeltilmiş cümle veya paragraf önerme. Örnek cümle verme. Sadece dönüt ver. İmla ve noktalama hatalarında yalnızca hatanın türünü ve metinde yaklaşık nerede olduğunu söyle, düzeltmeyi yazma. Anlamadığın bir şey varsa uydurma. Eserler hakkında metinde yer alan bir bilgiyi doğrulayamazsan "öğretmen kaynaktan kontrol etsin" diye işaretle.
+ÖLÇÜTLER: ${C7.map((c,i)=>(i+1)+") "+c).join("; ")}.
+BİÇİM: Her ölçüt için bir satır: ölçüt adı, durum (Var / Kısmen / Eksik) ve 1-2 cümlelik gerekçe. Sonunda "Öncelikli 3 gelişim alanı" başlığı altında üç madde. Türkçe yaz, öğrenciye saygılı ve yapıcı bir dil kullan.`;
+  aiBusy = true; aiOut = "Değerlendiriliyor..."; render();
+  try{
+    const url = "https://generativelanguage.googleapis.com/v1beta/models/"+encodeURIComponent(S.set.model||"gemini-2.5-flash")+":generateContent?key="+encodeURIComponent(key);
+    const r = await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({systemInstruction:{parts:[{text:sys}]},contents:[{role:"user",parts:[{text:"["+s.kod+"] taslak metni:\n\n"+txt}]}]})});
+    const j = await r.json();
+    if(!r.ok){ throw new Error((j.error&&j.error.message)||("HTTP "+r.status)); }
+    const out = j.candidates&&j.candidates[0]&&j.candidates[0].content&&j.candidates[0].content.parts&&j.candidates[0].content.parts.map(p=>p.text||"").join("");
+    aiOut = out ? mdLite(out) : "Boş yanıt geldi. Tekrar deneyin.";
+  }catch(e){
+    aiOut = "Hata: "+esc(e.message)+"<br><span class='mini'>API anahtarını, model adını ve internet bağlantısını kontrol edin.</span>";
+  }
+  aiBusy = false; render();
+}
+
+/* ===== Ayarlar ===== */
+function vSettings(){
+  return `<h2>Ayarlar</h2>
+  <div class="card"><b>Yapay zekâ</b>
+    <label class="f">Gemini API anahtarı (yalnızca bu tarayıcıda saklanır)<input type="password" data-p="set.apiKey" value="${esc(S.set.apiKey)}" autocomplete="off"></label>
+    <label class="f">Model adı<input type="text" data-p="set.model" value="${esc(S.set.model)}"></label>
+    <p class="mini">Model adı eskirse Google AI Studio'daki güncel bir model adıyla değiştirin.</p></div>
+  <div class="card"><b>Yedek</b>
+    <p class="mini">Veriler bu bilgisayarın tarayıcısında durur; tarayıcı verisi silinirse gider. Düzenli olarak yedek indirin.</p>
+    <div class="row"><button data-act="export">Yedeği indir (JSON)</button><label class="btn alt" style="background:#fff;color:var(--navy);border:1px solid var(--navy)">Yedeği yükle<input type="file" id="imp" accept=".json" style="display:none"></label></div></div>
+  <div class="card"><b>Sıfırla</b><p class="mini">Tüm tikleri, öğrenci bilgilerini ve notları siler.</p><button class="alt" data-act="reset" style="color:var(--bad);border-color:var(--bad)">Her şeyi sıfırla</button></div>`;
+}
+
+/* ================= HAZIR ÇIKTILAR (haftaya bağlı, yazdırılabilir) ================= */
+const pg = h => `<div class="paper pg">${h}</div>`;
+const pre = t => `<div style="white-space:pre-wrap;font-size:15px;line-height:1.6">${esc(t)}</div>`;
+const nm = s => s.ad ? `<b>${esc(s.ad)}</b>` : "……………………………";
+const ln = n => Array(n).fill('<div style="border-bottom:1px solid #555;height:27px"></div>').join("");
+const hd = t => `<p style="text-align:center;margin:0 0 6px;font-size:12.5px">${esc(OKUL)} · “Oku-Yorum, Yazı-Yorum” Projesi · Siyasetname/Ütopyalar</p><h3>${t}</h3>`;
+const blank = n => Array.from({length:n}, () => []);
+const tbl = (cols, rows, h) => `<table class="pt">${cols.every(c=>!c)?"":`<tr>${cols.map(c=>`<th>${c}</th>`).join("")}</tr>`}${rows.map(r=>`<tr>${cols.map((c,i)=>`<td style="height:${h||34}px">${r && r[i]!=null ? r[i] : ""}</td>`).join("")}</tr>`).join("")}</table>`;
+const perStu = fn => S.students.map((s,i)=>pg(fn(s,i))).join("");
+const box = c => c ? "☑" : "☐";
+const info = s => `<p>Öğrenci: ${nm(s)} &nbsp;&nbsp; Sınıf: ${esc(s.sinif||"10")} &nbsp;&nbsp; Tarih: ……/……/……….</p>`;
+const signT = () => `<table class="pt" style="margin-top:22px"><tr><td style="height:70px;width:50%">Danışman öğretmen<br>${esc(OGRT)}<br>İmza:</td><td>Okul müdürü<br>${esc(MUDUR)}<br>İmza:</td></tr></table>`;
+const titles = () => S.students.map((s,i)=>`${i+1}. ${s.ad||"……………………"} – ${s.sinif||"10"}. sınıf – “${s.baslik||s.konu}” – ${s.tel||"…………"}`).join("\n");
+
+function letterText(k){
+  const d = todayStr();
+  if(k==="teslim") return `${d}
+
+${KOORD_KISA.toUpperCase()} MÜDÜRLÜĞÜNE
+(Aksaray / Merkez)
+
+Konu: “Oku-Yorum” Bildirilerinin Gönderilmesi
+
+“Oku-Yorum, Yazı-Yorum” Projesi Uygulama Kılavuzu (Ekim 2026) kapsamında okulumuz (${OKUL}) öğrencilerince, Siyasetname (Nizâmülmülk) ve Hükümdar (Machiavelli) eserleri üzerine hazırlanan bildiriler (PDF) ile il paneline katılacak öğrenci ve danışman öğretmen bilgileri ekte sunulmuştur.
+
+Öğrenciler, bildiri başlıkları ve iletişim:
+${titles()}
+
+Danışman öğretmen: ${OGRT}, Türk Dili ve Edebiyatı Öğretmeni
+Proje yürütücüsü müdür yardımcısı: ……………………………
+
+Ek: 3 adet bildiri (PDF)
+
+Gereğini arz ederim.
+
+${OGRT}                                ${MUDUR}
+Türk Dili ve Edebiyatı Öğretmeni        Okul Müdürü`;
+  if(k==="hikayeTeslim") return `${d}
+
+${KOORD_KISA.toUpperCase()} MÜDÜRLÜĞÜNE
+(Aksaray / Merkez)
+
+Konu: “Yazı-Yorum” Okul Hikâyesinin Gönderilmesi
+
+“Oku-Yorum, Yazı-Yorum” Projesi Uygulama Kılavuzu (Ekim 2026) kapsamında okulumuzda yapılan değerlendirme sonucunda seçilen hikâye (PDF, sayfa üzerinde isim bilgisi bulunmayan), hikâyeye ait ayrı kişisel bilgi sayfası ile EK-4 (Veli İzin Belgesi), EK-5 (Telif Hakları Taahhütnamesi) ve EK-6 (Aydınlatma Metni ve Açık Rıza Onayı) belgeleri ekte sunulmuştur.
+
+Hikâyenin başlığı: ……………………………………………
+
+Ek:
+1. Hikâye (PDF)
+2. Kişisel bilgi sayfası
+3. EK-4, EK-5, EK-6 belgeleri
+
+Gereğini arz ederim.
+
+${OGRT}                                ${MUDUR}
+Türk Dili ve Edebiyatı Öğretmeni        Okul Müdürü`;
+  return "";
+}
+function panelLetter(s){
+  return `${todayStr()}
+
+Sayın Veli,
+
+Millî Eğitim Bakanlığı Ortaöğretim Genel Müdürlüğü “Oku-Yorum, Yazı-Yorum” Projesi kapsamında okulumuzdan hazırlanan bildiriler arasında öğrencinizin (${s.ad||"……………………"}) bildirisi de il panelinde değerlendirilecektir.
+
+Panelin tarihi : ……/……/2027
+Panelin yeri : ……………………………………………
+Çıkış / dönüş saati : ……………………………………
+
+Öğrencinizin panele katılımı için onayınızı rica ederiz.
+
+${OGRT}
+Türk Dili ve Edebiyatı Öğretmeni
+
+— — — — — — — — — — — — — — — — — — — — — — — — — — —
+Öğrencimin ${s.ad||"……………………"} il paneline katılmasına izin veriyorum.
+
+Veli adı soyadı: ${s.veli||"……………………"}      Telefon: ${s.tel||"……………"}
+İmza:                                         Tarih: ……/……/……….`;
+}
+
+const OT = [
+ {k:"Tür (üslup) özellikleri, yazar ve eser; eserlerin yazıldığı dönemin siyasi, kültürel, ekonomik, sosyal ve felsefi özellikleri",
+  q:["Hükümdara öğüt (siyasetname) türünün özellikleri neler? İki eser bu bakımdan nasıl karşılaştırılabilir?","Yazarlar kimdir, hangi görevlerde bulunmuşlardır? Bu durum yazdıklarını nasıl etkilemiş olabilir?","Eserlerin yazıldığı dönemin siyasi, kültürel, ekonomik, sosyal ve felsefi özellikleri nelerdir?","Yazar bu eseri neden ve kimin için yazmış olabilir?"],
+  r:["Tür ve üslup","Yazar ve görevi","Dönemin özellikleri","Yazılış amacı"]},
+ {k:"Seçilen eserlerin biçim, anlatım, metafor vb. bakımından karşılaştırmalı olarak değerlendirilmesi",
+  q:["Metin nasıl kurulmuş? Örnek ve hikâye mi, doğrudan öğüt mü, tez ve kanıt mı kullanılıyor?","Anlatımın dili ve tonu nasıl? Yazar okura nasıl sesleniyor?","Hangi benzetme, metafor ve simgeler öne çıkıyor?","Bu biçim, yazarın amacına hizmet ediyor mu?"],
+  r:["Metnin kuruluşu","Dil ve ton","Benzetme / metafor","Etkisi"]},
+ {k:"Seçilen eserlerdeki devletlerin var olma amaçları ve meşruiyet kaynaklarının karşılaştırmalı olarak değerlendirilmesi",
+  q:["Yazara göre devlet ne için vardır?","Hükümdarın yönetme hakkı neye dayanıyor?","Halk neden itaat eder? İtaatin bir sınırı var mı?","Meşruiyet kaynağı bakımından iki eser nerede ayrılıyor?"],
+  r:["Devletin amacı","Meşruiyet kaynağı","İtaat ve halk","Ayrışma noktası"]},
+ {k:"Seçilen eserlerde geçen yönetici tiplerinin ve adalet düzenlerinin karşılıklı olarak değerlendirilmesi",
+  q:["Yazara göre ideal yönetici nasıl biridir?","Hangi yönetici tipi kötü ya da tehlikeli sayılıyor?","Adalet devlet düzeninde nerede duruyor?","Yönetici çevresindeki insanlara (vezir, danışman, ordu) nasıl davranmalı?"],
+  r:["İdeal yönetici","Kötü yönetici","Adaletin yeri","Çevresiyle ilişkisi"]},
+ {k:"Seçilen eserlerdeki halk ve halkın rolünün siyaset ve sosyoloji bağlamında karşılaştırmalı olarak değerlendirilmesi",
+  q:["Halk nasıl tanımlanıyor, nasıl görülüyor?","Halkın devlet içindeki rolü nedir?","Hükümdar halka karşı ne yapmalıdır?","Siyaset ve sosyoloji açısından bu bakış ne söylüyor?"],
+  r:["Halkın tanımı","Halkın rolü","Hükümdar–halk ilişkisi","Sosyolojik yorum"]},
+ {k:"Seçilen eserlerden hareketle adalet, düzen, yönetim, halk-otorite ilişkisi bakımından günümüz siyaset teorilerine bakış",
+  q:["Eserlerdeki hangi görüşler bugünün yönetim anlayışıyla örtüşüyor, hangileri ayrışıyor?","Adalet ve düzen bugün nasıl sağlanıyor?","Halk ile otorite arasındaki ilişki bugün nasıl kuruluyor?","Bu altı oturumdan çıkardığın kendi sonuç cümlen nedir?"],
+  r:["Adalet","Düzen","Yönetim","Halk–otorite ilişkisi"]}
+];
+function oturumDoc(n){
+  const o = OT[n-1];
+  return pg(hd(n+". OTURUM FÖYÜ")
+   + `<p><b>Konu (EK-2):</b> ${esc(o.k)}</p><p>Tarih: ……/……/………. &nbsp;&nbsp; Ders saati: ………… &nbsp;&nbsp; Yer: …………………</p>`
+   + `<p><b>Katılım</b></p>` + tbl(["Öğrenci","İmza"], S.students.map(s=>[nm(s),""]), 30)
+   + `<p><b>Tartışma soruları</b></p><ol>${o.q.map(q=>`<li>${esc(q)}</li>`).join("")}</ol>`
+   + `<p><b>Karşılaştırma çalışma kâğıdı</b></p>` + tbl(["Başlık","Siyasetname (Nizâmülmülk)","Hükümdar (Machiavelli)","Benzerlik / fark"], o.r.map(r=>[esc(r),"","",""]), 62)
+   + `<p><b>Oturum notları ve bir sonraki oturuma görev</b></p>` + ln(3));
+}
+
+function scoreForm(key, crit, max, title, anon){
+  return S.students.map((s,i)=>{
+    const rows = crit.map((c,ci)=>{ const v = getPath(S,key+"."+i+"."+ci); return [(ci+1)+". "+esc(c), max, v==null?"":v, ""]; });
+    const vals = crit.map((c,ci)=>Number(getPath(S,key+"."+i+"."+ci))||0);
+    const any = crit.some((c,ci)=>{ const v = getPath(S,key+"."+i+"."+ci); return v!=null && v!==""; });
+    rows.push(["<b>Toplam</b>", crit.length*max, any ? vals.reduce((a,b)=>a+b,0) : "", ""]);
+    return pg(hd(title)
+      + (anon ? `<p>Hikâye No: <b>${i+1}</b> &nbsp;&nbsp; (isimsiz değerlendirme) &nbsp;&nbsp; Değerlendiren: …………………… &nbsp;&nbsp; Tarih: ……/……/……….</p>`
+              : info(s) + `<p>Bildiri başlığı: ${esc(s.baslik||s.konu)}</p><p>Değerlendiren: ${esc(OGRT)}</p>`)
+      + tbl(["Ölçüt","Üst puan","Verilen puan","Not"], rows, 38)
+      + `<p><b>Genel görüş ve gelişim önerileri</b></p>` + ln(4));
+  }).join("");
+}
+
+const DOCS = {
+ gorev:{t:"Görevlendirme talebi (müdürlüğe)", f:()=>pg(pre(textBody("gorev")))},
+ liste:{t:"Liste yazısı (koordinatör okula)", f:()=>pg(pre(textBody("liste")))},
+ sorular:{t:"Soru yazısı (koordinatör okula)", f:()=>pg(pre(textBody("sorular")))},
+ veli:{t:"Veli bilgilendirme yazısı (her öğrenci için bir sayfa)", f:()=>perStu(s=>pre("Öğrenci: "+(s.ad||"……………………")+"\n\n"+textBody("veli")))},
+ ogr:{t:"Öğrenci duyuru metni", f:()=>pg(pre(textBody("ogr")))},
+ ek4:{t:"EK-4 Veli İzin Belgesi (3 öğrenci)", f:()=>perStu(s=>formHTML("ek4",s))},
+ ek5:{t:"EK-5 Telif Hakları Taahhütnamesi (3 öğrenci)", f:()=>perStu(s=>formHTML("ek5",s))},
+ ek6:{t:"EK-6 Aydınlatma Metni ve Açık Rıza (3 öğrenci)", f:()=>perStu(s=>formHTML("ek6",s))},
+ okumaGunlugu:{t:"Okuma günlüğü (her öğrenci için)", f:()=>perStu(s=>hd("OKUMA GÜNLÜĞÜ")+info(s)+`<p>Eser: ☐ Siyasetname (Nizâmülmülk) &nbsp;&nbsp; ☐ Hükümdar (Machiavelli)</p>`+tbl(["Tarih","Okuduğum bölüm / sayfa","Yazar ne diyor?","Katılıyor muyum? Neden?","Aklıma takılan soru"], blank(9), 42))},
+ elestirel:{t:"Eleştirel okuma rehberi", f:()=>pg(hd("ELEŞTİREL OKUMA REHBERİ")
+   + `<p>Eleştirel okuma, metni olduğu gibi kabul etmek yerine sorgulayarak okumaktır. Okurken kendine şu soruları sor:</p>
+   <ol><li>Yazar bu bölümde ne söylüyor? (Kendi cümlelerinle yaz.)</li>
+   <li>Bunu neden söylüyor? Hangi örnek ya da kanıtı kullanıyor?</li>
+   <li>Bu görüş yazarın yaşadığı dönemle nasıl ilişkili?</li>
+   <li>Ben bu görüşe katılıyor muyum, neden? (Kanıta dayanan yorumun nesnel, kendi düşüncenin öznel olduğunu ayır.)</li>
+   <li>Diğer eser aynı konuda ne söylüyor? Benzer ve farklı yönler neler?</li>
+   <li>Bölümde öne çıkan anahtar kavramlar neler? (adalet, düzen, meşruiyet, halk gibi)</li>
+   <li>Bu görüş bugün için ne ifade eder?</li></ol>
+   <p><b>Okurken yap:</b> önemli yerlerin altını çiz, kenara kısa not al, alıntıları sayfa numarasıyla “alıntı tablosuna” yaz.</p>
+   <p><b>Projenin senden beklediği beceriler (Kılavuz, Madde 2):</b> nesnel ve öznel eleştiri yapmak, eski ve yeni bilgiyi birleştirmek, parçalar arasındaki ilişkiyi belirlemek, özgün bir bakış açısı geliştirmek, anahtar kavramları fark edip kullanmak.</p>`)},
+ tanitim:{t:"Yazarlar ve dönemler: başlangıç notu", f:()=>pg(hd("YAZARLAR VE DÖNEMLER: BAŞLANGIÇ NOTU")
+   + tbl(["","Siyasetname (Nizâmülmülk)","Hükümdar (Machiavelli)"], [
+      ["Eser","Siyasetname","Hükümdar (Prens)"],
+      ["Dönem ve yer","11. yüzyıl, Selçuklu devleti","Rönesans dönemi İtalya'sı (Floransa)"],
+      ["Yazarın görevi","Vezir","Devlet görevlisi ve düşünür"],
+      ["Eserin türü","Hükümdara öğüt (siyasetname)","Hükümdara öğüt"],
+      ["Yazılış amacı","",""],["Dönemin siyasi özellikleri","",""],["Dönemin kültürel ve sosyal özellikleri","",""]], 56)
+   + `<p class="mini" style="font-size:12.5px">Not: Dolu satırlar genel çerçevedir. Bilgileri öğrencilerin kullandığı baskının önsözünden doğrulayın, boş satırları birlikte tamamlayın.</p>`)},
+ bildiriRehberi:{t:"Bildiri nedir? Öğrenci rehberi", f:()=>pg(hd("BİLDİRİ NEDİR?")
+   + `<p>Bildiri, bir konuyu okuyup araştırarak ortaya koyduğun, kısa ve resmî dille yazılmış bilimsel yazıdır. Kitabın özeti değildir; eserleri karşılaştırıp <b>kendi yorumunu</b> ortaya koyduğun metindir.</p>`
+   + tbl(["Kompozisyon / özet","Bildiri"], [["“Ben bu kitabı okudum, şunları anlattı”","“Bu çalışmada iki eser şu açıdan karşılaştırılmıştır”"],["Duygu ve izlenim yazılabilir","Kanıta dayanır; kitaptan örnek ve alıntı verilir"],["“Ben” diye yazılır","3. tekil kişi: “incelenmiştir”, “görülmektedir”"],["Serbest üslup","Resmî, akademik üslup"]], 30)
+   + `<p><b>Bölümleri:</b></p><ol><li>Başlık</li><li>Özet (4-5 cümle)</li><li>Anahtar kavramlar (4-5 kelime)</li><li>Giriş (konu, eserler, yazarlar, amaç)</li><li>Gelişme (karşılaştırma; alıntı ve atıflar)</li><li>Sonuç ve değerlendirme (kendi yorumun, ana fikir)</li><li>Kaynakça</li></ol>
+   <p><b>Örnek cümle farkı:</b><br>Özet tarzı: “Nizâmülmülk kitabında adaletten çok bahsediyor.”<br>Bildiri tarzı: “Nizâmülmülk, Siyasetname'de adaleti devletin devamlılığının temel şartı olarak ele almaktadır.”</p>
+   <p><b>Biçim:</b> Times New Roman, 12 punto, 1,5 satır aralığı, PDF. <b>Değerlendirme ölçütleri (EK-7):</b> ${C7.map((c,i)=>(i+1)+") "+esc(c)).join("; ")}.</p>`)},
+ soylesi:{t:"Söyleşi / konuk dinleme notu (her öğrenci için)", f:()=>perStu(s=>hd("SÖYLEŞİ DİNLEME NOTU")+info(s)+`<p>Söyleşinin konusu: ……………………………………………………</p><p>Konuşmacı: ……………………………………………………</p><p><b>Öğrendiğim üç yeni şey</b></p>`+ln(4)+`<p><b>Bildirimde kullanabileceğim fikir</b></p>`+ln(3)+`<p><b>Konuşmacıya sormak istediğim soru</b></p>`+ln(2))},
+ oturum1:{t:"1. Oturum föyü", f:()=>oturumDoc(1)},
+ oturum2:{t:"2. Oturum föyü", f:()=>oturumDoc(2)},
+ oturum3:{t:"3. Oturum föyü", f:()=>oturumDoc(3)},
+ oturum4:{t:"4. Oturum föyü", f:()=>oturumDoc(4)},
+ oturum5:{t:"5. Oturum föyü", f:()=>oturumDoc(5)},
+ oturum6:{t:"6. Oturum föyü", f:()=>oturumDoc(6)},
+ alinti:{t:"Alıntı tablosu (her öğrenci için)", f:()=>perStu(s=>hd("ALINTI TABLOSU")+info(s)+tbl(["Eser","Bölüm / sayfa","Alıntı","Bildiride nasıl kullanacağım?"], blank(8), 50))},
+ konuSecimi:{t:"Bildiri konu belirleme formu (her öğrenci için)", f:()=>perStu(s=>hd("BİLDİRİ KONU BELİRLEME FORMU")+info(s)
+   + `<p><b>Seçtiğim konu:</b> ${esc(s.konu)}</p><p><b>Konuyu seçme nedenim:</b></p>${ln(3)}<p><b>Okuyacağım bölümler:</b> ${esc(s.bolumler)||"……………………………………………"}</p>${s.bolumler?"":ln(1)}<p><b>Aklımdaki anahtar kavramlar:</b> …………………………………………………</p>`
+   + `<p><b>Üç öğrencinin konuları (birbirinden farklı olmalı):</b></p>` + tbl(["Öğrenci","Konu"], S.students.map(x=>[nm(x), esc(x.konu)]), 34)
+   + `<p>Konum diğer öğrencilerinkinden farklıdır: ☐ &nbsp;&nbsp; Öğretmen onayı / imza: ………………</p>`)},
+ bildiriPlani:{t:"Bildiri planı: 1 sayfa (her öğrenci için)", f:()=>perStu(s=>hd("BİLDİRİ PLANI")+info(s)
+   + `<p><b>Başlık:</b> ${esc(s.baslik)||"……………………………………………………"}</p><p><b>Özet (4-5 cümle):</b></p>${ln(3)}<p><b>Anahtar kavramlar:</b> ………………………………………………</p><p><b>Giriş (konu, eserler, amaç):</b></p>${ln(2)}`
+   + `<p><b>Gelişme (3 ana başlık, her birinde alıntı ve sayfa no):</b></p><p>1. ……………………………………………………</p><p>2. ……………………………………………………</p><p>3. ……………………………………………………</p><p><b>Sonuç: Kendi yorumum / ana fikir:</b></p>${ln(3)}<p><b>Kaynakça:</b></p>${ln(2)}`)},
+ bildiriSablon:{t:"Bildiri yazım şablonu (her öğrenci için)", f:()=>perStu(s=>hd("BİLDİRİ YAZIM ŞABLONU")+info(s)
+   + `<p><b>BAŞLIK</b> (konuyu anlatan kısa ad): ${esc(s.baslik)||"…………………………………………………"}</p><p><b>ÖZET</b> (ne yapıldı, ne bulundu; 4-5 cümle)</p>${ln(2)}<p><b>ANAHTAR KAVRAMLAR:</b> …………………………………………</p>`
+   + `<p><b>GİRİŞ</b> (Hangi eserler, hangi yazarlar, bildirinin amacı: “Bu çalışmada ... incelenmiştir.”)</p>${ln(2)}<p><b>GELİŞME</b> (karşılaştırma, alıntı ve atıf, kendi yorumun; 3. tekil kişi)</p>${ln(4)}<p><b>SONUÇ VE DEĞERLENDİRME</b> (ana fikir)</p>${ln(2)}<p><b>KAYNAKÇA</b></p>${ln(1)}<p class="mini" style="font-size:12.5px">Biçim: Times New Roman, 12 punto, 1,5 satır aralığı, PDF.</p>`)},
+ ek7:{t:"EK-7 Bildiri değerlendirme formu (her öğrenci için)", f:()=>scoreForm("sc7", C7, S.max7, "EK-7 BİLDİRİ DEĞERLENDİRME FORMU", false)},
+ teslimKontrol:{t:"Bildiri teslim kontrol listesi (her öğrenci için)", f:()=>perStu(s=>hd("BİLDİRİ TESLİM KONTROL LİSTESİ")+info(s)+`<p>Bildiri başlığı: ${esc(s.baslik||s.konu)}</p>`
+   + tbl(["Kontrol","Tamam"], [
+      ...C7.map(c=>[esc(c),"☐"]),
+      ["Kaynakça var","☐"],["Times New Roman, 12 punto, 1,5 satır aralığı","☐"],["PDF olarak hazırlandı","☐"],
+      ["Siyasi, genel ahlaka ve toplum yapısına aykırı unsur yok","☐"],["Telif ihlali yok; kurum, firma, marka, kişi reklamı yok","☐"],
+      ["EK-4 Veli İzin Belgesi imzalı",box(s.ek4)],["EK-5 Telif Hakları Taahhütnamesi imzalı",box(s.ek5)],["EK-6 Aydınlatma Metni ve Açık Rıza imzalı",box(s.ek6)]], 28)
+   + signT())},
+ teslimYazisi:{t:"Bildiri gönderim yazısı: 18 Ocak (koordinatör okula)", f:()=>pg(pre(letterText("teslim")))},
+ panelBilgi:{t:"İl paneli veli bilgilendirme ve izin (her öğrenci için)", f:()=>perStu(s=>pre(panelLetter(s)))},
+ panelHazirlik:{t:"Panel sunum hazırlık notu (her öğrenci için)", f:()=>perStu(s=>hd("PANEL SUNUM HAZIRLIK NOTU")+info(s)+`<p>Bildiri başlığı: ${esc(s.baslik||s.konu)}</p><p>Sunum süresi (panelden öğrenilecek): ………… dk.</p>`
+   + `<p><b>Üç ana mesajım</b></p>${ln(3)}<p><b>Açılış cümlem</b></p>${ln(1)}<p><b>Sunumda kullanacağım alıntı</b></p>${ln(2)}`
+   + `<p><b>Olası sorular ve cevaplarım</b></p>` + tbl(["Soru","Cevap"], blank(3), 44)
+   + `<p>☐ Metni sesli okudum &nbsp;&nbsp; ☐ Süreyi ölçtüm &nbsp;&nbsp; ☐ Öğretmenimle prova yaptım</p>`)},
+ atolye:{t:"Yaratıcı yazarlık atölyesi planı", f:()=>pg(hd("YARATICI YAZARLIK ATÖLYESİ PLANI")
+   + `<p>Kılavuz, 2. dönemde çevrim içi eğitim, yazar/akademisyen buluşması ve kütüphane söyleşisi gibi etkinliklerin planlanıp gerçekleştirilmesini bekler (Madde 7).</p>`
+   + tbl(["Etkinlik","Konuk / yürüten","Tarih","Yer veya bağlantı","Durum"], [["Çevrim içi yaratıcı yazarlık eğitimi"],["Yazar / akademisyen buluşması"],["Kütüphane söyleşisi"],[""],[""]], 52)
+   + `<p><b>Notlar</b></p>` + ln(4))},
+ hikayeRehberi:{t:"Hikâye yazım rehberi (EK-8'e göre)", f:()=>{
+   const hints = ["Başlığın var mı? Paragrafların düzenli mi? Times New Roman, 12 punto, 1,5 satır aralığı, PDF.","Olay örgün sana mı ait? Sıradan bir kurgudan farkı ne?","Olaylar giriş, gelişme, sonuç mantığıyla tutarlı sıralanıyor mu?","İlk paragraf okuru çekiyor mu? Merak uyandıran bir düğüm var mı?","Yazım kuralları ve noktalama doğru mu?","Zengin söz varlığı: deyim, atasözü, benzetme kullandın mı?","Kişi, yer, zaman, olay örgüsü, anlatıcı ve tema var mı?"];
+   return pg(hd("HİKÂYE YAZIM REHBERİ")
+    + `<p>Hikâyen, okuduğumuz Siyasetname ve Hükümdar bağlamında (adalet, yönetim, halk, iktidar gibi) bir tema taşımalı. Aşağıdaki ölçütlere göre değerlendirileceksin:</p>`
+    + tbl(["Ölçüt (EK-8)","Kendine sor"], C8.map((c,i)=>[esc(c), esc(hints[i])]), 44)
+    + `<p><b>Önemli:</b> Sayfa üzerinde isim yazma. Kişisel bilgilerin ayrı bir sayfada verilir. Hikâyen başka bir yerde yayımlanmamış ve özgün olmalı.</p>`);}},
+ hikayePlani:{t:"Hikâye planı (her öğrenci için)", f:()=>perStu(s=>hd("HİKÂYE PLANI")+info(s)
+   + `<p><b>Çalışma başlığı:</b> ……………………………………………</p><p><b>Kişiler:</b></p>${ln(1)}<p><b>Yer ve zaman:</b></p>${ln(1)}<p><b>Anlatıcı:</b> ☐ 1. kişi &nbsp;&nbsp; ☐ 3. kişi</p><p><b>Merak uyandıran açılış:</b></p>${ln(2)}`
+   + `<p><b>Olay örgüsü:</b> Giriş</p>${ln(1)}<p>Gelişme</p>${ln(2)}<p>Sonuç</p>${ln(1)}<p><b>Siyasetname / Hükümdar ile bağlantısı (tema):</b></p>${ln(2)}`)},
+ ek8:{t:"EK-8 Hikâye değerlendirme formu (isimsiz, 3 adet)", f:()=>scoreForm("sc8", C8, S.max8, "EK-8 HİKÂYE DEĞERLENDİRME FORMU", true)},
+ hikayeKisisel:{t:"Kişisel bilgi sayfası: hikâyeden ayrı (her öğrenci için)", f:()=>perStu(s=>hd("KİŞİSEL BİLGİ SAYFASI")
+   + `<p class="mini" style="font-size:12.5px">Bu sayfa hikâyenin içinde değil, ayrı bir sayfa olarak gönderilir (Kılavuz, Madde 9/4).</p>`
+   + tbl(["",""], [["Öğrencinin adı soyadı",nm(s)],["Sınıfı",esc(s.sinif||"10")],["Okulu",esc(OKUL)],["Veli telefonu",esc(s.tel)||""],["Hikâyenin başlığı",""],["Danışman öğretmen",esc(OGRT)]], 40))},
+ hikayeTeslimYazisi:{t:"Hikâye gönderim yazısı: 10-11 Mayıs (koordinatör okula)", f:()=>pg(pre(letterText("hikayeTeslim")))},
+ arsiv:{t:"Proje dosyası arşiv kontrol listesi", f:()=>pg(hd("PROJE DOSYASI ARŞİV KONTROL LİSTESİ")
+   + tbl(["Belge","Var mı?"], [["Görevlendirme yazısı (müdür yardımcısı ve danışman öğretmen)","☐"],["Koordinatör okula gönderilen liste yazısı","☐"],["Oturum föyleri ve yoklamalar (6 oturum)","☐"],["Bildiriler (PDF) ve EK-7 değerlendirme formları","☐"],["İl paneli belgeleri ve fotoğrafları","☐"],["Hikâyeler (PDF) ve EK-8 değerlendirme formları","☐"],["EK-4, EK-5, EK-6 imzalı belgeleri (3 öğrenci)","☐"],["Katılım belgeleri (öğrenciler)","☐"],["Atölye ve söyleşi etkinlik kayıtları","☐"]], 32)
+   + signT())}
+};
+
+/* hafta numarası -> hazır çıktılar */
+const WD = {
+ 0:["gorev","veli","ogr","ek4","ek5","ek6"],
+ 1:["liste","sorular","okumaGunlugu"],
+ 2:["tanitim","elestirel","bildiriRehberi","okumaGunlugu"],
+ 3:["soylesi","okumaGunlugu"],
+ 4:["oturum1","alinti"],
+ 5:["oturum2","konuSecimi"],
+ 6:["oturum3","bildiriPlani"],
+ 7:["oturum4","alinti"],
+ 8:["oturum5"],
+ 9:["oturum6"],
+ 10:["bildiriSablon","ek7"],
+ 11:["ek7","teslimKontrol"],
+ 12:["teslimYazisi","teslimKontrol"],
+ 13:["panelBilgi","panelHazirlik"],
+ 14:["atolye"],
+ 15:["hikayeRehberi","atolye"],
+ 16:["hikayePlani","ek8"],
+ 17:["hikayeTeslimYazisi","hikayeKisisel","ek4","ek5","ek6"],
+ 18:[],
+ 19:[],
+ 20:["arsiv"]
+};
+
+function docsBlock(wi){
+  const ids = WD[wi] || [];
+  if(!ids.length) return `<div class="tip">Bu hafta yazdırılacak çıktı yok.</div>`;
+  return `<div class="card" style="background:#fffdf9;margin-top:14px"><b style="font-size:17px">Bu hafta yazdıracaklarım</b>
+  <div class="row" style="margin:10px 0"><button data-act="docall" data-w="${wi}">Hepsini yazdır</button><button class="alt" data-act="docwordall" data-w="${wi}">Hepsini Word olarak indir</button></div>
+  ${ids.map(id=>`<div class="task" style="cursor:default"><span style="flex:1"><b>${esc(DOCS[id].t)}</b></span><button class="alt sm" data-act="docprev" data-d="${id}">Önizle</button><button class="sm" data-act="docprint" data-d="${id}">Yazdır</button><button class="alt sm" data-act="docword" data-d="${id}">Word</button></div>`).join("")}
+  <p class="mini">Öğrenci bilgileri “Öğrencilerim” sayfasından gelir. Başka belgeler için “Tüm Çıktılar” sayfasına bakın.</p></div>`;
+}
+let pvIds = [];
+function openPV(ids){ pvIds = ids; $("#pvBody").innerHTML = ids.map(id=>DOCS[id].f()).join(""); $("#pv").style.display = "block"; $("#pv").scrollTop = 0; }
+function closePV(){ $("#pv").style.display = "none"; }
+
+/* ===== Word (.doc) olarak indirme ===== */
+function wordHTML(ids, name){
+  let i = 0;
+  const body = ids.map(id=>DOCS[id].f()).join("").replace(/<div class="paper pg">/g, ()=> (i++ ? '<br clear="all" style="page-break-before:always;mso-break-type:page-break"><div>' : '<div>'));
+  const body2 = body.replace(/<div style="white-space:pre-wrap[^"]*">([\s\S]*?)<\/div>/g, (m, t)=> '<p>'+t.replace(/\n/g,'<br>').replace(/ {2,}/g, sp=>'&nbsp;'.repeat(sp.length))+'</p>');
+  const css = 'body{font-family:"Times New Roman",serif;font-size:12pt;line-height:1.5}h3{text-align:center;font-size:14pt}h4{font-size:12pt;margin:10pt 0 3pt}p{margin:3pt 0}table{border-collapse:collapse;width:100%}td,th{border:1px solid #000;padding:4pt;vertical-align:top;font-size:11pt}th{background:#e8e8e8}.an{background:#dde6f5;font-size:9pt;font-family:Arial,sans-serif}.mini{font-size:10pt}';
+  return '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>'+esc(name)+'</title><!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument></xml><![endif]--><style>'+css+'</style></head><body>'+body2+'</body></html>';
+}
+function wordDoc(ids, name){
+  const tr = {"ı":"i","İ":"I","ğ":"g","Ğ":"G","ü":"u","Ü":"U","ş":"s","Ş":"S","ö":"o","Ö":"O","ç":"c","Ç":"C","â":"a","Â":"A","î":"i","û":"u"};
+  const safe = String(name).replace(/[ıİğĞüÜşŞöÖçÇâÂîû]/g, c=>tr[c]).replace(/[^A-Za-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,60).replace(/-+$/,"") || "cikti";
+  const blob = new Blob(["\ufeff"+wordHTML(ids, name)], {type:"application/msword"});
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "oku-yorum-"+safe+".doc";
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href), 3000);
+}
+function printIds(ids){ $("#printRoot").innerHTML = ids.map(id=>DOCS[id].f()).join(""); window.print(); }
+
+/* ================= ESERLER VE BİLDİRİ: ayrıntılı içerik ================= */
+const WTABS = [["bildiri","Bildiri nedir?"],["siy","Siyasetname"],["hukumdar","Hükümdar"],["fark","İki eser: farklar"],["anlatim","Sınıfta anlatım"],["ornek","Örnek bildiriler"],["sozluk","Kavramlar"],["cmp","Karşılaştırma tablosu"],["kaynak","Kaynaklar"]];
+const WDOC = {siy:"eserSiy", hukumdar:"eserPr", fark:"fark", anlatim:"anlatim", ornek:"ornekHepsi", sozluk:"sozluk"};
+
+/* Karşılaştırma tablosundaki ipuçları, araştırmaya göre güncellendi */
+(function(){
+  const set = (id,a,b)=>{ const r = CMP.find(x=>x.id===id); if(r){ if(a!=null) r.h1=a; if(b!=null) r.h2=b; } };
+  set("c3","Adaletli; cimri de israfçı da olmayan; danışan, ilim adamlarıyla görüşen hükümdar.","Devleti korumayı önceleyen; gerektiğinde aslan gibi güçlü, tilki gibi kurnaz davranan hükümdar (15. ve 18. bölüm).");
+  set("c4","Hükümdarın öncelikli görevi adaletle yönetmektir; zalim görevli görevden alınır ve suçu oranında cezalandırılır.","Ölçüt adaletten çok devletin korunması ve gücüdür (15. bölüm). Adaletin yerini kendin bul.");
+  set("c5","Allah her çağda birini seçip hükümdarlık özellikleriyle donatır; adil hükümdara halk saygı duyar.","Gücün ve başarının sonucu; iktidar meşruiyetini kendinden alır (Gökcan, 2018).");
+  set("c6","Yargılar ayet ve hadise dayanır; din uygulamaları denetlenir, sapkınlıkla mücadele edilir.","Din halkı yönlendirmede bir araç gibi görülür; hükümdar için dindar görünmek yeterli sayılabilir (Gökcan, 2018; 18. bölüm).");
+  set("c7","Âmil halka nazik davranır; ürün toplanmadan vergi istenmez; gerekirse tohum/öküz için borç verilir.","Halkın desteği devletin temelidir (9. bölüm); nefret uyandırmaktan kaçınılır (17. bölüm).");
+  set("c8","Vezirlik devletin en üst görevlerindendir; iyi vezir düzen getirir; vezir çobana benzetilir; görevliler gizlice denetlenir.","Dalkavuklardan kaçınılır, seçkin ve bilge birkaç danışman seçilir; karar hükümdara aittir (22-23. bölüm).");
+  set("c9","Askerlerin istihkakı ve ihtiyaçları belirlenir; askerî konular eserin kapsamlı bölümlerinden biridir.","Devletin iki temeli sağlam yasalar ve güçlü ordudur; paralı askere güvenilmez, kendi ordusu kurulmalıdır (12-14. bölüm).");
+  set("c10","Önce durum tespiti, sonra görüş ve uygulama; ayet, hadis, büyüklerin sözü ve kıssalarla desteklenir.","Kısa bölümler, doğrudan tez; Roma, Yunan ve İtalyan örnekleri.");
+  set("c11","Vezir–çoban benzetmesi; Behrâm-ı Gûr ve vezir kıssası; Sultan Mahmud–Emir Altıntaş vergi kıssası.","Aslan ve tilki (18. bölüm); taşkın nehir ve set (25. bölüm).");
+})();
+
+const an = t => `<span class="an">${t}</span>`;
+const jp = t => `<p style="text-align:justify;margin:4px 0 8px">${t}</p>`;
+const ul = a => `<ul>${a.map(x=>`<li>${x}</li>`).join("")}</ul>`;
+const OKUMA_UYARI = `<p style="font-size:12.5px;border-top:1px solid #999;padding-top:6px;margin-top:12px"><i>Bu not genel kaynaklardan derlenmiştir (Kaynaklar sekmesi). Bildiride kullanmadan önce bilgileri öğrencilerin okuduğu baskıdan doğrulayın; fasıl ve bölüm numaraları baskıya göre değişebilir.</i></p>`;
+
+function eserSiyHTML(){
+  return pg(hd("ESER NOTU: SİYASETNAME (NİZÂMÜLMÜLK)")
+  + tbl(["",""], [
+   ["Yazar","Nizâmülmülk (Ebû Ali Hasan b. Ali et-Tûsî). Yaklaşık 1018'de Tus yakınlarında doğdu; 14 Ekim 1092'de Nahavand yakınında öldü."],
+   ["Görevi","Büyük Selçuklu veziri. Alp Arslan (1063-1072) ve Melikşah (1072-1092) dönemlerinde yaklaşık 30 yıl (1064-1092) vezirlik yaptı. Nizamiye medreselerini kurdu."],
+   ["Ölümü","Isfahan'dan Bağdat'a yolculuk sırasında suikasta uğradı. Yaygın anlatıma göre saldırgan, Hasan Sabbah'ın gönderdiği bir Haşhaşi (Assassin) idi."],
+   ["Eser","Siyasetname (Siyerü'l-Mülûk). Farsça, 11. yüzyıl. Tür: siyasetname (hükümdara öğüt ve devlet yönetimi kitabı). Tamamlanışı: 1092."],
+   ["Yazılış nedeni","Sultan Melikşah, devlet adamlarından devletin ve toplumun durumu ile yönetim konusunda görüş yazmalarını istedi. Nizâmülmülk'ün kitabı onaylandı."],
+   ["Yapı","Baskıya göre 50 veya 51 fasıl (ayrıca bir giriş bölümü). İlk sürüm 39 fasılmış; sonradan 11 fasıl eklenmiştir. Son fasıllar daha çok devlete yönelen tehditleri, özellikle İsmailîleri ele alır. Bu son bölümlerin sonradan eklendiği ya da yoğun müdahale gördüğü modern araştırmalarda tartışılır. Konular sistemli bir sırayla verilmez, aynı konu farklı fasıllarda tekrarlanır."]
+  ], 30)
+  + `<h4>Ana fikirler</h4>` + ul([
+   "<b>Meşruiyet:</b> Allah her çağda halk arasından birini seçip hükümdarlık özellikleriyle donatır ve dünya işlerinden sorumlu kılar. Hükümdar adaletiyle halkın saygısını kazanır.",
+   "<b>Adalet:</b> Hükümdarın öncelikli görevi adaletle yönetmektir; her sınıfa hakkını vermek ve zayıfı korumak esastır. Zalim görevliler görevden alınır, suçları oranında cezalandırılır. Hükümdar Allah'a karşı sorumludur.",
+   "<b>Vezir ve görevliler:</b> Vezirlik devletin en üst görevlerindendir; iyi vezir düzen, kötü vezir karışıklık getirir. Vezir çobana benzetilir. Vezir ve görevliler gizlice denetlenmelidir. Hükümdar görevlilerin durumundan haberdar olmalıdır.",
+   "<b>Halk ve vergi:</b> Vergi toplayan âmil halka nazik davranmalı, ürün toplanmadan vergi istememeli, gerekirse tohum ya da öküz için borç vermelidir. Haksız vergi alan ikta sahibinin iktası elinden alınır.",
+   "<b>Ordu:</b> Askerlerin istihkakı belirlenir ve ihtiyaçları karşılanır. Askerî konular eserin kapsamlı bölümlerindendir.",
+   "<b>Mali düzen:</b> Gelir-gider kayıtları yazılı tutulur; iki ayrı hazine önerilir. Hükümdar cami, köprü, kanal, medrese gibi kamu hizmetlerini yaptırır.",
+   "<b>Din:</b> Değerlendirmeler ağırlıkla ayet ve hadise dayanır. Dinî uygulamalar denetlenir, sapkınlıkla mücadele edilir.",
+   "<b>Hükümdarın nitelikleri:</b> Ahlâkî üstünlük öne çıkar; cimri de israfçı da olmamalı, danışmalı ve ilim adamlarıyla görüşmelidir."])
+  + `<h4>Anlatım biçimi</h4>` + jp("Yazar çoğu zaman önce bir durumu tespit eder, sonra görüşünü bildirir ve uygulamanın nasıl yapılacağını anlatır. Bunu ayet, hadis, büyüklerin sözleri ve kıssalarla destekler. Örnekler: vezirin çobana benzetilmesi, Behrâm-ı Gûr ile vezir kıssası, Sultan Mahmud ile Emir Altıntaş arasındaki vergi hikâyesi. Hikâyelerde İran kralları, halifeler, Gazneli Mahmud, Hüsrev Anuşirvan gibi isimler geçer. Modern araştırmacılar bu kıssaların tarihî gerçeği kaydetmekten çok öğüdü güçlendirmek için kullanıldığını tartışır.")
+  + `<h4>Öğrenciye sorulabilecek sorular</h4>` + ul(["Kitap kime, hangi isteğin üzerine yazılmış? Bu, kitabın üslubunu nasıl etkilemiş olabilir?","Yazar adaleti neden bu kadar önemsiyor? Adaletsiz hükümdara ne olur?","Vezir neden çobana benzetilmiş? Bu benzetme sana ne düşündürüyor?","Kıssalar öğüdü güçlendiriyor mu, yoksa konuyu dağıtıyor mu?","Vergi hakkındaki öğütler bugün için de geçerli mi?"])
+  + `<h4>Okuma önerisi (10. sınıf için seçme bölümler)</h4>` + jp("Eserin tamamı yerine şu konulardaki bölümler okunabilir: hükümdarın görevi ve adalet, halkın şikâyetlerinin dinlenmesi, vezir ve görevliler, vergi ve âmil, ordu, danışma. Hangi fasılda olduklarını kullandığınız baskının içindekiler bölümünden bulun; numaralar baskıya göre değişir.")
+  + OKUMA_UYARI);
+}
+
+function eserPrHTML(){
+  return pg(hd("ESER NOTU: HÜKÜMDAR (MACHIAVELLI)")
+  + tbl(["",""], [
+   ["Yazar","Niccolò Machiavelli (1469-1527). Floransalı diplomat ve düşünür; Floransa devlet hizmetinde çalıştı."],
+   ["Eser","Hükümdar (Prens), İtalyanca Il Principe; ilk adı Latince De Principatibus. 1513'te yazıldı. Machiavelli'nin ölümünden beş yıl sonra, 1532'de basıldı. 26 bölümdür."],
+   ["Adanma","Lorenzo de' Medici'ye (Urbino Dükü). Önce Giuliano de' Medici için düşünülmüştü; Giuliano 1516'da öldü."],
+   ["Yazılış koşulu","Medici ailesi 1512'de Floransa'da yeniden iktidara geldi. Machiavelli görevden uzaklaştırıldı; sorgulandı, sonra salıverildi ve kırsala çekildi. Kitabı bu dönemde yazdı."],
+   ["Tarihî bağlam","15. yüzyıl sonunda Fransa Kralı VIII. Charles İtalya'yı işgal etti. İtalya yüzyıllarca Fransa ile İspanya arasında bir savaş alanı oldu, siyasi birliği yoktu. Machiavelli istikrarlı, birleşik ve güçlü bir İtalya istiyordu."],
+   ["Bölümleme","Genel kabul gören ayrım: 1-11. bölümler yönetim türleri ve devletin nasıl kazanıldığı; 12-14. bölümler ordu; 15-23. bölümler hükümdarın davranışı; 24-26. bölümler talih ve İtalya'nın kurtarılması çağrısı."]
+  ], 30)
+  + `<h4>Ana fikirler (bölüm numaralarıyla)</h4>` + ul([
+   "<b>7. bölüm:</b> Devleti kendi yeteneğiyle (virtù) kuran, başkasının talihiyle elde edenden daha kolay koruyabilir. Örnek: Cesare Borgia, babasının talihiyle Romagna'ya sahip oldu ama konumunu koruyamadı.",
+   "<b>9. bölüm:</b> İleri gelenler ezmek, halk ise ezilmemek ister. Hükümdar temelini halkın desteğine dayandırmalıdır.",
+   "<b>12-14. bölümler:</b> Her devletin iki temeli vardır: sağlam yasalar ve güçlü ordu. Paralı askerler disiplinsiz ve sadakatsizdir; yardımcı kuvvetler daha da tehlikelidir. Hükümdar savaşa hazırlığı ihmal etmemelidir.",
+   "<b>15. bölüm:</b> Machiavelli hayalî ideal yerine gerçeğe bakmak ister. Hükümdarın ilk görevi devleti korumaktır; bu uğurda kötü sayılan davranışlara başvurması gerekebilir.",
+   "<b>17. bölüm:</b> İkisi birlikte olamıyorsa korkulmak sevilmekten daha güvenlidir; ama hükümdar nefret uyandırmaktan kaçınmalıdır.",
+   "<b>18. bölüm:</b> Hükümdar hem yasayla hem güçle mücadele etmelidir; kurtlara karşı aslan gibi, tuzakları görmek için tilki gibi olmalıdır. İnsanlar görünüşe ve sonuca bakar.",
+   "<b>22-23. bölümler:</b> Hükümdar dalkavuklardan kaçınmalı, birkaç seçkin ve bilge danışman seçmeli, kararı kendisi vermelidir.",
+   "<b>25. bölüm:</b> Talih (fortuna) işlerin yaklaşık yarısını belirler, yarısı insanın iradesine ve yeteneğine kalır. Talih, set yapılmadığında zarar veren taşkın bir nehir gibidir. Zamana uyum sağlamak gerekir.",
+   "<b>26. bölüm:</b> Machiavelli Medici'yi, İspanyol ve İsviçreli güçlere karşı kendi ordusunu kurmaya ve İtalya'yı kurtarmaya çağırır."])
+  + `<h4>Anlatım biçimi</h4>` + jp("Kısa bölümler, doğrudan tez, ardından Roma, Yunan ve çağdaş İtalyan örnekleri. Dil sade ve kesindir. Benzetmeler (aslan ve tilki, taşkın nehir) soyut fikirleri akılda kalıcı yapar.")
+  + `<h4>Sık yapılan yanlış okuma</h4>` + jp("“Machiavelli amaca ulaşmak için her yolu mubah saymıştır” özeti kitabı basitleştirir. Kitapta devletin korunması ve bunun için gerçekçi olmak vurgulanır; ama aynı kitap nefret uyandırmaktan kaçınmayı, halkın desteğini ve kuvvetli yasaları da öne çıkarır. Bu cümlenin kitapta bu biçimde geçip geçmediğini öğrencilerle kendi baskınızdan arayın. Bu, öğrencilere kaynağa dönmeyi öğretmek için güzel bir fırsattır.")
+  + `<h4>Öğrenciye sorulabilecek sorular</h4>` + ul(["Machiavelli kitabı neden yazdı, kime yazdı? Yazıldığı koşullar kitabı nasıl etkilemiş?","15. bölümde “gerçeğe bakmak” ne demek? Bu bakış açısı sana doğru mu geliyor?","Korkulmak mı sevilmekten iyidir? Machiavelli’nin gerekçesi nedir? Sen katılıyor musun?","Aslan–tilki benzetmesi hükümdardan ne bekliyor?","Talih ile yetenek arasındaki denge bugünkü yaşamda da var mı?"])
+  + `<h4>Okuma önerisi</h4>` + jp("Eser kısa olduğu için tamamı okunabilir. Zaman kısıtlıysa en az şu bölümler: 7, 9, 12, 15, 17, 18, 23, 25, 26.")
+  + OKUMA_UYARI);
+}
+
+function farkHTML(){
+  return pg(hd("İKİ ESER: BENZERLİK VE FARKLAR (ÖĞRETMEN NOTU)")
+  + jp("Aşağıdaki tablo, iki eseri doğrudan karşılaştıran bir akademik makalenin (Gökcan, 2018) ve eserlere ilişkin diğer kaynakların özetidir. Bu bir <b>yorumdur</b>; öğrencilerden her maddeyi kendi okumalarıyla doğrulamalarını isteyin.")
+  + tbl(["Konu","Siyasetname (Nizâmülmülk)","Hükümdar (Machiavelli)"], [
+   ["Ortak amaç","Hükümdara yönetim öğütleri verir; öğütleri örneklerle destekler.","Hükümdara yönetim öğütleri verir; öğütleri örneklerle destekler."],
+   ["Örnek kaynakları","İran kralları, halifeler, ayet ve hadisler","Roma, Yunan ve İtalyan tarihi"],
+   ["Hükümdar tipi","Tek kişinin yönettiği monarşi; pratik ve gerçekçi yaklaşım","Tek kişinin yönettiği monarşi; pratik ve gerçekçi yaklaşım"],
+   ["Meşruiyet","İktidarın kaynağı Allah'tır; babadan oğula geçiş de meşruiyetin ikinci dayanağıdır.","İktidar dış bir dayanağa ihtiyaç duymaz; meşruiyetini kendi gücünden ve başarısından alır."],
+   ["Adalet","Hükümdarın temel niteliğidir; hükümdar Allah'ın emirlerini yeryüzünde uygulayandır.","Temel ölçüt güç, çıkar, devletin birliği ve bütünlüğüdür."],
+   ["Din","Hükümdar dinin ve devletin efendisidir; sapkınlıkla mücadele eder.","Din halkı yönlendirmede araçtır; hükümdarın dindar görünmesi yeterli sayılabilir."],
+   ["Ahlak","Temiz ahlak, sözünde durma, merhamet, cömertlik","Devletin bekası için gerektiğinde cimrilik, zalimlik, sözden dönme tercih edilebilir (pragmatizm)."],
+   ["Halk","Hükümdar ve halk karşılıklı sorumluluk içindedir; zulmeden hükümdar cezalandırılır.","İnsan doğası kötü kabul edilir, halka tam güvenilmez; yine de halkın desteği devletin temelidir."],
+   ["Danışma","Hükümdar danışmalı, ilim adamlarıyla görüşmeli","Seçkin birkaç danışman; dalkavuklardan kaçınma; son karar hükümdarındır"],
+   ["Ordu ve savaş","Ordu önemlidir; savaş iktidarı kurma ve korumanın aracıdır","Ordu önemlidir; kendi ordusu şarttır; savaş iktidarı kurma ve korumanın aracıdır"],
+   ["Tarihî bağlam","Genişleyen ama tehditlerle karşılaşan Selçuklu devleti (özellikle İsmailî/Batıni hareketler)","Parçalı ve yabancı egemenliği altındaki İtalya; birlik özlemi"]
+  ], 46)
+  + `<h4>Sınıfta vurgulanacak üç cümle</h4>` + ul([
+   "İkisi de hükümdara öğüt verir ve örneklerle ikna eder: <b>yöntem ortak</b>.",
+   "Biri iktidarı Tanrı'ya ve adalete bağlar, diğeri iktidarı gücüne ve sonucuna bağlar: <b>dayanak farklı</b>.",
+   "İkisi de halkın ve ordunun önemini görür: <b>gerekçeleri farklı</b>."])
+  + `<p style="font-size:12.5px"><i>Not: Machiavelli'nin “siyaseti dinden ve ahlaktan ayırdığı, modern siyaset anlayışının öncüsü sayıldığı” görüşü yaygındır ama tek yorum değildir. Öğrencilerin farklı yorumları da tartışmasına izin verin.</i></p>`);
+}
+
+function sozlukHTML(){
+  const t = [
+   ["Siyasetname","Hükümdara devlet yönetimi hakkında öğüt veren, genellikle tarih örnekleriyle desteklenmiş eserlerin genel adı. Nizâmülmülk'ün kitabı bu türün en önemli örneklerinden biridir."],
+   ["Hükümdara öğüt","Bir yöneticiye nasıl davranması gerektiğini anlatan edebî ve siyasi tür. Hem Siyasetname hem Hükümdar bu geleneğe dahil edilir."],
+   ["Meşruiyet","Bir yönetimin neden haklı ve kabul edilebilir sayıldığı. Nizâmülmülk'te kaynak Tanrı'nın seçimi ve adalettir; Machiavelli'de devletin gücü ve başarısıdır."],
+   ["Adalet","Her sınıfa hakkını vermek, zayıfı korumak. Siyasetname'de hükümdarın temel görevi."],
+   ["Vezir","Sultanın başlıca yardımcısı, devletin idari işlerinin başı. Nizâmülmülk yaklaşık 30 yıl Selçuklu veziri olmuştur."],
+   ["İstişare (danışma)","Karar vermeden önce bilgili kişilerle görüşme."],
+   ["İkta","Selçuklu'da gelirini toplama hakkı karşılığında devlete hizmet eden kişilere (özellikle askerlere) verilen toprak ya da gelir payı."],
+   ["Âmil / müşrif","Âmil vergi toplayan görevli; müşrif mali işleri denetleyen müfettiştir (Siyasetname'de anılır)."],
+   ["Kıssa","Öğüt vermek için anlatılan kısa hikâye. Siyasetname'de sık kullanılır."],
+   ["İsmailîler (Batıniler)","Selçuklu devletini tehdit eden bir hareket. Siyasetname'nin son bölümleri bu tehdide ayrılmıştır; Nizâmülmülk de bu hareketle ilişkilendirilen bir suikastta ölmüştür."],
+   ["Rönesans","14.-17. yüzyıllarda Avrupa'da, özellikle İtalya'da sanat, bilim ve düşüncenin yeniden canlandığı dönem. Machiavelli bu dönemin düşünürüdür."],
+   ["Virtù","Machiavelli'de hükümdarın yeteneği, becerisi, cesareti ve iradesi. Ahlâki erdemle birebir aynı değildir."],
+   ["Fortuna (talih)","Machiavelli'ye göre işlerin yaklaşık yarısını belirleyen, insanın kontrolü dışındaki şans ve koşullar. Kitapta taşkın bir nehre benzetilir."],
+   ["Pragmatizm","Düşünce ve davranışta ilkeden çok sonuca ve işe yararlılığa bakma."],
+   ["Atıf","Bildiride başka bir kaynaktan aldığın bilginin kaynağını belirtmek: (Yazar, yıl, sayfa)."],
+   ["Anahtar kavram","Bildirinin ana fikrini taşıyan, metin boyunca tekrarlanan temel sözcükler."]
+  ];
+  return pg(hd("KAVRAMLAR SÖZLÜĞÜ") + tbl(["Kavram","Anlamı"], t.map(r=>["<b>"+esc(r[0])+"</b>", esc(r[1])]), 28) + OKUMA_UYARI);
+}
+
+function anlatimHTML(){
+  const ders = (no, baslik, sure, hedef, adimlar, cikis) => pg(hd(no+". DERS: "+baslik)
+    + `<p>Süre: ${sure} &nbsp;&nbsp; Tarih: ……/……/……….</p><p><b>Hedef:</b> ${hedef}</p>`
+    + adimlar.map(a=>`<h4>${a[0]} <span style="font-weight:normal">(${a[1]})</span></h4>${a[2]}`).join("")
+    + `<h4>Çıkış kartı</h4>${jp(cikis)}`);
+  const d1 = ders(1,"TANIŞMA: İKİ YAZAR, İKİ ESER","40 dk","Öğrenciler yazarları, dönemlerini ve eserleri tanır; iki eserin aynı soruya farklı cevaplar verdiğini fark eder.",[
+    ["Isınma","5 dk", jp("Tahtaya yazın: <b>“Bir devleti yönetseydin, adalet mi güç mü daha önemli olurdu? Neden?”</b> Her öğrenci bir cümleyle cevap verir. Cevaplar tahtada kalır; ders sonunda geri dönülür.")],
+    ["Zaman çizelgesi","8 dk", tbl(["Yıl","Olay"], [["1018","Nizâmülmülk doğar"],["1064","Nizâmülmülk Selçuklu veziri olur (Alp Arslan dönemi)"],["1092","Nizâmülmülk öldürülür; Siyasetname tamamlanmıştır"],["1469","Machiavelli doğar"],["1513","Hükümdar yazılır"],["1532","Hükümdar basılır (Machiavelli 1527'de ölmüştür)"]], 26) + jp("Soru: <i>Aradaki kaç yüzyıl? İki yazar arasında hangi coğrafya, hangi inanç ve devlet düzeni farkı olabilir?</i>")],
+    ["Yazar ve eser kartları","10 dk", jp("Üç öğrenci: biri Nizâmülmülk kartını, biri Machiavelli kartını okur, üçüncüsü iki kartı karşılaştıran bir cümle kurar. Kartlar: “Eser notu” sayfalarının ilk tablosu.")],
+    ["Durum kartları","12 dk", jp("Üç durum okunur. Öğrenci önce “Yazarlar ne öğütlerdi?” diye tahmin yürütür, sonra eser notundan doğrular.")
+      + tbl(["Durum","Nizâmülmülk ne öğütler?","Machiavelli ne öğütler?"], [
+       ["Köyde kıtlık var, vergi toplanacak.","Ürün toplanmadan vergi istenmez; gerekirse tohum veya öküz için borç verilir.","Halkın desteği devletin temelidir (9. bölüm); hükümdar nefret uyandırmamalıdır (17. bölüm)."],
+       ["Bir görevli halka zulmediyor.","Zalim görevli görevden alınır, suçu oranında cezalandırılır; görevliler gizlice denetlenir.","Hükümdar dalkavuklardan kaçınmalı, bilge danışmanlarla gerçeği öğrenmelidir (22-23. bölüm)."],
+       ["Düşman sınırda; ordu paralı askerden oluşuyor.","Askerlerin istihkakı ve ihtiyaçları düzenli karşılanmalıdır.","Paralı asker güvenilmezdir; hükümdar kendi ordusunu kurmalıdır (12-14. bölüm)."]], 50)],
+    ["Kapanış","5 dk", jp("Isınma sorusuna dönülür: fikri değişen var mı? Neden?")]],
+    "“Bugün öğrendiğim bir benzerlik: …… Bir fark: …… Aklımdaki bir soru: ……”");
+  const d2 = ders(2,"KARŞILAŞTIRMA: BİÇİM, ANLATIM, BENZETME","40 dk","Öğrenciler iki eserin anlatım biçimini karşılaştırır ve alıntıyı doğru yerde kullanmayı öğrenir.",[
+    ["Üç sahne","10 dk", jp("Üç kısa ifade okunur, öğrenciler hangi esere ait olduğunu tahmin eder ve nedenini söyler:") + ul(["Vezir, devletin çobanı gibidir. (Siyasetname'deki vezir–çoban benzetmesi)","Hükümdar hem aslan hem tilki gibi davranmalıdır. (Hükümdar, 18. bölüm)","Talih, set yapılmamış bir nehir gibi taşar. (Hükümdar, 25. bölüm)"]) + jp("<i>İfadeler kitaplardaki benzetmelerin özetidir, birebir alıntı değildir.</i>")],
+    ["Kıssa mı, tez mi?","10 dk", jp("Sorular: Kıssa öğüdü güçlendiriyor mu, konuyu dağıtıyor mu? Machiavelli'nin kısa ve doğrudan tezleri okuru nasıl etkiliyor? Hangisi daha ikna edici?")],
+    ["Çalışma tablosu","12 dk", jp("Oturum föyündeki karşılaştırma çalışma kâğıdı birlikte doldurulur. Her cümle için sayfa/bölüm numarası yazılır.")],
+    ["Alıntı alıştırması","8 dk", jp("Öğrenci eserden bir cümleyi seçer ve alıntı tablosuna yazar: Eser | Bölüm/sayfa | Alıntı | Bildiride nasıl kullanacağım?")]],
+    "“Bugünkü tablodaki en güçlü satırım: …… Bildirimde şunu kullanacağım: ……”");
+  const d3 = ders(3,"BİLDİRİ NASIL YAZILIR?","40 dk","Öğrenciler özet/kompozisyon ile bildiri arasındaki farkı anlar, örnek bildirinin yapısını çözümler.",[
+    ["Fark tablosu","8 dk", jp("“Bildiri nedir?” sayfasındaki tablo okunur. Öğrenciler ikişer örnek cümle ekler.")],
+    ["Cümle dönüştürme","12 dk", tbl(["Özet dili","Bildiri dili (öğretmen anahtarı)"], [
+       ["Machiavelli kitabında halktan çok bahsediyor.","Machiavelli, Hükümdar'da halkın desteğini devletin temel dayanaklarından biri olarak ele almaktadır."],
+       ["Nizâmülmülk vezirin çok önemli olduğunu söylüyor.","Nizâmülmülk, Siyasetname'de veziri devletin en üst görevlerinden biri olarak değerlendirmektedir."],
+       ["Bence Machiavelli haklı.","Machiavelli'nin gerçekçi yaklaşımı, devletin korunması açısından bazı bakımlardan savunulabilir görünmektedir."],
+       ["İki kitap da orduyu önemsiyor.","Her iki eserde de ordunun, iktidarı kurma ve koruma bakımından önemine vurgu yapıldığı görülmektedir."],
+       ["Bu konuyu anlatacağım.","Bu çalışmada ... konusu incelenmiştir."]], 40) + jp("Öğrenciler önce sol sütunu bildiri diline kendileri çevirir, sonra anahtara bakar.")],
+    ["Örnek bildirinin anatomisi","12 dk", jp("“Örnek bildiriler” sayfasından biri okunur. Her paragrafın başındaki etiket (özet, giriş, gelişme, sonuç) önce kapatılır; öğrenciler paragrafın görevini tahmin eder.")],
+    ["Öz değerlendirme","8 dk", jp("EK-7 ölçütleri okunur. Öğrenci, örnek bildiriyi 8 ölçüte göre değerlendirir: hangisi var, hangisi eksik?")]],
+    "“Bildirimin başlığı: …… Üç anahtar kavramım: ……”");
+  return d1 + d2 + d3;
+}
+
+/* ---- Örnek bildiriler ---- */
+const BP = [
+ {baslik:"Siyasetname ve Hükümdar'da Anlatım Biçimi ve Benzetmeler: Kıssa mı, Tez mi?",
+  ozet:"Bu çalışmada, Nizâmülmülk'ün Siyasetname'si ile Machiavelli'nin Hükümdar adlı eseri biçim, anlatım ve benzetmeler bakımından karşılaştırılmıştır. İncelemede iki eserin de hükümdara yönetim öğütleri verdiği, ancak bu öğütleri farklı yollarla okura ulaştırdığı görülmüştür. Siyasetname'de ayet, hadis ve kıssalarla desteklenen bir anlatım öne çıkarken Hükümdar'da kısa ve doğrudan tezlerin tarihî örneklerle güçlendirildiği bir anlatım dikkati çekmektedir. Çalışmanın sonunda, anlatım biçimindeki farkın yazarların dayandığı değerlerle ilişkili olduğu sonucuna varılmıştır.",
+  anahtar:"Siyasetname, Hükümdar, anlatım biçimi, kıssa, benzetme",
+  giris:"Hükümdara öğüt veren eserler, farklı çağlarda ve coğrafyalarda yazılmış olsa da okurunu ikna etmek için benzer bir sorunla karşılaşır: Yönetim bilgisi nasıl anlatılmalı ve öğüt nasıl inandırıcı kılınmalıdır? Nizâmülmülk, 11. yüzyılda Selçuklu sultanı Melikşah'ın isteği üzerine Siyasetname'yi yazmış; Machiavelli ise 1513'te Hükümdar'ı kaleme almıştır. Bu çalışmanın amacı, iki eserin biçim ve anlatım özelliklerini karşılaştırarak yazarların okuru ikna yöntemlerini ortaya koymaktır. İnceleme, her iki eserden seçilmiş bölümler ve konuyla ilgili ikincil kaynaklar üzerinden yapılmıştır.",
+  gel:[["Siyasetname'de anlatım","Siyasetname'de yazar genellikle önce bir durumu tespit etmekte, ardından görüşünü bildirmekte ve uygulamanın nasıl yapılacağını açıklamaktadır. Bu açıklamalar ayet, hadis, büyüklerin sözleri ve kıssalarla desteklenmektedir (Nizâmülmülk, Siyasetname, [sayfa]). Örneğin vezirin devlet içindeki yeri çobana yapılan benzetmeyle anlatılmış, Behrâm-ı Gûr ile vezir kıssası bu konuyu somutlaştırmak için kullanılmıştır. Vergi konusunda ise Sultan Mahmud ile Emir Altıntaş arasında geçen bir hikâyeye yer verilmiştir. Bu örnekler, öğüdün soyut bir kural olarak kalmayıp tarihî bir olayla ilişkilendirilmesini sağlamaktadır. Eserde konuların her zaman sistemli bir sırayla verilmediği ve bazı konuların farklı fasıllarda yinelendiği de belirtilmelidir."],
+   ["Hükümdar'da anlatım","Hükümdar, bölümlere ayrılmış, kısa ve doğrudan bir metindir. Machiavelli çoğu bölümde bir görüş öne sürmekte ve bu görüşü Roma, Yunan ve çağdaş İtalyan örnekleriyle desteklemektedir (Gökcan, 2018). Örneğin 7. bölümde Cesare Borgia'nın devleti babasının talihi sayesinde elde etmesine rağmen onu koruyamaması, kendi gücüyle kurulan devletlerle karşılaştırılmıştır (Machiavelli, Hükümdar, 7. bölüm). Eserde iki benzetme dikkat çekicidir: 18. bölümde hükümdarın hem aslan hem tilki gibi davranması gerektiği, 25. bölümde ise talihin, set yapılmadığında zarar veren taşkın bir nehre benzetildiği anlatılmaktadır. Bu benzetmeler soyut fikirleri akılda kalıcı görüntülere dönüştürmektedir."],
+   ["Karşılaştırma","İki eser karşılaştırıldığında ortak bir yöntem görülmektedir: her ikisi de görüşünü örneklerle desteklemektedir (Gökcan, 2018). Ancak örneklerin kaynağı ve işlevi farklıdır. Nizâmülmülk'ün örnekleri ayet, hadis ve İran kralları ile halifeler gibi dinî ve geleneksel otoritelerden gelirken Machiavelli'nin örnekleri Roma ve İtalyan siyasi tarihinden seçilmiştir. Siyasetname'de kıssa, öğüdü dinî ve ahlâkî bir zemine oturtarak güçlendirmekte; Hükümdar'da ise örnek, tezin gözleme dayalı kanıtı olarak kullanılmaktadır. Bu farkın, Nizâmülmülk'ün meşruiyeti Tanrı'ya dayandıran, Machiavelli'nin ise iktidarı gücüne ve sonucuna bağlayan yaklaşımıyla ilişkili olduğu düşünülebilir."]],
+  sonuc:"Bu çalışmada Siyasetname ve Hükümdar'ın anlatım biçimleri karşılaştırılmıştır. Her iki eser de hükümdara öğüt veren birer metin olarak örneklerle ikna etme yöntemini kullanmakla birlikte, Siyasetname dinî ve geleneksel kaynaklara dayalı, kıssa ağırlıklı bir anlatımı; Hükümdar ise kısa tezlere ve gözleme dayalı bir anlatımı benimsemektedir. Bu bulgular, anlatım biçiminin yazarın dayandığı değerlerle bağlantılı olduğunu düşündürmektedir. Yine de bu sonuç iki eserden seçilen bölümlere dayanmaktadır; eserlerin tamamının incelenmesi daha kesin yargılara imkân verecektir."},
+ {baslik:"Siyasetname ve Hükümdar'da Hükümdara Öğütler: Danışma, Denetim ve Ordu",
+  ozet:"Bu çalışmada Nizâmülmülk'ün Siyasetname'si ile Machiavelli'nin Hükümdar'ında hükümdarın çevresindekilerle ilişkisi ve ordu konusundaki öğütler karşılaştırılmıştır. İncelemede her iki eserin de danışmayı ve güçlü bir orduyu önemsediği görülmüştür. Ancak Siyasetname görevlilerin denetimi ve mali işleyiş gibi idari ayrıntılara geniş yer verirken Hükümdar'ın hükümdarın şahsi tutumuna ve ordunun kendi gücüne dayanması gerektiğine odaklandığı anlaşılmıştır.",
+  anahtar:"hükümdar, danışma, denetim, ordu, devlet yönetimi",
+  giris:"Bir devletin yönetimi yalnızca hükümdarın kişisel niteliklerine değil, çevresindeki görevlilere ve sahip olduğu güce de bağlıdır. Bu nedenle hükümdara öğüt veren eserlerde danışma, görevlilerin denetimi ve ordu önemli yer tutar. Bu çalışmanın amacı, Siyasetname ve Hükümdar'da bu üç konunun nasıl ele alındığını karşılaştırmaktır. İnceleme, eserlerin ilgili bölümleri ve bu konuları karşılaştıran bir makale (Gökcan, 2018) üzerinden yapılmıştır.",
+  gel:[["Danışma ve hükümdarın çevresi","Siyasetname'de hükümdarın danışma yapması ve ilim adamlarıyla görüşmesi öğütlenmektedir (Nizâmülmülk, Siyasetname, [sayfa]). Vezirlik devletin en üst görevlerinden sayılmakta, iyi bir vezirin düzene, kötü bir vezirin karışıklığa yol açacağı belirtilmektedir. Ayrıca vezir ve diğer görevlilerin gizlice denetlenmesi gerektiği vurgulanmaktadır. Hükümdar'da ise 22. ve 23. bölümlerde dalkavuklardan kaçınılması, hükümdarın yanına birkaç seçkin ve bilge danışmanı alması ve kararı kendisinin vermesi gerektiği ifade edilmektedir (Machiavelli, Hükümdar, 23. bölüm). İki eser bu noktada danışmanın gerekliliğinde birleşmekte, ancak Siyasetname denetim mekanizmasına, Hükümdar ise dalkavukluk tehlikesine ve son kararın hükümdara ait olduğuna vurgu yapmaktadır."],
+   ["Ordu","Siyasetname'de askerlerin istihkakının belirlenmesi ve ihtiyaçlarının karşılanması gerektiği belirtilmektedir; askerî konular eserin kapsamlı bölümlerinden birini oluşturmaktadır (Nizâmülmülk, Siyasetname, [sayfa]). Hükümdar'da ise 12. bölümde her devletin iki temeli olduğu, bunların sağlam yasalar ve güçlü ordu olduğu söylenmektedir. Machiavelli paralı askerlerin disiplinsiz ve sadakatsiz olduğunu, yardımcı kuvvetlerin ise daha tehlikeli olduğunu belirtmekte, hükümdarın kendi ordusuna dayanması gerektiğini savunmaktadır (Machiavelli, Hükümdar, 12-14. bölüm). Gökcan'a (2018) göre her iki yazar da savaşı iktidarı kurmanın ve korumanın bir aracı olarak görmektedir."],
+   ["İdari ayrıntı ve genel ilke","Siyasetname'de mali işlerin düzeni de ayrıntılı biçimde ele alınmakta, gelir ve giderin yazılı kayıt altına alınması ve iki ayrı hazine tutulması önerilmektedir (Nizâmülmülk, Siyasetname, [sayfa]). Hükümdar'ın incelenen bölümlerinde bu düzeyde idari ayrıntıya rastlanmamıştır. Bu durum, Siyasetname'nin geniş bir devlet teşkilatını yönetmenin pratik sorularına, Hükümdar'ın ise iktidarın kazanılması ve korunması gibi genel ilkelere yöneldiğini düşündürmektedir."]],
+  sonuc:"Bu çalışmada Siyasetname ve Hükümdar'daki danışma, denetim ve ordu konulu öğütler karşılaştırılmıştır. Her iki eser de hükümdarın danışmasını ve ordusunun güçlü olmasını önemsemektedir. Siyasetname bu konuları kurumsal ve idari ayrıntılarla işlerken Hükümdar, hükümdarın tutumuna ve ordunun kendi gücüne dayanması gerektiğine odaklanmaktadır. Bu fark, iki eserin yazıldığı devlet yapıları ve yazarların konumlarıyla ilişkili olabilir. Yine de bu değerlendirme eserlerin seçilmiş bölümlerine dayanmakta olup daha geniş bir okumayla desteklenmelidir."},
+ {baslik:"Adalet, Din ve Halk: Siyasetname ve Hükümdar'da Meşruiyet Anlayışı",
+  ozet:"Bu çalışmada Nizâmülmülk'ün Siyasetname'si ile Machiavelli'nin Hükümdar'ında adalet, din ve halk kavramları meşruiyet anlayışı bağlamında karşılaştırılmıştır. Siyasetname'de iktidarın kaynağının Tanrı'ya, hükümdarın itibarının ise adalete dayandırıldığı; Hükümdar'da ise devletin korunmasının ve halkın desteğinin öne çıktığı görülmüştür. İki eserde de halkın önemi kabul edilmekle birlikte gerekçeler farklıdır.",
+  anahtar:"meşruiyet, adalet, din, halk, hükümdar",
+  giris:"Bir hükümdarın yönetme hakkını neye dayandırdığı sorusu, siyaset düşüncesinin temel sorularından biridir. Nizâmülmülk ve Machiavelli bu soruya farklı çağlarda ve farklı toplumlarda cevap aramışlardır. Bu çalışmanın amacı, Siyasetname ve Hükümdar'da meşruiyetin dayanağını ve adalet, din ve halkın bu dayanaktaki yerini karşılaştırmaktır. İnceleme, eserlerin ilgili bölümlerine ve konuyu karşılaştıran bir makaleye (Gökcan, 2018) dayanmaktadır.",
+  gel:[["Meşruiyet ve adalet","Siyasetname'de Allah'ın her çağda halk arasından birini seçip hükümdarlık özellikleriyle donattığı ve onu dünya işlerinden sorumlu kıldığı belirtilmektedir; hükümdar adaletiyle halkın saygısını kazanır (Nizâmülmülk, Siyasetname, [sayfa]). Hükümdarın öncelikli görevi adaletle yönetmektir; zalim görevliler görevden alınmalı ve suçları oranında cezalandırılmalıdır. Hükümdar Allah'a karşı sorumludur. Hükümdar'da ise 15. bölümde devleti korumanın hükümdarın ilk görevi olduğu, bu uğurda kötü sayılan davranışlara gerek duyulabileceği ifade edilmektedir (Machiavelli, Hükümdar, 15. bölüm). Gökcan'a (2018) göre Machiavelli iktidarın meşruiyetini dış bir dayanağa değil, iktidarın kendisine bağlamaktadır."],
+   ["Din","Siyasetname'deki değerlendirmeler ağırlıklı olarak ayet ve hadislere dayanır; dinî uygulamaların denetlenmesi ve sapkınlıkla mücadele hükümdarın görevleri arasında sayılmıştır (Nizâmülmülk, Siyasetname, [sayfa]). Gökcan'a (2018) göre Nizâmülmülk'te hükümdar hem dinin hem devletin efendisidir. Machiavelli'de ise din, halkı yönlendirmede bir araç olarak görülmekte ve hükümdarın gerektiğinde dindar görünmesinin yeterli olduğu düşünülmektedir. Bu görüş, 18. bölümde insanların görünüşe ve sonuca bakacağı düşüncesiyle uyumludur (Machiavelli, Hükümdar, 18. bölüm)."],
+   ["Halk","Siyasetname'de vergi toplayan görevlinin halka nazik davranması, ürün toplanmadan vergi istememesi ve gerekirse tohum veya öküz için borç vermesi öğütlenmektedir; haksız vergi alan ikta sahibinin iktası elinden alınır (Nizâmülmülk, Siyasetname, [sayfa]). Gökcan'a (2018) göre burada hükümdar ve halk karşılıklı sorumluluk içindedir. Hükümdar'da halk ise 9. bölümde ileri gelenlerle karşılaştırılmakta; ileri gelenlerin ezmek, halkın ezilmemek istediği, hükümdarın temelini halkın desteğine dayandırması gerektiği söylenmektedir. 17. bölümde ise hükümdarın nefret uyandırmaktan kaçınması öğütlenir (Machiavelli, Hükümdar, 9 ve 17. bölüm)."]],
+  sonuc:"Bu çalışmada Siyasetname ve Hükümdar'da adalet, din ve halk, meşruiyet anlayışı bağlamında karşılaştırılmıştır. Siyasetname'de iktidarın kaynağı Tanrı'ya, hükümdarın itibarı adalete, halkla ilişki ise karşılıklı sorumluluğa dayanmaktadır. Hükümdar'da ise devletin korunması, güç ve halkın desteği öne çıkmaktadır. Her iki eserde de halkın önemi kabul edilmekle birlikte, Siyasetname bunu adalet ve sorumluluk, Hükümdar ise devletin devamı gerekçesiyle ele almaktadır. Bu değerlendirme, eserlerin seçilmiş bölümlerine ve bir ikincil kaynağa dayandığından, daha kapsamlı okumalarla sınanmalıdır."}
+];
+function bildiriHTML(n){
+  const b = BP[n-1];
+  const sec = (lbl, body) => `${an(lbl)}${body}`;
+  return pg(hd("ÖRNEK BİLDİRİ "+n)
+   + `<p style="font-size:12.5px;border:1px solid #999;padding:6px 8px"><b>Öğretmen notu:</b> Bu metin öğrencilere yapıyı göstermek için hazırlanmıştır; öğrencinin kendi bildirisi olarak gönderilemez (EK-7, 4. ölçüt: özgünlük). Köşeli parantezli [sayfa] yerlerine, kullandığınız baskının sayfa numarası yazılır. Mavi etiketler bildirinin bölümlerini gösterir.</p>`
+   + `<p style="text-align:center;font-size:16px;margin:12px 0 4px"><b>${esc(b.baslik)}</b></p>`
+   + jp(sec("ÖZET (4-5 cümle: ne yapıldı, ne bulundu)", "<b>Özet.</b> "+esc(b.ozet)))
+   + jp(`<b>Anahtar kavramlar:</b> ${esc(b.anahtar)}`)
+   + `<h4>1. Giriş</h4>` + jp(sec("GİRİŞ (konu, eserler, amaç, yöntem)", esc(b.giris)))
+   + `<h4>2. Gelişme</h4>` + b.gel.map((g,i)=>`<h4 style="font-weight:normal;font-style:italic">2.${i+1}. ${esc(g[0])}</h4>` + jp(sec(i===0?"GELİŞME (alıntı, atıf, karşılaştırma)":i===2?"KARŞILAŞTIRMA / YORUM":"GELİŞME", esc(g[1])))).join("")
+   + `<h4>3. Sonuç ve değerlendirme</h4>` + jp(sec("SONUÇ (ana fikir, sınırlılık)", esc(b.sonuc)))
+   + `<h4>Kaynakça</h4>` + ul([
+      "Gökcan, Ö. (2018). Machiavelli ve Nizamülmülk'te devlet yönetimi: Hükümdar (Prens) ve Siyasetname üzerine karşılaştırmalı bir analiz. <i>Munzur Üniversitesi Sosyal Bilimler Dergisi, 6</i>(12).",
+      "Machiavelli, N. <i>Hükümdar</i>. [Çevirmen, yayınevi, basım yılı: kullandığınız baskıdaki bilgiler]",
+      "Nizâmülmülk. <i>Siyasetname</i>. [Çevirmen, yayınevi, basım yılı: kullandığınız baskıdaki bilgiler]"]));
+}
+function ornekGirisHTML(){
+  return pg(hd("ÖRNEK BİLDİRİLER: NASIL KULLANILIR?")
+   + jp("Aşağıdaki üç örnek bildiri, uygulamadaki üç öneri konuya karşılık gelir. Her biri yaklaşık 3-4 sayfalık bir bildirinin yapısını gösterir: özet, anahtar kavramlar, giriş, gelişme, sonuç, kaynakça.")
+   + `<h4>Sınıfta nasıl kullanılır?</h4>` + ul(["Önce bir örnek bildiriyi etiketsiz okutun; öğrenciler her paragrafın görevini tahmin etsin.","Sonra etiketleri açın, tahminleri kontrol edin.","“Sınıfta anlatım” 3. dersteki cümle dönüştürme alıştırmasını yapın.","Öğrencilere kendi konularında aynı yapıyı kullanmalarını, <b>cümleleri kopyalamamalarını</b> söyleyin.","Örnek bildirilerdeki sınırlılık cümlelerine (“bu sonuç seçilmiş bölümlere dayanmaktadır”) dikkat çekin: iyi bildiri neyi bilmediğini de söyler."])
+   + `<h4>Bu örneklerde dikkat edilenler</h4>` + ul(["3. tekil kişi ve resmî üslup (“incelenmiştir”, “görülmektedir”).","Her iddianın bir dayanağı var: eserden bölüm numarası ya da ikincil kaynak.","Siyasetname için sayfa numaraları [sayfa] olarak boş bırakıldı; baskıdan doldurulmalıdır.","Alıntı yerine özetleyen aktarım kullanıldı; öğrenciler kısa doğrudan alıntıyı tırnak ve sayfa numarasıyla ekleyebilir."])
+   + `<h4>Üç örnek bildiri</h4>` + tbl(["No","Konu","Odak"], [["1","Anlatım biçimi ve benzetmeler","Kıssa mı, tez mi?"],["2","Hükümdara öğütler","Danışma, denetim, ordu"],["3","Adalet, din ve halk","Meşruiyet anlayışı"]], 30));
+}
+function kaynakHTML(){
+  const L = (u,t)=>`<li><a href="${u}" target="_blank" rel="noopener">${esc(t)}</a></li>`;
+  return `<div class="card"><b>Araştırmada kullanılan kaynaklar</b>
+   <p class="mini">Bu sekmedeki ve çıktılardaki bilgiler aşağıdaki kaynaklardan derlendi. Bildiride kullanmadan önce öğrencilerin kullandığı baskıdan doğrulayın.</p>
+   <ul>
+   ${L("https://dergipark.org.tr/tr/download/article-file/510143","Gökcan, Ö. (2018). Machiavelli ve Nizamülmülk'te Devlet Yönetimi: Hükümdar (Prens) ve Siyasetname Üzerine Karşılaştırmalı Bir Analiz. Munzur Üniversitesi Sosyal Bilimler Dergisi, 6(12) — iki eseri doğrudan karşılaştırır")}
+   ${L("https://dergipark.org.tr/en/download/article-file/906662","DergiPark makalesi: Siyasetname'nin yapısı, mali ve idari konuları (fasıl sayısı, vezir, vergi, ordu, anlatım biçimi)")}
+   ${L("https://en.wikipedia.org/wiki/Siyasatnama","Wikipedia: Siyasatnama (yapı, yazılış nedeni, temalar)")}
+   ${L("https://en.wikipedia.org/wiki/Nizam_al-Mulk","Wikipedia: Nizam al-Mulk (hayatı, görevleri, ölümü)")}
+   ${L("https://en.wikipedia.org/wiki/The_Prince","Wikipedia: The Prince (yazılış, adanma, basım, ana kavramlar)")}
+   ${L("https://litwiki.org/wiki/The_Prince","LitWiki: The Prince (bölüm özetleri, tarihî bağlam)")}
+   </ul></div>
+   <div class="warn"><b>Bilmeniz gerekenler:</b> Siyasetname'nin fasıl sayısı kaynaklara ve baskılara göre 50, 51 veya 52 olarak geçer. Bölüm ve sayfa numaralarını öğrencilerin okuduğu baskıdan alın. Wikipedia ve genel kaynaklar öğrenciye kaynakça olarak verilmemeli; akademik makale ve kitap tercih edilmeli.</div>`;
+}
+
+Object.assign(DOCS, {
+ eserSiy:{t:"Eser notu: Siyasetname (Nizâmülmülk)", f:eserSiyHTML},
+ eserPr:{t:"Eser notu: Hükümdar (Machiavelli)", f:eserPrHTML},
+ fark:{t:"İki eser: benzerlik ve farklar (öğretmen notu)", f:farkHTML},
+ sozluk:{t:"Kavramlar sözlüğü", f:sozlukHTML},
+ anlatim:{t:"Sınıfta anlatım: 3 ders planı", f:anlatimHTML},
+ ornek1:{t:"Örnek bildiri 1: anlatım biçimi ve benzetmeler", f:()=>bildiriHTML(1)},
+ ornek2:{t:"Örnek bildiri 2: hükümdara öğütler", f:()=>bildiriHTML(2)},
+ ornek3:{t:"Örnek bildiri 3: adalet, din ve halk", f:()=>bildiriHTML(3)},
+ ornekHepsi:{t:"Örnek bildiriler (giriş + 3 bildiri)", f:()=>ornekGirisHTML()+bildiriHTML(1)+bildiriHTML(2)+bildiriHTML(3)}
+});
+Object.assign(WD, {
+ 2:["tanitim","anlatim","elestirel","bildiriRehberi","okumaGunlugu"],
+ 3:["eserSiy","eserPr","sozluk","soylesi","okumaGunlugu"],
+ 4:["oturum1","fark","alinti"],
+ 5:["oturum2","ornek1","konuSecimi"],
+ 6:["oturum3","ornek2","bildiriPlani"],
+ 7:["oturum4","ornek3","alinti"]
+});
+
+
+/* ===== Tüm Çıktılar ===== */
+let selDocs = new Set();
+const DOC_GROUPS = [
+ ["Okula ve müdürlüğe yazılar","Resmî yazılar: görevlendirme, koordinatör okula liste, sorular, bildiri ve hikâye gönderimi.",["gorev","liste","sorular","teslimYazisi","hikayeTeslimYazisi"]],
+ ["Veli ve öğrenci belgeleri","Veli izni, telif, aydınlatma metni, bilgilendirme ve duyurular (3 öğrenci için ayrı sayfalar).",["veli","ogr","ek4","ek5","ek6","panelBilgi"]],
+ ["Ders anlatımı ve eserler","Sınıfta anlatım planı, eser notları, karşılaştırma, sözlük ve örnek bildiriler.",["anlatim","eserSiy","eserPr","fark","sozluk","elestirel","tanitim","bildiriRehberi","ornekHepsi","ornek1","ornek2","ornek3"]],
+ ["Oturum föyleri","6 oturumun föyleri ve söyleşi notu.",["oturum1","oturum2","oturum3","oturum4","oturum5","oturum6","soylesi"]],
+ ["Öğrenci çalışma kâğıtları","Her öğrenci için ayrı sayfa: günlük, alıntı, konu, plan, yazım şablonu, panel hazırlığı.",["okumaGunlugu","alinti","konuSecimi","bildiriPlani","bildiriSablon","panelHazirlik"]],
+ ["Kontrol ve değerlendirme","Puanlama formları (EK-7, EK-8), teslim kontrol listesi, arşiv listesi.",["ek7","teslimKontrol","ek8","arsiv"]],
+ ["Hikâye ve atölye","İkinci dönem: atölye planı, hikâye rehberi ve planı, kişisel bilgi sayfası.",["atolye","hikayeRehberi","hikayePlani","hikayeKisisel"]]
+];
+function selIds(){ return Object.keys(DOCS).filter(k=>selDocs.has(k)); }
+function vCikti(){
+  return `<h2>Tüm Çıktılar</h2>
+  <p class="sub">Yazdırabileceğiniz ve Word olarak indirebileceğiniz bütün belgeler burada. İstediklerinizin kutusunu işaretleyin, sonra üstteki düğmelerle hepsini birden yazdırın ya da indirin.</p>
+  <div class="card hl" style="position:sticky;top:0;z-index:4"><b><span id="selCount">${selDocs.size}</span> belge seçili</b>
+    <div class="row" style="margin-top:8px"><button data-act="selprint">Seçilenleri yazdır</button><button data-act="selword">Seçilenleri Word olarak indir</button><button class="alt" data-act="selall">Hepsini seç</button><button class="alt" data-act="selnone">Seçimi temizle</button></div></div>
+  ${DOC_GROUPS.map((g,gi)=>`<h3>${esc(g[0])} <button class="alt sm" data-act="grpsel" data-g="${gi}">Bu grubu seç</button></h3><p class="mini">${esc(g[1])}</p>`
+    + g[2].map(id=>`<div class="task" style="cursor:default"><input type="checkbox" data-sel="${id}" ${selDocs.has(id)?"checked":""}><span style="flex:1"><b>${esc(DOCS[id].t)}</b></span><button class="alt sm" data-act="docprev" data-d="${id}">Önizle</button><button class="sm" data-act="docprint" data-d="${id}">Yazdır</button><button class="alt sm" data-act="docword" data-d="${id}">Word</button></div>`).join("")).join("")}`;
+}
+
+/* ===== Bilgi ve Kılavuz ===== */
+const MORE = [
+ ["guide","Kılavuz","Kılavuzun sade özeti, sık sorulan sorular ve arama kutusu."],
+ ["works","Eserler ve Bildiri","Eser notları, örnek bildiriler, sınıfta anlatım planı, kavramlar, kaynaklar."],
+ ["qs","Koordinatör okula sorulacaklar","Kılavuzda net olmayan noktalar ve hazır soru cümleleri."],
+ ["ekler","Ekler ve puan tabloları","Koordinatör okullar listesi (EK-1), oturum planı (EK-2), bildiri ve hikâye puanlama (EK-7, EK-8)."],
+ ["ai","Yapay zekâ dönütü","Öğrencinin taslağını EK-7 ölçütlerine göre değerlendirir; metni yazmaz."],
+ ["texts","Hazır yazılar (kopyalama)","Yazıları kopyalayıp başka bir yere yapıştırmak için."]
+];
+function vMore(){
+  return `<h2>Bilgi ve Kılavuz</h2>
+  <p class="sub">Okumak ve bakmak için sayfalar. Yazdıracağınız belgeler için “Tüm Çıktılar” sayfasına gidin.</p>
+  <div class="grid">${MORE.map(m=>`<a class="card linkcard" href="#${m[0]}"><b style="font-size:17px">${esc(m[1])}</b><p class="mini" style="margin:6px 0 0">${esc(m[2])}</p></a>`).join("")}</div>`;
+}
+
+/* ================= YÖNLENDİRME ================= */
+const VIEWS = {cikti:vCikti, more:vMore, home:vHome, road:vRoad, guide:vGuide, ekler:vEkler, students:vStudents, works:vWorks, qs:vQs, texts:vTexts, ai:vAi, settings:vSettings};
+function render(){
+  let h = (location.hash||"#home").slice(1); if(!VIEWS[h]) h = "home";
+  const act = TABS.some(t=>t[0]===h) ? h : "more";
+  $("#nav").innerHTML = TABS.map(t=>`<a href="#${t[0]}" class="${t[0]===act?"on":""}">${t[1]}</a>`).join("");
+  $("#main").innerHTML = (SUBPAGES.has(h) ? `<p><a href="#more">← Bilgi ve Kılavuz'a dön</a></p>` : "") + VIEWS[h]();
+}
+window.addEventListener("hashchange", ()=>{ render(); window.scrollTo(0,0); });
+
+/* ================= OLAYLAR ================= */
+document.addEventListener("change", e=>{
+  const t = e.target;
+  if(t.dataset && t.dataset.sel){
+    if(t.checked) selDocs.add(t.dataset.sel); else selDocs.delete(t.dataset.sel);
+    const c = $("#selCount"); if(c) c.textContent = selDocs.size; return;
+  }
+  if(t.dataset && t.dataset.task){
+    if(t.checked) S.done[t.dataset.task] = true; else delete S.done[t.dataset.task];
+    save(); render(); return;
+  }
+  if(t.id==="fkind"){ formKind = t.value; render(); return; }
+  if(t.id==="fstu"){ formStu = Number(t.value); render(); return; }
+  if(t.id==="aistu"){ aiStu = Number(t.value); aiDraft = $("#aidraft").value; render(); return; }
+  if(t.id==="imp"){
+    const f = t.files[0]; if(!f) return;
+    const r = new FileReader();
+    r.onload = ()=>{ try{ const o = JSON.parse(r.result); const d = defaults(); S = Object.assign(d,o,{set:Object.assign(d.set,o.set||{})}); save(); alert("Yedek yüklendi."); render(); }catch(err){ alert("Dosya okunamadı."); } };
+    r.readAsText(f); return;
+  }
+  if(t.dataset && (t.dataset.p==="max7"||t.dataset.p==="max8")){ render(); return; }
+  if(t.dataset && t.dataset.p && (t.type==="checkbox"||t.tagName==="SELECT")){
+    setPath(S, t.dataset.p, t.type==="checkbox" ? t.checked : t.value);
+    save();
+    if(t.dataset.p.startsWith("students.")) render();
+  }
+});
+document.addEventListener("input", e=>{
+  const t = e.target;
+  if(t.id==="gsearch"){ guideQ = t.value; const q = guideQ.toLowerCase();
+    const list = GUIDE.filter(g => !q || (g.m+" "+g.k+" "+g.b).toLowerCase().includes(q));
+    $("#glist").innerHTML = list.length?list.map(g=>`<div class="card"><span class="badge navy">${esc(g.m)}</span> <b>${esc(g.k)}</b><div style="white-space:pre-wrap;margin-top:6px">${esc(g.b)}</div></div>`).join(""):"<p>Sonuç yok.</p>"; return; }
+  if(t.id==="ek1q"){ ek1q = t.value; $("#ek1b").innerHTML = ek1Rows(); return; }
+  if(t.id==="aidraft"){ aiDraft = t.value; return; }
+  if(t.dataset && t.dataset.p && t.type!=="checkbox" && t.tagName!=="SELECT"){
+    let v = t.value;
+    if(t.type==="number") v = v===""?"":Number(v);
+    setPath(S, t.dataset.p, v); save();
+    const m = t.dataset.p.match(/^(sc7|sc8)\.(\d+)\./);
+    if(m){ const n = m[1]==="sc7"?C7.length:C8.length; const el = $("#tot_"+m[1]+"_"+m[2]); if(el) el.textContent = scoreTotal(m[1],Number(m[2]),n); }
+    if(t.dataset.p==="max7"||t.dataset.p==="max8"){ /* üst puan değişti; tablo yeniden çizilsin */ }
+  }
+});
+document.addEventListener("toggle", e=>{
+  const d = e.target;
+  if(d.tagName==="DETAILS" && d.dataset.wk!=null){
+    const i = Number(d.dataset.wk);
+    if(d.open){ openWeeks.add(i); openWeeks.delete("x"+i); } else { openWeeks.delete(i); openWeeks.add("x"+i); }
+  }
+}, true);
+document.addEventListener("click", e=>{
+  const b = e.target.closest("[data-act]"); if(!b) return;
+  const a = b.dataset.act;
+  if(a==="wk"){ const ci = curWeekIdx(); viewWeek = Math.max(0, Math.min(W.length-1, (viewWeek==null?ci:viewWeek)+Number(b.dataset.d))); render(); }
+  else if(a==="wk0"){ viewWeek = null; render(); }
+  else if(a==="ekt"){ eklerTab = b.dataset.v; render(); }
+  else if(a==="wt"){ wtab = b.dataset.v; render(); }
+  else if(a==="tt"){ ttab = b.dataset.v; render(); }
+  else if(a==="printform"){ $("#printRoot").innerHTML = '<div class="paper">'+formHTML(formKind,S.students[formStu])+'</div>'; window.print(); }
+  else if(a==="selprint"){ const ids = selIds(); if(!ids.length){ alert("Önce en az bir belge seçin."); } else printIds(ids); }
+  else if(a==="selword"){ const ids = selIds(); if(!ids.length){ alert("Önce en az bir belge seçin."); } else wordDoc(ids, "secilen-ciktilar"); }
+  else if(a==="selall"){ Object.keys(DOCS).forEach(k=>selDocs.add(k)); const y = window.scrollY; render(); window.scrollTo(0,y); }
+  else if(a==="selnone"){ selDocs.clear(); const y = window.scrollY; render(); window.scrollTo(0,y); }
+  else if(a==="grpsel"){ const g = DOC_GROUPS[Number(b.dataset.g)][2]; const all = g.every(id=>selDocs.has(id)); g.forEach(id=> all ? selDocs.delete(id) : selDocs.add(id)); const y = window.scrollY; render(); window.scrollTo(0,y); }
+  else if(a==="docword"){ wordDoc([b.dataset.d], DOCS[b.dataset.d].t); }
+  else if(a==="docwordall"){ const w = Number(b.dataset.w); wordDoc(WD[w]||[], "hafta-"+(w+1)+"-"+W[w].title); }
+  else if(a==="pvword"){ wordDoc(pvIds, pvIds.length===1 ? DOCS[pvIds[0]].t : "ciktilar"); }
+  else if(a==="docprev"){ openPV([b.dataset.d]); }
+  else if(a==="docprint"){ printIds([b.dataset.d]); }
+  else if(a==="docall"){ printIds(WD[Number(b.dataset.w)]||[]); }
+  else if(a==="pvprint"){ printIds(pvIds); }
+  else if(a==="pvclose"){ closePV(); }
+  else if(a==="printtext"){
+    $("#printRoot").innerHTML = '<div class="paper" style="white-space:pre-wrap;font-size:15px;line-height:1.6">'+esc(textBody(ttab))+'</div>'; window.print();
+  }
+  else if(a==="printroad"){
+    $("#printRoot").innerHTML = '<div class="paper"><h3>Oku-Yorum, Yazı-Yorum Yol Haritası</h3><p style="text-align:center">'+esc(OKUL)+' · Siyasetname/Ütopyalar</p>'+W.map((w,i)=>'<div style="margin-top:12px;page-break-inside:avoid"><b>'+(i+1)+'. '+esc(w.title)+'</b> <i>('+fmt(toD(w.s))+' – '+fmt(toD(w.e))+')</i><ul style="margin:4px 0">'+w.tasks.map(t=>'<li>'+(S.done[t.id]?'☑ ':'☐ ')+esc(t.t)+'</li>').join('')+'</ul></div>').join('')+'</div>'; window.print();
+  }
+  else if(a==="copytext"){
+    const txt = textBody(ttab);
+    const done = ()=>{ const c=$("#copied"); if(c){ c.textContent="Kopyalandı"; setTimeout(()=>{c.textContent="";},2000);} };
+    if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(done,()=>{ fallbackCopy(txt); done(); }); }
+    else { fallbackCopy(txt); done(); }
+  }
+  else if(a==="aigo"){ aiRun(); }
+  else if(a==="export"){
+    const blob = new Blob([JSON.stringify(S,null,2)],{type:"application/json"});
+    const l = document.createElement("a"); l.href = URL.createObjectURL(blob); l.download = "oku-yorum-yedek-"+todayStr()+".json"; l.click();
+  }
+  else if(a==="reset"){ if(confirm("Tüm veriler silinecek. Emin misiniz?")){ S = defaults(); save(); render(); } }
+});
+function fallbackCopy(txt){ const ta = document.createElement("textarea"); ta.value = txt; document.body.appendChild(ta); ta.select(); try{document.execCommand("copy");}catch(e){} ta.remove(); }
+
+render();
+</script>
+</body>
+</html>
