@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Öğretmen Masası</title>
+<meta name="description" content="Türk Dili ve Edebiyatı dersi için uygulamalar ve ders içerikleri, öğretmenlerin işini kolaylaştıran araçlar.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231f3a33'/%3E%3Cpath d='M8 21h16M10 21V12h12v9' stroke='%23f4efe6' stroke-width='2.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --kagit:#f6f3ec; --yuzey:#fffdf8; --murekkep:#1d211f; --soluk:#5d625e; --cizgi:#e2ddd2;
+  --vurgu:#1f5a4a; --vurgu-acik:#e3ece6; --isaret:#a8462b;
+  --serif:"Newsreader", Georgia, "Times New Roman", serif;
+  --sans:"Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --kagit:#151816; --yuzey:#1c201e; --murekkep:#ebe7df; --soluk:#a3a8a3; --cizgi:#2e3330;
+    --vurgu:#7fbfa8; --vurgu-acik:#22302a; --isaret:#e0876a;
+  }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--kagit);color:var(--murekkep);font:16px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
+a{color:inherit}
+.kap{max-width:1080px;margin:0 auto;padding:0 20px}
+
+/* Üst çubuk */
+header.ust{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--kagit) 92%,transparent);backdrop-filter:saturate(1.2) blur(6px);border-bottom:1px solid var(--cizgi)}
+.ust .kap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:60px}
+.marka{font-family:var(--serif);font-size:1.3rem;font-weight:600;text-decoration:none;letter-spacing:-.01em;white-space:nowrap}
+.marka span{color:var(--vurgu)}
+nav.menu{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+nav.menu::-webkit-scrollbar{display:none}
+nav.menu a{text-decoration:none;font-size:.92rem;color:var(--soluk);padding:6px 10px;border-radius:6px;white-space:nowrap}
+nav.menu a:hover{color:var(--murekkep);background:var(--vurgu-acik)}
+
+/* Giriş */
+.giris{padding:72px 0 48px;border-bottom:1px solid var(--cizgi)}
+.giris h1{font-family:var(--serif);font-weight:500;font-size:clamp(2.1rem,5.5vw,3.6rem);line-height:1.08;letter-spacing:-.02em;margin:0 0 20px;max-width:16ch}
+.giris p{font-size:1.12rem;color:var(--soluk);max-width:52ch;margin:0}
+.giris .sayilar{display:flex;gap:32px;margin-top:36px;flex-wrap:wrap}
+.sayilar div{font-size:.88rem;color:var(--soluk)}
+.sayilar b{display:block;font-family:var(--serif);font-size:1.7rem;font-weight:500;color:var(--murekkep)}
+
+/* Bölümler */
+section.bolum{padding:56px 0;border-bottom:1px solid var(--cizgi)}
+.baslik{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:24px;flex-wrap:wrap}
+.baslik h2{font-family:var(--serif);font-weight:500;font-size:1.85rem;letter-spacing:-.01em;margin:0}
+.baslik p{margin:0;color:var(--soluk);font-size:.95rem;max-width:46ch}
+.alt-baslik{font-size:.78rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--soluk);margin:32px 0 12px}
+.alt-baslik:first-of-type{margin-top:0}
+
+/* Uygulama listesi */
+.liste{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1px;background:var(--cizgi);border:1px solid var(--cizgi);border-radius:10px;overflow:hidden}
+a.uyg{display:flex;flex-direction:column;gap:6px;padding:20px 22px;background:var(--yuzey);text-decoration:none;transition:background .15s}
+a.uyg:hover{background:var(--vurgu-acik)}
+a.uyg:focus-visible{outline:2px solid var(--vurgu);outline-offset:-2px}
+.uyg .ad{display:flex;justify-content:space-between;align-items:center;gap:12px;font-weight:600;font-size:1.02rem}
+.uyg .ok{color:var(--vurgu);transition:transform .15s;flex:none}
+a.uyg:hover .ok{transform:translateX(3px)}
+.uyg .acik{color:var(--soluk);font-size:.92rem;line-height:1.5}
+.uyg .etiket{margin-top:4px;font-size:.76rem;color:var(--isaret)}
+
+/* Ders içerikleri ve duyurular */
+.bos{padding:28px;border:1px dashed var(--cizgi);border-radius:10px;color:var(--soluk);background:var(--yuzey)}
+.duyuru{display:grid;grid-template-columns:110px 1fr;gap:16px;padding:16px 0;border-top:1px solid var(--cizgi)}
+.duyuru:first-child{border-top:0}
+.duyuru time{color:var(--soluk);font-size:.88rem;font-variant-numeric:tabular-nums}
+.duyuru h3{margin:0 0 4px;font-size:1rem}
+.duyuru p{margin:0;color:var(--soluk);font-size:.95rem}
+
+/* Bilgi kutusu */
+.not{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:24px}
+.not h3{font-family:var(--serif);font-weight:500;font-size:1.2rem;margin:0 0 6px}
+.not p{margin:0;color:var(--soluk);font-size:.95rem}
+
+footer{padding:32px 0 48px;color:var(--soluk);font-size:.85rem}
+
+@media (max-width:640px){
+  .kap{padding:0 16px}
+  .ust .kap{height:auto;padding-top:10px;padding-bottom:6px;flex-direction:column;align-items:flex-start;gap:4px}
+  nav.menu{width:100%;margin-left:-10px}
+  html{scroll-padding-top:100px}
+  .giris{padding:44px 0 36px}
+  section.bolum{padding:40px 0}
+  .liste{grid-template-columns:1fr}
+  .duyuru{grid-template-columns:1fr;gap:2px}
+}
+</style>
+</head>
+<body>
+
+<header class="ust">
+  <div class="kap">
+    <a class="marka" href="#">Öğretmen <span>Masası</span></a>
+    <nav class="menu" aria-label="Bölümler">
+      <a href="#uygulamalar">Uygulamalar</a>
+      <a href="#icerikler">Ders İçerikleri</a>
+      <a href="#duyurular">Duyurular</a>
+      <a href="#bilgi">Nasıl Çalışır</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="giris">
+    <div class="kap">
+      <h1>Derse hazırlığın bir masada toplandığı yer.</h1>
+      <p>Türk Dili ve Edebiyatı dersi için uygulamalar ve ders içerikleri, öğretmenlerin işini kolaylaştıran araçlar.</p>
+      <div class="sayilar">
+        <div><b id="uygSayisi">10</b>uygulama</div>
+        <div><b>0 ₺</b>ücret, üyelik yok</div>
+        <div><b>Tarayıcıda</b>veriler sizde kalır</div>
+      </div>
+    </div>
+  </div>
+
+  <section class="bolum" id="uygulamalar">
+    <div class="kap">
+      <div class="baslik">
+        <h2>Uygulamalar</h2>
+        <p>Her uygulama yeni sekmede açılır. Kurulum gerekmez; telefonda ve bilgisayarda çalışır.</p>
+      </div>
+
+      <div class="alt-baslik">Türk Dili ve Edebiyatı</div>
+      <div class="liste">
+        <a class="uyg" href="uygulamalar/soru-uretici.html" target="_blank" rel="noopener">
+          <span class="ad">Soru Üretici <span class="ok">→</span></span>
+          <span class="acik">Türkiye Yüzyılı Maarif Modeline uygun açık uçlu yazılı soruları, cevap anahtarı ve puanlamasıyla hazırlar.</span>
+          <span class="etiket">Yapay zekâ için kendi Gemini anahtarınız gerekir</span>
+        </a>
+        <a class="uyg" href="uygulamalar/foy-atolyesi.html" target="_blank" rel="noopener">
+          <span class="ad">Föy Atölyesi <span class="ok">→</span></span>
+          <span class="acik">Konu föyü ve çalışma kâğıdı hazırlar, yazdırmaya uygun çıktı verir.</span>
+          <span class="etiket">Yapay zekâ için kendi Gemini anahtarınız gerekir</span>
+        </a>
+        <a class="uyg" href="uygulamalar/ders-notu-atolyesi.html" target="_blank" rel="noopener">
+          <span class="ad">Ders Notu Atölyesi <span class="ok">→</span></span>
+          <span class="acik">Word ve PDF belgelerinden düzenli ders notları hazırlar.</span>
+          <span class="etiket">Yapay zekâ için kendi Gemini anahtarınız gerekir</span>
+        </a>
+        <a class="uyg" href="uygulamalar/ders-plani.html" target="_blank" rel="noopener">
+          <span class="ad">Ders Planı <span class="ok">→</span></span>
+          <span class="acik">Ders planı hazırlar, imzalı Word belgesi olarak indirir.</span>
+          <span class="etiket">Yapay zekâ için kendi Gemini anahtarınız gerekir</span>
+        </a>
+        <a class="uyg" href="uygulamalar/rubrik.html" target="_blank" rel="noopener">
+          <span class="ad">Rubrik Değerlendirme <span class="ok">→</span></span>
+          <span class="acik">Yazılı ve performans çalışmalarını ölçütlere göre puanlar.</span>
+          <span class="etiket">Yapay zekâ için kendi Gemini anahtarınız gerekir</span>
+        </a>
+        <a class="uyg" href="uygulamalar/bilgi-yarismasi.html" target="_blank" rel="noopener">
+          <span class="ad">Bilgi Yarışması ve Oyun <span class="ok">→</span></span>
+          <span class="acik">Soru bankasıyla sınıfta takım yarışması, çark ve eşleştirme oyunları.</span>
+          <span class="etiket">Soru üretmek için kendi Gemini anahtarınız gerekir</span>
+        </a>
+        <a class="uyg" href="uygulamalar/oku-yorum.html" target="_blank" rel="noopener">
+          <span class="ad">Oku-Yorum Rehberi <span class="ok">→</span></span>
+          <span class="acik">“Oku-Yorum, Yazı-Yorum” projesinin takvimi, aşamaları ve öğrenci takibi. Aksaray koordinatörlüğüne göre hazırlanmıştır.</span>
+          <span class="etiket">Yapay zekâ için kendi Gemini anahtarınız gerekir</span>
+        </a>
+        <a class="uyg" href="uygulamalar/dilimizin-zenginlikleri.html" target="_blank" rel="noopener">
+          <span class="ad">Dilimizin Zenginlikleri <span class="ok">→</span></span>
+          <span class="acik">Proje etkinliklerinin haftalık planı ve faaliyet raporları.</span>
+        </a>
+      </div>
+
+      <div class="alt-baslik">Genel öğretmen araçları</div>
+      <div class="liste">
+        <a class="uyg" href="uygulamalar/not-defteri.html" target="_blank" rel="noopener">
+          <span class="ad">Not Defteri <span class="ok">→</span></span>
+          <span class="acik">Sınıf listeleri, yazılı ve performans notları, öğrenci takibi.</span>
+        </a>
+        <a class="uyg" href="uygulamalar/kulup-raporu.html" target="_blank" rel="noopener">
+          <span class="ad">Kulüp Raporu <span class="ok">→</span></span>
+          <span class="acik">Kulübün yıllık planı ve aylık faaliyet raporları.</span>
+          <span class="etiket">Yapay zekâ için kendi Gemini anahtarınız gerekir</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="bolum" id="icerikler">
+    <div class="kap">
+      <div class="baslik">
+        <h2>Ders İçerikleri</h2>
+        <p>Konu anlatımları, okuma metinleri ve etkinlikler.</p>
+      </div>
+      <div class="bos">Bu bölüme yakında konu anlatımları ve okuma metinleri eklenecek.</div>
+    </div>
+  </section>
+
+  <section class="bolum" id="duyurular">
+    <div class="kap">
+      <div class="baslik">
+        <h2>Duyurular</h2>
+      </div>
+      <div>
+        <div class="duyuru">
+          <time datetime="2026-11-13">13 Kasım 2026</time>
+          <div>
+            <h3>Öğretmen Masası açıldı</h3>
+            <p>Uygulamaların hepsi ücretsiz ve üyeliksiz kullanılabilir.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bolum" id="bilgi">
+    <div class="kap">
+      <div class="baslik"><h2>Nasıl çalışır?</h2></div>
+      <div class="not">
+        <div>
+          <h3>Verileriniz sizde</h3>
+          <p>Girdiğiniz bilgiler yalnızca kullandığınız tarayıcıda saklanır, başka bir cihazda görünmez. Yapay zekâ özelliğini kullandığınızda yalnızca o istek Google'a gider.</p>
+        </div>
+        <div>
+          <h3>Yedek almayı unutmayın</h3>
+          <p>Tarayıcı geçmişi ve site verileri silinirse kayıtlar da silinir. Önemli çalışmaları uygulamanın yedek düğmesiyle dosyaya kaydedin.</p>
+        </div>
+        <div>
+          <h3>Yapay zekâ özelliği</h3>
+          <p>Bazı uygulamalar Google'ın ücretsiz Gemini hizmetini kullanır. Anahtarınızı Google AI Studio'dan alıp uygulamanın ayarlarına girersiniz; anahtar yalnızca sizin tarayıcınızda durur.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="kap">Öğretmen Masası · Ücretsiz eğitim araçları</div>
+</footer>
+
+<script>
+  // Uygulama sayısını listeden say (elle güncellemeye gerek kalmasın)
+  document.getElementById('uygSayisi').textContent = document.querySelectorAll('a.uyg').length;
+</script>
+</body>
+</html>
