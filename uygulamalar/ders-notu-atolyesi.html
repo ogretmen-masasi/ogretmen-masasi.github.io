@@ -547,6 +547,7 @@ dialog .df{padding:12px 18px;border-top:1px solid var(--line);display:flex;justi
 <!-- KÜTÜPHANE -->
 <section class="view" id="viewLib" aria-labelledby="tabLib">
   <div class="banner" id="dbBanner" hidden>Tarayıcı kaydı kullanılamıyor. Notların yalnızca bu açık sayfada kalır. “Yedeği indir” ile dosyaya kaydet.</div>
+  <div class="banner" id="backupNag" hidden></div>
   <div class="libtop">
     <input type="search" id="libSearch" placeholder="Not ya da PDF ara..." aria-label="Not ara">
     <select id="libGrade" aria-label="Sınıf"><option value="">Tüm sınıflar</option><option value="9">9. sınıf</option><option value="10">10. sınıf</option><option value="11">11. sınıf</option></select>
@@ -1717,7 +1718,7 @@ function bandHTML(st) {
   if (!st || !st.band) return '';
   const name = esc(st.teacher || ''), title = esc(st.teacherTitle || ''), school = esc(st.school || '');
   if (!name && !school && !st.logo) return '';
-  const logo = st.logo && /^data:image\/(png|jpeg|webp);base64,/.test(st.logo) ? '<img src="' + st.logo + '" alt="">' : '';
+  const logo = st.logo && /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+\/=]+$/.test(st.logo) ? '<img src="' + st.logo + '" alt="">' : '';
   return '<div class="tband">' + logo + '<div class="tb-s">' + school + '</div><div class="tb-t">' + (name ? '<b>' + name + '</b>' : '') + (title ? '<span>' + title + '</span>' : '') + '</div></div>';
 }
 function studentLine() { return '<div class="sline"><span>Ad Soyad:<i></i></span><span class="sm">Sınıf:<i></i></span><span class="sm">No:<i></i></span></div>'; }
@@ -1846,7 +1847,7 @@ const DB = {
   },
   put(rec) {
     if (!this._db) { const i = this.mem.findIndex(x => x.id === rec.id); if (i > -1) this.mem[i] = rec; else this.mem.push(rec); return Promise.resolve(); }
-    return new Promise((res, rej) => { const tx = this._db.transaction('notes', 'readwrite'); tx.objectStore('notes').put(rec); tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error); tx.onabort = () => rej(tx.error); });
+    return new Promise((res, rej) => { const tx = this._db.transaction('notes', 'readwrite'); tx.objectStore('notes').put(rec); tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error || new Error('Kayıt alanı dolu olabilir.')); tx.onabort = () => rej(tx.error || new Error('Kayıt alanı dolu olabilir.')); });
   },
   del(id) {
     if (!this._db) { this.mem = this.mem.filter(x => x.id !== id); return Promise.resolve(); }
@@ -2746,6 +2747,7 @@ async function genPageData(o) {
     catch (e) { notes.push({ k: 'warn', m: 'Doğrulama yapılamadı (' + e.message + '). Not doğrulanmadan bırakıldı, dikkatle kontrol et.' }); }
   } else if (artJob) st('çiziliyor');
   if (o.srcIdx) notes.push(...enforceQuotes(o.template, data, o.srcIdx));
+  else if (leaves(T.fields, data).some(it => QUOTE_FIELDS.includes(it.key) && looksLikeQuote(it.text))) notes.push({ k: 'warn', m: 'Bu notta kaynak verilmeden üretilmiş alıntı/örnek cümleler var; yapay zekâ uydurmuş olabilir, kontrol edin.' });
   const nHl = cleanHighlights(o.template, data);
   if (nHl) notes.push({ k: 'info', m: nHl + ' örnekte gereğinden uzun (bütün dize/cümle) vurgu kaldırıldı.' });
   const removed = pruneData(o.template, data);
@@ -2784,6 +2786,7 @@ async function onGenerate() {
   if (!o.key) { setAi('err', 'Önce Gemini API anahtarını gir.'); return; }
   if (!topic && !src) { setAi('err', 'Konu başlığı yaz ya da bir kaynak ekle.'); return; }
   if ($('aiNeedSrc').checked && !src) { setAi('err', '“Kaynak zorunlu” açık. Word/PDF ekle ya da metin yapıştır. Kaynaksız üretmek için kutunun işaretini kaldır.'); return; }
+  if (n === 1 && S.dirty && !confirm('Açık notta kaydedilmemiş değişiklikler var. Yeni not üretilirse bu değişiklikler kaybolur. Devam edilsin mi?')) return;
   saveAiPrefs(o);
   if (src.length > MAX_SOURCE) src = src.slice(0, MAX_SOURCE);
   o.extra = extra; o.srcIdx = src ? makeSrcIndex(src) : null;
@@ -2798,10 +2801,12 @@ async function onGenerate() {
 async function genSingle(o, topic, src, extra) {
   const r = await genPageData(Object.assign(o, { template: S.template, topic, src: trunc(src, 120000), extra, status: s => setAi('', '<span class="spin"></span>Not ' + esc(s) + '... <span class="hint">(' + esc(o.model) + ')</span>') }));
   if (src.length > 120000) r.notes.unshift({ k: 'warn', m: 'Kaynak uzun: tek sayfalık notta yalnızca ilk 120.000 karakter kullanıldı. Kaynağın tamamı için sayfa sayısını artır.' });
-  S.data = r.data; S.datas[S.template] = r.data; S.auditNotes = r.notes;
+  // Sonuç YENİ NOT olarak açılır: kütüphanedeki eski not ezilmesin
+  if (S.setId || S.pages) toast('Açık set kütüphanede olduğu gibi duruyor; üretilen sayfa ayrı yeni not olarak açıldı.', 6000);
+  S.noteId = null; S.noteCreated = null; S.savedIds = []; S.pages = null; S.pageIds = []; S.setId = null; S.setTitle = ''; S.plan = null; renderPlan();
+  S.data = r.data; S.datas[S.template] = r.data; S.auditNotes = r.notes; S.hideAnswers = false;
   S.ai = makeAiMeta(o, src);
-  if (S.pages) stashPage();
-  renderForm(); schedule(); $('secEdit').open = true;
+  renderForm(); renderPageBar(); schedule(); setDirty(true); $('secEdit').open = true;
   const w = r.notes.filter(x => x.k === 'warn').length;
   setAi('ok', 'Not hazır (' + esc(o.model) + '). ' + (w ? w + ' uyarı var, önizlemenin altındaki kontrol listesine bak.' : 'Kontrol listesini incele, gerekirse içeriği düzenle.'));
 }
@@ -2926,6 +2931,7 @@ async function runPlan() {
   if (aiBusy) { toast('Şu an başka bir yapay zekâ işlemi sürüyor, bitmesini bekle.'); return; }
   const P = S.plan, o = P.opts; o.key = $('apiKey').value.trim() || o.key;
   if (!o.key) { planMsg('err', 'Önce Gemini API anahtarını gir.'); return; }
+  if (!P.done && S.dirty && !confirm('Açık notta kaydedilmemiş değişiklikler var. Yeni not üretilirse bu değişiklikler kaybolur. Devam edilsin mi?')) return;
   aiBusy = true; $('btnGen').disabled = true; P.running = true; P.stop = false; P.msg = ''; P.cache = P.cache || {}; P.active = [];
   const t0 = Date.now(); let lastMsg = '', waitMsg = '';
   const status = {};
@@ -3006,7 +3012,7 @@ async function saveNote() {
   try {
     for (const r of recs) await DB.put(r);
     for (const old of S.savedIds) if (!ids.includes(old)) await DB.del(old);
-  } catch (e) { toast('Kaydedilemedi: ' + (e && e.message || e), 5000); return; }
+  } catch (e) { toast('Kaydedilemedi: ' + ((e && e.message) || 'Kayıt alanı dolu olabilir.'), 5000); return; }
 
   S.savedIds = ids; S.noteCreated = created; if (isSet) S.pageIds = ids; else S.noteId = ids[0];
   setDirty(false); await loadLib();
@@ -3019,6 +3025,7 @@ function resetNote(blankData) {
   renderForm(); renderPageBar(); schedule();
 }
 function applyGroup(g) {
+  if (aiBusy) { toast('Yapay zekâ üretimi sürüyor; bitmesini bekleyin, sonra açın.'); return; }
   const r0 = g.recs[0];
   S.grade = r0.grade || 9; S.ti = Math.min(r0.themeIdx || 0, THEMES[S.grade].length - 1); S.konu = r0.konu || ''; S.kaz = (r0.kazanim || []).slice();
   S.format = r0.format || 'a4'; S.paper = r0.paper || 'cizgili'; S.color = r0.color || 'turuncu'; S.font = r0.font || 'hand'; S.density = r0.density || 'normal'; S.ai = r0.ai || null;
@@ -3045,7 +3052,7 @@ function groupLib() {
 const selected = new Set();
 function selectedRecs() { return groupLib().filter(g => selected.has(g.key)).flatMap(g => g.recs); }
 function renderLib() {
-  $('dbBanner').hidden = DB.ok;
+  $('dbBanner').hidden = DB.ok; renderBackupNag();
   const q = normTr($('libSearch').value), gr = $('libGrade').value, tp = $('libTpl').value, fo = $('libFolder').value;
   // klasör listesi
   const fsel = $('libFolder'), folders = {};
@@ -3082,9 +3089,9 @@ function renderLib() {
     const open = mk('button', 'btn sm pri', 'Aç'); open.type = 'button'; open.addEventListener('click', () => { if (S.dirty && !confirm('Kaydedilmemiş değişiklikler var. Yine de başka bir notu açayım mı?')) return; applyGroup(g); });
     const pres = mk('button', 'btn sm', 'Sun'); pres.type = 'button'; pres.addEventListener('click', () => openPresent(g.recs, 0));
     const star = mk('button', 'btn sm', g.recs.some(x => x.styleEx) ? '★ Örnek' : '☆ Örnek'); star.type = 'button'; star.title = 'Yapay zekâ bu notun biçimini ve seviyesini örnek alsın';
-    star.addEventListener('click', async () => { const on = !g.recs.some(x => x.styleEx); for (const x of g.recs) { x.styleEx = on; await DB.put(x); } await loadLib(); toast(on ? 'Stil örneği olarak işaretlendi' : 'Stil örneği işareti kaldırıldı'); });
+    star.addEventListener('click', async () => { const on = !g.recs.some(x => x.styleEx); try { for (const x of g.recs) { x.styleEx = on; await DB.put(x); } await loadLib(); toast(on ? 'Stil örneği olarak işaretlendi' : 'Stil örneği işareti kaldırıldı'); } catch (e) { await loadLib(); toast('Kaydedilemedi: ' + ((e && e.message) || 'Kayıt alanı dolu olabilir.'), 5000); } });
     const dup = mk('button', 'btn sm', 'Çoğalt'); dup.type = 'button';
-    dup.addEventListener('click', async () => { const sid = g.isSet ? uid() : null; for (const x of g.recs) { const c = clone(x); c.id = uid(); c.createdAt = c.updatedAt = Date.now(); delete c.styleEx; if (sid) { c.setId = sid; c.setTitle = (x.setTitle || '') + ' (kopya)'; } else { c.title = x.title + ' (kopya)'; c.data.title = c.title; } await DB.put(c); } await loadLib(); toast('Çoğaltıldı'); });
+    dup.addEventListener('click', async () => { try { const sid = g.isSet ? uid() : null; for (const x of g.recs) { const c = clone(x); c.id = uid(); c.createdAt = c.updatedAt = Date.now(); delete c.styleEx; if (sid) { c.setId = sid; c.setTitle = (x.setTitle || '') + ' (kopya)'; } else { c.title = x.title + ' (kopya)'; c.data.title = c.title; } await DB.put(c); } await loadLib(); toast('Çoğaltıldı'); } catch (e) { await loadLib(); toast('Çoğaltılamadı: ' + ((e && e.message) || 'Kayıt alanı dolu olabilir.'), 5000); } });
     const del = mk('button', 'btn sm danger', 'Sil'); del.type = 'button';
     del.addEventListener('click', async () => { if (!confirm('“' + (g.isSet ? (r.setTitle || r.title) + '” seti (' + g.recs.length + ' sayfa)' : r.title + '”') + ' silinsin mi?')) return; for (const x of g.recs) await DB.del(x.id); selected.delete(g.key); if (g.recs.some(x => S.savedIds.includes(x.id))) { S.noteId = null; S.savedIds = []; S.pageIds = S.pageIds.map(() => null); } await loadLib(); toast('Silindi'); });
     const fbtn = mk('button', 'btn sm', 'Klasör'); fbtn.type = 'button'; fbtn.title = 'Bu notu bir klasöre koy';
@@ -3092,8 +3099,10 @@ function renderLib() {
       const ex = [...new Set(S.lib.map(x => x.folder).filter(Boolean))];
       const v = prompt('Klasör adı yaz (örn. "10. sınıf – Şiir"). Klasörden çıkarmak için boş bırak.' + (ex.length ? '\nMevcut klasörler: ' + ex.join(', ') : ''), r.folder || '');
       if (v === null) return; const name = v.trim().slice(0, 60);
-      for (const x of g.recs) { if (name) x.folder = name; else delete x.folder; await DB.put(x); }
-      await loadLib(); toast(name ? '“' + name + '” klasörüne kondu' : 'Klasörden çıkarıldı');
+      try {
+        for (const x of g.recs) { if (name) x.folder = name; else delete x.folder; await DB.put(x); }
+        await loadLib(); toast(name ? '“' + name + '” klasörüne kondu' : 'Klasörden çıkarıldı');
+      } catch (e) { await loadLib(); toast('Kaydedilemedi: ' + ((e && e.message) || 'Kayıt alanı dolu olabilir.'), 5000); }
     });
     [open, pres, star, fbtn, dup, del].forEach(b => act.appendChild(b)); body.appendChild(act); card.appendChild(body); cards.push([g.updatedAt, card]);
   });
@@ -3111,24 +3120,40 @@ function showView(v) {
 }
 const blobToDataURL = b => new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.onerror = () => rej(fr.error); fr.readAsDataURL(b); });
 async function exportBackup() {
+  if (!S.lib.length && !(S.files || []).length && !confirm('Kütüphanede not yok; yine de indirilsin mi?')) return;
   let files = [];
   const fl = S.files || [];
   if (fl.length) {
     const mb = fl.reduce((n, f) => n + (f.size || 0), 0) / 1048576;
     if (confirm('Yedeğe ' + fl.length + ' PDF dosyası da eklensin mi? (yaklaşık ' + mb.toFixed(1) + ' MB)\n\nTamam: notlar + PDF’ler\nİptal: yalnızca notlar')) {
       toast('PDF’ler yedeğe ekleniyor...', 6000);
-      for (const f of fl) { const o = Object.assign({}, f); delete o.blob; try { o.data = await blobToDataURL(f.blob); files.push(o); } catch (e) {} }
+      for (const f of fl) { if (!f.blob) continue; const o = Object.assign({}, f); delete o.blob; try { const b = f.blob.type === 'application/pdf' ? f.blob : new Blob([f.blob], { type: 'application/pdf' }); o.data = await blobToDataURL(b); files.push(o); } catch (e) {} }
     }
   }
-  const blob = new Blob([JSON.stringify({ app: 'ders-notu-atolyesi', version: 3, exportedAt: new Date().toISOString(), notes: S.lib, files }, null, 1)], { type: 'application/json' });
+  const blob = new Blob([JSON.stringify({ app: 'ders-notu-atolyesi', version: 3, exportedAt: new Date().toISOString(), notes: S.lib, files, settings: SET }, null, 1)], { type: 'application/json' });
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'ders-notlari-yedek-' + new Date().toISOString().slice(0, 10) + '.json';
   document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  lsSet('dn_son_yedek', new Date().toISOString()); lsSet('dn_yedek_gizle', ''); renderBackupNag();
+}
+// Yedek hatırlatması: son yedek eskiyse kütüphanede uyarı satırı (kapatılırsa ertesi güne kadar gizli)
+function renderBackupNag() {
+  const el = $('backupNag'); if (!el) return;
+  const nNotes = S.lib.length + (S.files || []).length, today = new Date().toDateString();
+  const last = lsGet('dn_son_yedek', ''), t = last ? Date.parse(last) : NaN;
+  const days = isNaN(t) ? null : Math.floor((Date.now() - t) / 86400000);
+  const limit = lsGet('dn_kalici', '') === '0' ? 3 : 7;
+  const need = nNotes > 0 && (days === null || days >= limit) && lsGet('dn_yedek_gizle', '') !== today;
+  el.hidden = !need; el.innerHTML = '';
+  if (!need) return;
+  el.appendChild(document.createTextNode('Son yedek: ' + (days === null ? 'hiç alınmadı' : (days === 0 ? 'bugün' : days + ' gün önce')) + '. Notlarınız yalnız bu tarayıcıda; “Yedeği indir” ile yedek alın. '));
+  const x = mk('button', 'btn sm', 'Kapat'); x.type = 'button'; x.addEventListener('click', () => { lsSet('dn_yedek_gizle', today); el.hidden = true; });
+  el.appendChild(x);
 }
 async function importBackup(file) {
   try {
     const j = JSON.parse(await file.text()); const arr = Array.isArray(j) ? j : j.notes;
     if (!Array.isArray(arr)) throw new Error('Yedek dosyası tanınmadı.');
-    let n = 0, nf = 0;
+    let n = 0, nf = 0, nSet = false;
     for (const r of arr) {
       if (!r || !r.id || !TPL[r.template] || !r.data) continue;
       const old = S.lib.find(x => x.id === r.id);
@@ -3136,11 +3161,21 @@ async function importBackup(file) {
       await DB.put(r); n++;
     }
     for (const f of (Array.isArray(j.files) ? j.files : [])) {
-      if (!f || !f.id || typeof f.data !== 'string' || !/^data:application\/pdf;base64,/.test(f.data)) continue;
+      if (!f || !f.id || typeof f.data !== 'string') continue;
+      const m = /^data:([^;,]*);base64,/.exec(f.data); if (!m) continue;
+      // tür boşsa (ya da genel ikili) ve dosya adı .pdf ile bitiyorsa PDF kabul et
+      const pdfLike = m[1] === 'application/pdf' || ((m[1] === '' || m[1] === 'application/octet-stream') && /\.pdf$/i.test(String(f.name || '')));
+      if (!pdfLike) continue;
       const old = (S.files || []).find(x => x.id === f.id); if (old && old.updatedAt >= f.updatedAt) continue;
-      const o = Object.assign({}, f); delete o.data; o.blob = await (await fetch(f.data)).blob(); await DB.fPut(o); nf++;
+      const o = Object.assign({}, f); delete o.data; const raw = await (await fetch(f.data)).blob(); o.blob = raw.type === 'application/pdf' ? raw : new Blob([raw], { type: 'application/pdf' }); await DB.fPut(o); nf++;
     }
-    await loadLib(); toast(n + ' not' + (nf ? ' ve ' + nf + ' PDF' : '') + ' içe aktarıldı');
+    if (j && j.settings && typeof j.settings === 'object' && !Array.isArray(j.settings)) {
+      if (confirm('Yedekte okul ayarları (okul, öğretmen adı, logo) var. Şu anki ayarlar yedektekilerle değiştirilsin mi?')) {
+        const ns = Object.assign({}, DEF_SET); Object.keys(DEF_SET).forEach(k => { if (typeof j.settings[k] === typeof DEF_SET[k]) ns[k] = j.settings[k]; });
+        SET = ns; lsSet('dn_settings', JSON.stringify(SET)); renderPreview(); if ($('viewLib').classList.contains('on')) renderLib(); nSet = true;
+      }
+    }
+    await loadLib(); toast(n + ' not' + (nf ? ' ve ' + nf + ' PDF' : '') + ' içe aktarıldı' + (nSet ? '; okul ayarları uygulandı' : ''));
   } catch (e) { toast('Yedek yüklenemedi: ' + e.message, 5000); }
 }
 
@@ -3403,7 +3438,7 @@ function bind() {
   $('selTheme').addEventListener('change', e => { S.ti = +e.target.value; S.konu = ''; S.kaz = []; fillTopicControls(); schedule(); });
   $('selKonu').addEventListener('change', e => { S.konu = e.target.value; $('subTopic').textContent = S.grade + '. sınıf' + (S.konu ? ' · ' + trunc(S.konu, 28) : ''); schedule(); });
   $('btnSave').addEventListener('click', saveNote);
-  $('btnNew').addEventListener('click', () => { if (S.dirty && !confirm('Kaydedilmemiş değişiklikler var. Yeni boş not açılsın mı?')) return; showView('Work'); resetNote(true); setDirty(false); toast('Boş şablon açıldı'); });
+  $('btnNew').addEventListener('click', () => { if (aiBusy) { toast('Yapay zekâ üretimi sürüyor; bitmesini bekleyin.'); return; } if (S.dirty && !confirm('Kaydedilmemiş değişiklikler var. Yeni boş not açılsın mı?')) return; showView('Work'); resetNote(true); setDirty(false); toast('Boş şablon açıldı'); });
   $('btnSample').addEventListener('click', () => { if (!confirm('Bu sayfanın içeriği örnek içerikle değişecek. Devam edeyim mi?')) return; S.data = clone(TPL[S.template].sample); S.datas[S.template] = S.data; S.auditNotes = []; renderForm(); schedule(); });
   $('btnBlank').addEventListener('click', () => { if (!confirm('Bu sayfanın içeriği silinip boş şablon açılacak. Devam edeyim mi?')) return; S.data = blank(TPL[S.template].fields); S.datas[S.template] = S.data; S.auditNotes = []; renderForm(); schedule(); });
   $('btnGen').addEventListener('click', onGenerate);
@@ -3412,7 +3447,7 @@ function bind() {
   $('srcText').addEventListener('input', () => { srcName = ''; updateSrcInfo(); updateEstimate(); });
   $('srcFile').addEventListener('change', async e => {
     const f = e.target.files[0]; if (!f) return; setAi('', '<span class="spin"></span>Dosya okunuyor...');
-    try { const t = await readSourceFile(f); $('srcText').value = t; srcName = f.name; if (!$('aiTopic').value) $('aiTopic').value = f.name.replace(/\.[^.]+$/, ''); updateSrcInfo(); updateEstimate(); setAi('ok', f.name + ' okundu. Metni kontrol edip üretim düğmesine bas.'); }
+    try { const t = await readSourceFile(f); $('srcText').value = t; srcName = f.name; if (!$('aiTopic').value) $('aiTopic').value = f.name.replace(/\.[^.]+$/, ''); updateSrcInfo(); updateEstimate(); setAi('ok', esc(f.name) + ' okundu. Metni kontrol edip üretim düğmesine bas.'); }
     catch (err) { setAi('err', esc(err.message)); }
     e.target.value = '';
   });
@@ -3480,7 +3515,9 @@ function bind() {
 async function init() {
   initKeyFields(); bind(); initEditor(); buildStyleControls(); syncStyleControls();
   fillTopicControls(); buildTplGrid(); renderForm(); renderPageBar();
-  await DB.open(); await loadLib();
+  await DB.open();
+  try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist().then(ok => lsSet('dn_kalici', ok ? '1' : '0'), () => {}); } catch (e) {}
+  await loadLib();
   renderPreview(); setDirty(false);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { renderPreview(); if ($('viewLib').classList.contains('on')) renderLib(); });
 }

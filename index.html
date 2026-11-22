@@ -90,6 +90,21 @@ footer{padding:32px 0 48px;color:var(--soluk);font-size:.85rem}
   .liste{grid-template-columns:1fr}
   .duyuru{grid-template-columns:1fr;gap:2px}
 }
+[hidden]{display:none!important}
+.giris{padding:40px 0 30px}
+.giris h1{margin-bottom:8px;max-width:none}
+#uygulamalar{padding-top:30px}
+.arama{max-width:32rem}
+.arama label{display:block;font-weight:600;margin-bottom:4px}
+.arama input{width:100%;min-height:48px;padding:10px 14px;border:1px solid var(--soluk);border-radius:8px;background:var(--yuzey);color:var(--murekkep);font:inherit}
+:focus-visible{outline:2px solid var(--vurgu);outline-offset:3px}
+.sonuc{color:var(--soluk);margin:8px 0 0}
+.sonuc:empty{display:none}
+.arac-grubu{margin-top:26px}
+.alt-baslik{margin:0 0 10px;font-size:1rem;text-transform:none;letter-spacing:normal;color:var(--murekkep)}
+.liste{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(max-width:940px){.liste{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:640px){.liste{grid-template-columns:minmax(0,1fr)}.giris{padding:28px 0 24px}a.uyg{padding:16px}}
 </style>
 </head>
 <body>
@@ -109,13 +124,8 @@ footer{padding:32px 0 48px;color:var(--soluk);font-size:.85rem}
 <main>
   <div class="giris">
     <div class="kap">
-      <h1>Derse hazırlığın bir masada toplandığı yer.</h1>
-      <p>Türk Dili ve Edebiyatı dersi için uygulamalar ve ders içerikleri, öğretmenlerin işini kolaylaştıran araçlar.</p>
-      <div class="sayilar">
-        <div><b id="uygSayisi">10</b>uygulama</div>
-        <div><b>0 ₺</b>ücret, üyelik yok</div>
-        <div><b>Tarayıcıda</b>veriler sizde kalır</div>
-      </div>
+      <h1>Öğretmen Masası</h1>
+      <p>Ders hazırlığı, ölçme ve okul işleri için ücretsiz araçlar.</p>
     </div>
   </div>
 
@@ -123,67 +133,57 @@ footer{padding:32px 0 48px;color:var(--soluk);font-size:.85rem}
     <div class="kap">
       <div class="baslik">
         <h2>Uygulamalar</h2>
-        <p>Her uygulama yeni sekmede açılır. Kurulum gerekmez; telefonda ve bilgisayarda çalışır.</p>
+        <p>Uygulamalar yeni sekmede açılır.</p>
       </div>
 
-      <div class="alt-baslik">Türk Dili ve Edebiyatı</div>
-      <div class="liste">
-        <a class="uyg" href="uygulamalar/soru-uretici.html" target="_blank" rel="noopener">
-          <span class="ad">Soru Üretici <span class="ok">→</span></span>
-          <span class="acik">Türkiye Yüzyılı Maarif Modeline uygun açık uçlu yazılı soruları, cevap anahtarı ve puanlamasıyla hazırlar.</span>
+      <div class="arama"><label for="arama">Uygulama ara</label><input id="arama" type="search" placeholder="Örneğin ders planı" autocomplete="off"></div><p id="sonuc" class="sonuc" role="status"></p><section class="arac-grubu"><h3 class="alt-baslik">Ders Hazırlığı</h3><div class="liste"><a class="uyg" href="uygulamalar/ders-plani.html" target="_blank" rel="noopener">
+          <span class="ad">Ders Planı <span class="ok">→</span></span>
+          <span class="acik">Ders planı hazırlar, imza alanları bulunan Word belgesi olarak indirir.</span>
           <span class="etiket">Yapay zekâ için kendi Gemini anahtarınız gerekir</span>
         </a>
-        <a class="uyg" href="uygulamalar/foy-atolyesi.html" target="_blank" rel="noopener">
+<a class="uyg" href="uygulamalar/foy-atolyesi.html" target="_blank" rel="noopener">
           <span class="ad">Föy Atölyesi <span class="ok">→</span></span>
           <span class="acik">Konu föyü ve çalışma kâğıdı hazırlar, yazdırmaya uygun çıktı verir.</span>
           <span class="etiket">Yapay zekâ için kendi Gemini anahtarınız gerekir</span>
         </a>
-        <a class="uyg" href="uygulamalar/ders-notu-atolyesi.html" target="_blank" rel="noopener">
+<a class="uyg" href="uygulamalar/ders-notu-atolyesi.html" target="_blank" rel="noopener">
           <span class="ad">Ders Notu Atölyesi <span class="ok">→</span></span>
           <span class="acik">Word ve PDF belgelerinden düzenli ders notları hazırlar.</span>
           <span class="etiket">Yapay zekâ için kendi Gemini anahtarınız gerekir</span>
-        </a>
-        <a class="uyg" href="uygulamalar/ders-plani.html" target="_blank" rel="noopener">
-          <span class="ad">Ders Planı <span class="ok">→</span></span>
-          <span class="acik">Ders planı hazırlar, imzalı Word belgesi olarak indirir.</span>
+        </a></div></section><section class="arac-grubu"><h3 class="alt-baslik">Sınav ve Değerlendirme</h3><div class="liste"><a class="uyg" href="uygulamalar/soru-uretici.html" target="_blank" rel="noopener">
+          <span class="ad">Soru Üretici <span class="ok">→</span></span>
+          <span class="acik">Türkiye Yüzyılı Maarif Modeline uygun açık uçlu yazılı soruları, cevap anahtarı ve puanlamasıyla hazırlar.</span>
           <span class="etiket">Yapay zekâ için kendi Gemini anahtarınız gerekir</span>
         </a>
-        <a class="uyg" href="uygulamalar/rubrik.html" target="_blank" rel="noopener">
+<a class="uyg" href="uygulamalar/rubrik.html" target="_blank" rel="noopener">
           <span class="ad">Rubrik Değerlendirme <span class="ok">→</span></span>
           <span class="acik">Yazılı ve performans çalışmalarını ölçütlere göre puanlar.</span>
           <span class="etiket">Yapay zekâ için kendi Gemini anahtarınız gerekir</span>
         </a>
-        <a class="uyg" href="uygulamalar/bilgi-yarismasi.html" target="_blank" rel="noopener">
+<a class="uyg" href="uygulamalar/bilgi-yarismasi.html" target="_blank" rel="noopener">
           <span class="ad">Bilgi Yarışması ve Oyun <span class="ok">→</span></span>
           <span class="acik">Soru bankasıyla sınıfta takım yarışması, çark ve eşleştirme oyunları.</span>
           <span class="etiket">Soru üretmek için kendi Gemini anahtarınız gerekir</span>
         </a>
-        <a class="uyg" href="uygulamalar/oku-yorum.html" target="_blank" rel="noopener">
+<a class="uyg" href="uygulamalar/not-defteri.html" target="_blank" rel="noopener">
+          <span class="ad">Not Defteri <span class="ok">→</span></span>
+          <span class="acik">Sınıf listeleri, yazılı ve performans notları, öğrenci takibi.</span>
+        </a></div></section><section class="arac-grubu"><h3 class="alt-baslik">Sınıf ve Okul İşleri</h3><div class="liste"><a class="uyg" href="uygulamalar/oku-yorum.html" target="_blank" rel="noopener">
           <span class="ad">Oku-Yorum Rehberi <span class="ok">→</span></span>
           <span class="acik">“Oku-Yorum, Yazı-Yorum” projesinin takvimi, aşamaları ve öğrenci takibi. Aksaray koordinatörlüğüne göre hazırlanmıştır.</span>
           <span class="etiket">Yapay zekâ için kendi Gemini anahtarınız gerekir</span>
         </a>
-        <a class="uyg" href="uygulamalar/dilimizin-zenginlikleri.html" target="_blank" rel="noopener">
+<a class="uyg" href="uygulamalar/dilimizin-zenginlikleri.html" target="_blank" rel="noopener">
           <span class="ad">Dilimizin Zenginlikleri <span class="ok">→</span></span>
           <span class="acik">Proje etkinliklerinin haftalık planı ve faaliyet raporları.</span>
         </a>
-      </div>
-
-      <div class="alt-baslik">Genel öğretmen araçları</div>
-      <div class="liste">
-        <a class="uyg" href="uygulamalar/not-defteri.html" target="_blank" rel="noopener">
-          <span class="ad">Not Defteri <span class="ok">→</span></span>
-          <span class="acik">Sınıf listeleri, yazılı ve performans notları, öğrenci takibi.</span>
-        </a>
-        <a class="uyg" href="uygulamalar/kulup-raporu.html" target="_blank" rel="noopener">
+<a class="uyg" href="uygulamalar/kulup-raporu.html" target="_blank" rel="noopener">
           <span class="ad">Kulüp Raporu <span class="ok">→</span></span>
           <span class="acik">Kulübün yıllık planı ve aylık faaliyet raporları.</span>
           <span class="etiket">Yapay zekâ için kendi Gemini anahtarınız gerekir</span>
-        </a>
-      </div>
+        </a></div></section>
     </div>
   </section>
-
   <section class="bolum" id="icerikler">
     <div class="kap">
       <div class="baslik">
@@ -237,8 +237,30 @@ footer{padding:32px 0 48px;color:var(--soluk);font-size:.85rem}
 </footer>
 
 <script>
-  // Uygulama sayısını listeden say (elle güncellemeye gerek kalmasın)
-  document.getElementById('uygSayisi').textContent = document.querySelectorAll('a.uyg').length;
+  const arama = document.querySelector('#arama');
+  const sonuc = document.querySelector('#sonuc');
+  const gruplar = [...document.querySelectorAll('.arac-grubu')];
+  const sade = metin => metin.toLocaleLowerCase('tr')
+    .normalize('NFD').replace(/\p{M}/gu, '').replace(/ı/g, 'i');
+
+  function filtrele() {
+    const kelimeler = sade(arama.value).trim().split(/\s+/).filter(Boolean);
+    let toplam = 0;
+    for (const grup of gruplar) {
+      let gorunen = 0;
+      for (const kart of grup.querySelectorAll('.uyg')) {
+        const metin = sade(kart.querySelector('.ad').textContent);
+        kart.hidden = !kelimeler.every(kelime => metin.includes(kelime));
+        if (!kart.hidden) gorunen++;
+      }
+      grup.hidden = gorunen === 0;
+      toplam += gorunen;
+    }
+    sonuc.textContent = kelimeler.length === 0 ? '' :
+      toplam ? toplam + ' uygulama bulundu.' : 'Aramanıza uygun uygulama bulunamadı.';
+  }
+  arama.addEventListener('input', filtrele);
+  window.addEventListener('pageshow', filtrele);
 </script>
 </body>
 </html>
