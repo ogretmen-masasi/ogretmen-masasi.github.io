@@ -433,81 +433,19 @@ function blankStudent(i){
   return {kod:"Öğrenci "+(i+1), ad:"", sinif:"10", baba:"", dogum:"", veli:"", tel:"", adres:"", baslik:"", konu:topics[i], bolumler:"", asama:"Konu seçimi", ek4:false, ek5:false, ek6:false, notlar:""};
 }
 function defaults(){
-  return {done:{}, students:[0,1,2].map(blankStudent), cmp:{}, sc7:{}, sc8:{}, max7:10, max8:10, q:{}, set:{apiKey:"", model:"gemini-2.5-flash", mudurYrd:"", danTel:""}};
+  return {done:{}, students:[0,1,2].map(blankStudent), cmp:{}, sc7:{}, sc8:{}, max7:10, max8:10, q:{}, set:{apiKey:"", model:"gemini-2.5-flash"}};
 }
-const KEY_SONYEDEK = KEY + "_sonyedek";
-const isObj = v => v !== null && typeof v === "object" && !Array.isArray(v);
-const mx = v => { const n = Number(v); return (isFinite(n) && n > 0) ? n : 10; };
-/* Veri denetimi: geçerliyse düzenlenmiş yeni nesne, değilse null döner. */
-function cleanData(o){
-  if(!isObj(o)) return null;
-  // en az öğrenci listesi ya da görev işaretleri olmalı (boş {} ya da başka uygulamanın dosyası reddedilir)
-  if(!Array.isArray(o.students) && !isObj(o.done)) return null;
-  const d = defaults();
-  if(o.students !== undefined){
-    if(!Array.isArray(o.students) || !o.students.every(isObj)) return null;
-  }
-  for(const k of ["done","cmp","sc7","sc8","q","set"]){ if(o[k] !== undefined && !isObj(o[k])) return null; }
-  const r = Object.assign(d, o, {set:Object.assign(d.set, o.set||{})});
-  const st = Array.isArray(o.students) ? o.students.slice() : [];
-  for(let i=0;i<Math.max(3,st.length);i++){ st[i] = Object.assign(blankStudent(i), st[i]||{}); }
-  r.students = st;
-  r.max7 = mx(r.max7); r.max8 = mx(r.max8);
-  for(const k of ["apiKey","model","mudurYrd","danTel"]){ if(typeof r.set[k] !== "string") r.set[k] = defaults().set[k]; }
-  return r;
-}
-let S, loadWarn = "", bozukKilit = false;
+let S;
 function load(){
-  let raw = null;
-  try{ raw = localStorage.getItem(KEY); }catch(e){ return defaults(); }
-  if(raw){
-    let v = null;
-    try{ v = cleanData(JSON.parse(raw)); }catch(e){ v = null; }
-    if(v) return v;
-    let kopya = false;
-    try{ for(let i=0;i<localStorage.length;i++){ const z = localStorage.key(i); if(z && z.indexOf(KEY + "_bozuk_")===0 && localStorage.getItem(z)===raw){ kopya = true; break; } } }catch(e){}
-    if(!kopya){ try{ localStorage.setItem(KEY + "_bozuk_" + Date.now(), raw); kopya = true; }catch(e){} }
-    if(!kopya) bozukKilit = true;
-    loadWarn = kopya ? "Kayıtlı veriler okunamadı; ham kopyası saklandı. Bir yedek dosyanız varsa yükleyin."
-                     : "Kayıtlı veriler okunamadı ve kopyası için yer açılamadı. Bozuk veri silinmesin diye kayıt durduruldu; Claude'a haber verin.";
-  }
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(raw){ const o = JSON.parse(raw); const d = defaults(); return Object.assign(d, o, {set:Object.assign(d.set, o.set||{})}); }
+  }catch(e){}
   return defaults();
 }
-let saveT, savePending = false;
-function kayitSeridi(goster){
-  let b = document.getElementById("kayitHata");
-  if(!goster){ if(b) b.remove(); return; }
-  if(b) return;
-  b = document.createElement("div"); b.id = "kayitHata";
-  b.setAttribute("style","position:fixed;left:0;right:0;top:0;z-index:99999;background:#b00020;color:#fff;padding:10px 14px;display:flex;gap:12px;align-items:center;justify-content:space-between;font-size:15px");
-  const sp = document.createElement("span"); sp.textContent = "Kayıt yapılamadı (tarayıcı depolaması dolu ya da gizli pencere). Yedek alın.";
-  const bt = document.createElement("button"); bt.type = "button"; bt.textContent = "Kapat"; bt.setAttribute("style","background:#fff;color:#b00020;border:0;padding:4px 10px;border-radius:4px;cursor:pointer");
-  bt.addEventListener("click", ()=>b.remove());
-  b.appendChild(sp); b.appendChild(bt); document.body.appendChild(b);
-}
-function flushSave(){
-  clearTimeout(saveT);
-  if(!savePending) return;
-  savePending = false;
-  if(bozukKilit){ kayitSeridi(true); return; }   // bozuk ham veri kopyalanamadı: üzerine yazılmaz
-  try{ localStorage.setItem(KEY, JSON.stringify(S)); kayitSeridi(false); }
-  catch(e){ kayitSeridi(true); }
-}
-function save(){ savePending = true; clearTimeout(saveT); saveT = setTimeout(flushSave, 150); }
-window.addEventListener("pagehide", flushSave);
-window.addEventListener("beforeunload", flushSave);
+let saveT;
+function save(){ clearTimeout(saveT); saveT = setTimeout(()=>{ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }, 150); }
 S = load();
-function yedekIndir(onek){
-  const c = JSON.parse(JSON.stringify(S));
-  if(!isObj(c.set)) c.set = {};
-  c.set.apiKey = "";
-  const blob = new Blob([JSON.stringify(c,null,2)],{type:"application/json"});
-  const l = document.createElement("a"); l.href = URL.createObjectURL(blob);
-  l.download = "oku-yorum-" + (onek || "yedek") + "-" + todayStr() + ".json";
-  document.body.appendChild(l); l.click(); l.remove();
-  setTimeout(()=>URL.revokeObjectURL(l.href), 5000);
-}
-function sonYedek(){ try{ const v = Number(localStorage.getItem(KEY_SONYEDEK)); return v > 0 ? v : 0; }catch(e){ return 0; } }
 
 function setPath(obj, path, val){
   const p = path.split("."); let o = obj;
@@ -553,16 +491,10 @@ function vHome(){
   const w = W[vi], st = weekState(vi), pr = weekProgress(vi);
   const t0 = today();
   const nk = KRITIK.filter(k=> toD(k.d) >= t0)[0];
-  const gec = KRITIK.filter(k=> k.ben && toD(k.d) < t0 && !S.done["kr_"+k.d]);
-  const gecHTML = gec.length ? gec.map(k=>`<div class="card" style="border-color:#b00020"><span class="badge" style="background:#b00020;color:#fff">Gecikti</span> <b>${fmt(toD(k.d))}</b> (${-daysTo(toD(k.d))} gün geçti)<br>${esc(k.t)}<label class="task" style="border:0"><input type="checkbox" data-task="kr_${k.d}"><span><b>Yapıldı</b></span></label></div>`).join("") : "";
-  const sy = sonYedek();
-  const adVar = S.students.some(s=>(s.ad||"").trim());
-  const yedekHat = (adVar && (!sy || (Date.now()-sy) > 7*864e5)) ? `<p class="mini" style="color:#b00020">Hatırlatma: ${sy?"son yedeğin üzerinden 7 günden fazla geçti":"henüz yedek indirilmedi"}. Ayarlar'dan yedek indirin.</p>` : "";
   const stTxt = st==="cur" ? "Şu an bu haftadasınız" : st==="past" ? "Geçmiş hafta" : "Gelecek hafta";
   return `
   <h2>Bu hafta ne yapacağım?</h2>
   <p class="sub">Bugün: ${fmt(t0)} ${t0.getFullYear()} · Hafta ${vi+1} / ${W.length}</p>
-  ${gecHTML}${yedekHat}
   <div class="card hl">
     <div class="row" style="justify-content:space-between">
       <span class="badge ${st==="cur"?"green":""}">${stTxt}</span>
@@ -635,13 +567,13 @@ function vEkler(){
   }
   else if(eklerTab==="ek7"){
     body = `<p class="sub">EK-7 örnek bildiri değerlendirme kriterleri. Kılavuzdaki tabloda puan değerleri yok; her ölçüt için üst puanı siz belirlersiniz.</p>
-    <label class="f">Her ölçütün üst puanı <input type="number" min="1" max="100" data-p="max7" value="${mx(S.max7)}" style="width:90px"></label>
-    ${scoreTable("sc7", C7, mx(S.max7))}`;
+    <label class="f">Her ölçütün üst puanı <input type="number" min="1" max="100" data-p="max7" value="${S.max7}" style="width:90px"></label>
+    ${scoreTable("sc7", C7, S.max7)}`;
   }
   else {
     body = `<p class="sub">EK-8 örnek hikâye değerlendirme kriterleri. Hikâyeler isimsiz değerlendirilir (Madde 9/4); “Hikâye 1, 2, 3” diye numaralandırabilirsiniz.</p>
-    <label class="f">Her ölçütün üst puanı <input type="number" min="1" max="100" data-p="max8" value="${mx(S.max8)}" style="width:90px"></label>
-    ${scoreTable("sc8", C8, mx(S.max8))}`;
+    <label class="f">Her ölçütün üst puanı <input type="number" min="1" max="100" data-p="max8" value="${S.max8}" style="width:90px"></label>
+    ${scoreTable("sc8", C8, S.max8)}`;
   }
   return `<h2>Ekler</h2>
   <div class="tabs2">${tabs.map(t=>`<button data-act="ekt" data-v="${t[0]}" class="${eklerTab===t[0]?"on":""}">${t[1]}</button>`).join("")}</div>${body}`;
@@ -682,12 +614,6 @@ function formHTML(kind, st){
 function vStudents(){
   return `<h2>Öğrencilerim</h2>
   <p class="sub">Bu bilgiler sadece bu bilgisayarın tarayıcısında saklanır. Veli bilgileri EK-4, 5, 6 formlarını doldurur; liste yazısına da öğrenci adı ve iletişim bilgisi buradan gelir.</p>
-  <div class="card"><b>Proje yürütücüleri</b>
-    <div class="grid" style="margin-top:10px">
-      <label class="f">Müdür yardımcısı adı<input type="text" data-p="set.mudurYrd" value="${esc(S.set.mudurYrd)}"></label>
-      <label class="f">Danışman öğretmen telefonu<input type="text" data-p="set.danTel" value="${esc(S.set.danTel)}"></label>
-    </div>
-    <p class="mini">Doluysa Hazır Yazılar'daki yazılarda noktalı satırın yerine yazılır.</p></div>
   ${S.students.map((s,i)=>{
     const p = k=>`data-p="students.${i}.${k}"`;
     return `<div class="card"><div class="row" style="justify-content:space-between"><b>${esc(s.ad||s.kod)}</b><span class="badge navy">${esc(s.asama)}</span></div>
@@ -757,7 +683,6 @@ function vQs(){
 
 /* ===== Hazır yazılar ===== */
 let ttab = "gorev";
-function setOr(k){ const v = String((S.set && S.set[k]) || "").trim(); return v || "……………………………"; }
 function todayStr(){ const d = today(); return String(d.getDate()).padStart(2,"0")+"."+String(d.getMonth()+1).padStart(2,"0")+"."+d.getFullYear(); }
 function stuLines(){
   return S.students.map((s,i)=>`${i+1}. ${s.ad||"……………………"} – ${s.sinif||"10"}. sınıf – ${s.tel||"…………"}`).join("\n");
@@ -786,8 +711,8 @@ Konu: “Oku-Yorum, Yazı-Yorum” Projesi Katılımcı Listesi
 Ortaöğretim Genel Müdürlüğünün “Oku-Yorum, Yazı-Yorum” Projesi Uygulama Kılavuzu (Ekim 2026) kapsamında okulumuz (${OKUL}) 2026-2027 eğitim öğretim yılında “Siyasetname/Ütopyalar” çalışmasına katılacaktır. Çalışmada, Nizâmülmülk'ün Siyasetname'si ile Machiavelli'nin Hükümdar (Prens) adlı eserleri seçilmiştir.
 
 Danışman öğretmen: ${OGRT}, Türk Dili ve Edebiyatı Öğretmeni
-Proje yürütücüsü müdür yardımcısı: ${setOr("mudurYrd")}
-Danışman öğretmen iletişim: ${setOr("danTel")}
+Proje yürütücüsü müdür yardımcısı: ……………………………
+Danışman öğretmen iletişim: ……………………………
 
 Katılımcı öğrenciler:
 ${stuLines()}
@@ -864,21 +789,6 @@ function vAi(){
 function mdLite(t){
   return esc(t).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/^#{1,4}\s*(.+)$/gm,"<b>$1</b>");
 }
-/* Türkçe harf kuralıyla (İ/ı) küçültür; uzunluk her zaman korunur. */
-function trKucuk(t){ return Array.from(String(t)).map(c=>{ const l = c.toLocaleLowerCase("tr-TR"); return l.length===c.length ? l : c; }).join(""); }
-function adGizle(txt, adlar){
-  const kel = new Set();
-  adlar.forEach(a=>String(a||"").split(/\s+/).forEach(w=>{ w = w.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu,""); if(w.length>2) kel.add(trKucuk(w)); }));
-  if(!kel.size) return txt;
-  const low = trKucuk(txt), aral = [];
-  // yalnız tam kelime olarak (ya da kesme işaretiyle ek almış: "Ayşe'nin") eşleşir; "faaliyet" içindeki "ali" gizlenmez
-  const harf = c => !!c && /[\p{L}\p{N}]/u.test(c);
-  kel.forEach(w=>{ let i = low.indexOf(w); while(i !== -1){ const e = i+w.length; if(!harf(low[i-1]) && (!harf(low[e]))) aral.push([i, e]); i = low.indexOf(w, i+1); } });
-  aral.sort((a,b)=>a[0]-b[0]);
-  let out = "", pos = 0;
-  for(const [b,e] of aral){ if(e <= pos) continue; if(b > pos) out += txt.slice(pos,b); else if(b < pos){ pos = Math.max(pos, e); continue; } out += "[ad]"; pos = e; }
-  return out + txt.slice(pos);
-}
 async function aiRun(){
   const key = (S.set.apiKey||"").trim();
   if(!key){ alert("Önce Ayarlar sekmesine Gemini API anahtarını girin."); return; }
@@ -886,8 +796,7 @@ async function aiRun(){
   if(txt.length < 80){ alert("Taslak çok kısa."); return; }
   aiDraft = txt;
   const s = S.students[aiStu];
-  // bütün öğrencilerin, velilerin ve babaların adları gizlenir (taslakta başka öğrencinin adı da geçebilir)
-  txt = adGizle(txt, S.students.reduce((l,o)=>l.concat([o.ad, o.veli, o.baba]), []));
+  (s.ad||"").split(/\s+/).filter(w=>w.length>2).forEach(w=>{ txt = txt.replace(new RegExp(w.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),"gi"),"[ad]"); });
   const sys = `Sen bir Türk Dili ve Edebiyatı öğretmeninin yardımcısısın. 10. sınıf öğrencisinin yazdığı bildiri taslağını MEB “Oku-Yorum, Yazı-Yorum” projesinin EK-7 ölçütlerine göre değerlendireceksin. Konu: Nizâmülmülk'ün Siyasetname'si ile Machiavelli'nin Hükümdar eserlerinin karşılaştırılması.
 KURALLAR: Metni yeniden yazma. Düzeltilmiş cümle veya paragraf önerme. Örnek cümle verme. Sadece dönüt ver. İmla ve noktalama hatalarında yalnızca hatanın türünü ve metinde yaklaşık nerede olduğunu söyle, düzeltmeyi yazma. Anlamadığın bir şey varsa uydurma. Eserler hakkında metinde yer alan bir bilgiyi doğrulayamazsan "öğretmen kaynaktan kontrol etsin" diye işaretle.
 ÖLÇÜTLER: ${C7.map((c,i)=>(i+1)+") "+c).join("; ")}.
@@ -899,8 +808,7 @@ BİÇİM: Her ölçüt için bir satır: ölçüt adı, durum (Var / Kısmen / E
     const j = await r.json();
     if(!r.ok){ throw new Error((j.error&&j.error.message)||("HTTP "+r.status)); }
     const out = j.candidates&&j.candidates[0]&&j.candidates[0].content&&j.candidates[0].content.parts&&j.candidates[0].content.parts.map(p=>p.text||"").join("");
-    const fr = j.candidates&&j.candidates[0]&&j.candidates[0].finishReason;
-    aiOut = out ? mdLite(out + ((fr && fr !== "STOP") ? "\n\n(Not: yapay zekâ cevabı yarım kalmış olabilir.)" : "")) : "Boş yanıt geldi. Tekrar deneyin.";
+    aiOut = out ? mdLite(out) : "Boş yanıt geldi. Tekrar deneyin.";
   }catch(e){
     aiOut = "Hata: "+esc(e.message)+"<br><span class='mini'>API anahtarını, model adını ve internet bağlantısını kontrol edin.</span>";
   }
@@ -915,8 +823,7 @@ function vSettings(){
     <label class="f">Model adı<input type="text" data-p="set.model" value="${esc(S.set.model)}"></label>
     <p class="mini">Model adı eskirse Google AI Studio'daki güncel bir model adıyla değiştirin.</p></div>
   <div class="card"><b>Yedek</b>
-    <p class="mini">Veriler bu bilgisayarın tarayıcısında durur; tarayıcı verisi silinirse gider. Düzenli olarak yedek indirin. Yedek dosyasına API anahtarı yazılmaz.</p>
-    <p class="mini">Son yedek: ${sonYedek() ? esc(new Date(sonYedek()).toLocaleString("tr-TR")) : "henüz indirilmedi"}</p>
+    <p class="mini">Veriler bu bilgisayarın tarayıcısında durur; tarayıcı verisi silinirse gider. Düzenli olarak yedek indirin.</p>
     <div class="row"><button data-act="export">Yedeği indir (JSON)</button><label class="btn alt" style="background:#fff;color:var(--navy);border:1px solid var(--navy)">Yedeği yükle<input type="file" id="imp" accept=".json" style="display:none"></label></div></div>
   <div class="card"><b>Sıfırla</b><p class="mini">Tüm tikleri, öğrenci bilgilerini ve notları siler.</p><button class="alt" data-act="reset" style="color:var(--bad);border-color:var(--bad)">Her şeyi sıfırla</button></div>`;
 }
@@ -950,7 +857,7 @@ Konu: “Oku-Yorum” Bildirilerinin Gönderilmesi
 ${titles()}
 
 Danışman öğretmen: ${OGRT}, Türk Dili ve Edebiyatı Öğretmeni
-Proje yürütücüsü müdür yardımcısı: ${setOr("mudurYrd")}
+Proje yürütücüsü müdür yardımcısı: ……………………………
 
 Ek: 3 adet bildiri (PDF)
 
@@ -1100,7 +1007,7 @@ const DOCS = {
  bildiriSablon:{t:"Bildiri yazım şablonu (her öğrenci için)", f:()=>perStu(s=>hd("BİLDİRİ YAZIM ŞABLONU")+info(s)
    + `<p><b>BAŞLIK</b> (konuyu anlatan kısa ad): ${esc(s.baslik)||"…………………………………………………"}</p><p><b>ÖZET</b> (ne yapıldı, ne bulundu; 4-5 cümle)</p>${ln(2)}<p><b>ANAHTAR KAVRAMLAR:</b> …………………………………………</p>`
    + `<p><b>GİRİŞ</b> (Hangi eserler, hangi yazarlar, bildirinin amacı: “Bu çalışmada ... incelenmiştir.”)</p>${ln(2)}<p><b>GELİŞME</b> (karşılaştırma, alıntı ve atıf, kendi yorumun; 3. tekil kişi)</p>${ln(4)}<p><b>SONUÇ VE DEĞERLENDİRME</b> (ana fikir)</p>${ln(2)}<p><b>KAYNAKÇA</b></p>${ln(1)}<p class="mini" style="font-size:12.5px">Biçim: Times New Roman, 12 punto, 1,5 satır aralığı, PDF.</p>`)},
- ek7:{t:"EK-7 Bildiri değerlendirme formu (her öğrenci için)", f:()=>scoreForm("sc7", C7, mx(S.max7), "EK-7 BİLDİRİ DEĞERLENDİRME FORMU", false)},
+ ek7:{t:"EK-7 Bildiri değerlendirme formu (her öğrenci için)", f:()=>scoreForm("sc7", C7, S.max7, "EK-7 BİLDİRİ DEĞERLENDİRME FORMU", false)},
  teslimKontrol:{t:"Bildiri teslim kontrol listesi (her öğrenci için)", f:()=>perStu(s=>hd("BİLDİRİ TESLİM KONTROL LİSTESİ")+info(s)+`<p>Bildiri başlığı: ${esc(s.baslik||s.konu)}</p>`
    + tbl(["Kontrol","Tamam"], [
       ...C7.map(c=>[esc(c),"☐"]),
@@ -1127,7 +1034,7 @@ const DOCS = {
  hikayePlani:{t:"Hikâye planı (her öğrenci için)", f:()=>perStu(s=>hd("HİKÂYE PLANI")+info(s)
    + `<p><b>Çalışma başlığı:</b> ……………………………………………</p><p><b>Kişiler:</b></p>${ln(1)}<p><b>Yer ve zaman:</b></p>${ln(1)}<p><b>Anlatıcı:</b> ☐ 1. kişi &nbsp;&nbsp; ☐ 3. kişi</p><p><b>Merak uyandıran açılış:</b></p>${ln(2)}`
    + `<p><b>Olay örgüsü:</b> Giriş</p>${ln(1)}<p>Gelişme</p>${ln(2)}<p>Sonuç</p>${ln(1)}<p><b>Siyasetname / Hükümdar ile bağlantısı (tema):</b></p>${ln(2)}`)},
- ek8:{t:"EK-8 Hikâye değerlendirme formu (isimsiz, 3 adet)", f:()=>scoreForm("sc8", C8, mx(S.max8), "EK-8 HİKÂYE DEĞERLENDİRME FORMU", true)},
+ ek8:{t:"EK-8 Hikâye değerlendirme formu (isimsiz, 3 adet)", f:()=>scoreForm("sc8", C8, S.max8, "EK-8 HİKÂYE DEĞERLENDİRME FORMU", true)},
  hikayeKisisel:{t:"Kişisel bilgi sayfası: hikâyeden ayrı (her öğrenci için)", f:()=>perStu(s=>hd("KİŞİSEL BİLGİ SAYFASI")
    + `<p class="mini" style="font-size:12.5px">Bu sayfa hikâyenin içinde değil, ayrı bir sayfa olarak gönderilir (Kılavuz, Madde 9/4).</p>`
    + tbl(["",""], [["Öğrencinin adı soyadı",nm(s)],["Sınıfı",esc(s.sinif||"10")],["Okulu",esc(OKUL)],["Veli telefonu",esc(s.tel)||""],["Hikâyenin başlığı",""],["Danışman öğretmen",esc(OGRT)]], 40))},
@@ -1496,18 +1403,7 @@ document.addEventListener("change", e=>{
   if(t.id==="imp"){
     const f = t.files[0]; if(!f) return;
     const r = new FileReader();
-    r.onerror = ()=>{ alert("Dosya okunamadı; hiçbir şey değiştirilmedi."); t.value = ""; };
-    r.onload = ()=>{
-      let v = null;
-      try{ v = cleanData(JSON.parse(r.result)); }catch(err){ v = null; }
-      if(!v){ alert("Bu dosya Oku-Yorum yedeği değil ya da bozuk; hiçbir şey değiştirilmedi."); t.value = ""; return; }
-      if(!confirm("Şu anki bütün veriler bu yedekle değiştirilecek. Önce şu anki hâl ayrıca indirilecek. Devam edilsin mi?")){ t.value = ""; return; }
-      yedekIndir("GERIYUKLEME_ONCESI");
-      const eskiAnahtar = (S.set && S.set.apiKey) || "";
-      if(!String(v.set.apiKey||"").trim()) v.set.apiKey = eskiAnahtar;
-      S = v; save(); flushSave(); t.value = "";
-      alert("Yedek yüklendi."); render();
-    };
+    r.onload = ()=>{ try{ const o = JSON.parse(r.result); const d = defaults(); S = Object.assign(d,o,{set:Object.assign(d.set,o.set||{})}); save(); alert("Yedek yüklendi."); render(); }catch(err){ alert("Dosya okunamadı."); } };
     r.readAsText(f); return;
   }
   if(t.dataset && (t.dataset.p==="max7"||t.dataset.p==="max8")){ render(); return; }
@@ -1576,16 +1472,14 @@ document.addEventListener("click", e=>{
   }
   else if(a==="aigo"){ aiRun(); }
   else if(a==="export"){
-    yedekIndir("yedek");
-    try{ localStorage.setItem(KEY_SONYEDEK, String(Date.now())); }catch(err){}
-    render();
+    const blob = new Blob([JSON.stringify(S,null,2)],{type:"application/json"});
+    const l = document.createElement("a"); l.href = URL.createObjectURL(blob); l.download = "oku-yorum-yedek-"+todayStr()+".json"; l.click();
   }
-  else if(a==="reset"){ if(confirm("Tüm veriler silinecek. Önce yedek indirilecek. Emin misiniz?")){ yedekIndir("SIFIRLAMA_ONCESI"); S = defaults(); save(); flushSave(); render(); } }
+  else if(a==="reset"){ if(confirm("Tüm veriler silinecek. Emin misiniz?")){ S = defaults(); save(); render(); } }
 });
 function fallbackCopy(txt){ const ta = document.createElement("textarea"); ta.value = txt; document.body.appendChild(ta); ta.select(); try{document.execCommand("copy");}catch(e){} ta.remove(); }
 
 render();
-if(loadWarn){ setTimeout(()=>alert(loadWarn), 100); }
 </script>
 </body>
 </html>

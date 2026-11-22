@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Bilgi Yarışması ve Oyun v47.0</title>
+    <title>Bilgi Yarışması ve Oyun</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         :root {
@@ -343,7 +343,7 @@
     <div class="header">
         <div>
             <div class="brand-title">Bilgi Yarışması</div>
-            <div class="brand-sub" style="color:var(--text-sub)">Türk Dili ve Edebiyatı | v47.0 (Soru Üret · Soru Bankası · Sınav · Oyunlar)</div>
+            <div class="brand-sub" style="color:var(--text-sub)">Türk Dili ve Edebiyatı | v46.0 (Soru Üret · Soru Bankası · Sınav · Oyunlar)</div>
         </div>
         <div style="display:flex; gap:10px;">
             <button id="mute-btn" class="btn-gray" onclick="toggleMute()">🔊</button>
@@ -532,7 +532,6 @@
             </div>
         </div>
         <p id="bk-ozet" style="color:var(--text-sub); font-size:14px; margin-top:0;"></p>
-        <p id="bellek-satir" style="color:var(--text-sub); font-size:14px; margin-top:0;"></p>
 
         <div class="bk-filtre">
             <input type="text" id="bk-ara" placeholder="🔍 Soru metninde ara…" oninput="bankaCiz(true)">
@@ -902,53 +901,8 @@ Cevap Anahtarı: 1-C 2-A 3-E" style="height:260px; border:2px dashed var(--prima
     let idSayac=0;
     function yeniId(){ return Date.now()*1000 + (++idSayac % 1000); }
     function metinNorm(s){ return String(s==null?'':s).toLocaleLowerCase('tr-TR').replace(/â/g,'a').replace(/î/g,'i').replace(/û/g,'u').replace(/\s+/g,' ').trim(); }
-    const _bozukUyarildi={}, _bozukKilit={};
-    function lsOku(k,def){
-        let v=null;
-        try{ v=localStorage.getItem(k); }catch(e){ return def; }
-        if(!v) return def;
-        try{ return JSON.parse(v); }
-        catch(e){
-            // Bozuk kayıt: ham değeri silmeden yedek anahtara kopyala, bir kez uyar
-            const t=new Date(), gun=t.getFullYear()+String(t.getMonth()+1).padStart(2,'0')+String(t.getDate()).padStart(2,'0');
-            const yk=k+'_bozuk_'+gun; let kopya=false;
-            try{
-                // aynı bozuk değerin kopyası zaten varsa yenisini açma (her gün yer doldurmasın)
-                for(let i=0;i<localStorage.length;i++){ const z=localStorage.key(i); if(z && z.indexOf(k+'_bozuk_')===0 && localStorage.getItem(z)===v){ kopya=true; break; } }
-                if(!kopya){ localStorage.setItem(yk,v); kopya=true; }
-            }catch(e2){}
-            // kopya alınamadıysa bu anahtara yazmak bozuk ham veriyi silerdi: yazma kilitlenir
-            if(!kopya) _bozukKilit[k]=true;
-            if(!_bozukUyarildi[k]){
-                _bozukUyarildi[k]=true;
-                alert("⚠️ '"+k+"' kaydı okunamadı (bozuk). "+(kopya?"Bozuk ham veri ayrıca saklandı; silinmedi.":"Bozuk veri için yedek yer açılamadı (bellek dolu olabilir). Bozuk veri silinmesin diye bu kayda yazma durduruldu; Claude'a haber verin."));
-            }
-            return def;
-        }
-    }
-    // Bu uygulamaya ait anahtarlar: 'mt_' ile başlayanlar ve 'ogm_sorular' (bozuk kopyalar dahil)
-    function bellekKullanimi(){
-        let toplam=0;
-        try{
-            for(let i=0;i<localStorage.length;i++){
-                const k=localStorage.key(i);
-                if(k && (k.indexOf('mt_')===0 || k.indexOf('ogm_sorular')===0)){ const v=localStorage.getItem(k)||''; toplam+=(k.length+v.length)*2; }
-            }
-        }catch(e){}
-        return toplam;
-    }
-    function bellekGoster(){
-        const e=$('bellek-satir'); if(!e) return;
-        const mb=bellekKullanimi()/1048576, kirmizi=mb>4;
-        e.style.color = kirmizi ? 'var(--danger)' : 'var(--text-sub)';
-        e.style.fontWeight = kirmizi ? '700' : '400';
-        e.innerText = 'Kullanılan bellek: '+mb.toFixed(2).replace('.',',')+' MB / ~5 MB'+(kirmizi?' — Görselli soruları azaltın ya da tam yedek alın.':'');
-    }
-    // Harf, ekranda gösterilen (boş olmayan) şıkların sırasına göre verilir
-    // Dolu şıklar arasında boş şık var mı? (ör. A, B, boş, D)
-    function siklarArasiBosVar(siklar){ let sonDolu=-1; siklar.forEach((x,i)=>{ if(x) sonDolu=i; }); for(let i=0;i<sonDolu;i++) if(!siklar[i]) return true; return false; }
-    function sikHarf(siklar,i){ let n=0; for(let k=0;k<i;k++) if(siklar[k]) n++; return 'ABCDE'[n]||'?'; }
-    function lsYaz(k,v){ if(typeof _bozukKilit!=='undefined' && _bozukKilit[k]){ alert("⚠️ '"+k+"' kaydı bozuk ve yedeği alınamadı; veri silinmesin diye bu kayda yazılmadı."); return false; } try{ localStorage.setItem(k,JSON.stringify(v)); return true; }catch(e){ alert("⚠️ Tarayıcı belleğine yazılamadı (dolu olabilir). Görselli sorular çok yer kaplar; 'Sınavı İndir (.json)' ile dosyaya yedekleyin."); return false; } }
+    function lsOku(k,def){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):def; }catch(e){ return def; } }
+    function lsYaz(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); return true; }catch(e){ alert("⚠️ Tarayıcı belleğine yazılamadı (dolu olabilir). Görselli sorular çok yer kaplar; 'Sınavı İndir (.json)' ile dosyaya yedekleyin."); return false; } }
 
     /* ================= ORTAK JSON FORMATI (3 dosya aynı biçimi kullanır) =================
        { id, tip: test|dy|bosluk|eslesme|yorum, soru, aciklama, gorsel,
@@ -998,18 +952,11 @@ Cevap Anahtarı: 1-C 2-A 3-E" style="height:260px; border:2px dashed var(--prima
         if(veri && !Array.isArray(veri) && Array.isArray(veri.sorular)) veri=veri.sorular;
         if(!Array.isArray(veri)) veri = veri ? [veri] : [];
         const testMi = q => q && (q.tip==='test' || (Array.isArray(q.siklar) && q.siklar.length));
-        const sayiMi = q => testMi(q) && q.dogruInd!==undefined && q.dogruInd!==null && /^\d+$/.test(String(q.dogruInd).trim());
-        // son dolu şıkkın konumu (1 tabanlı); ortada boş şık olsa da doğru kıyas için
-        const sikSayisi = q => { if(!Array.isArray(q.siklar)) return 0; let s=0; q.siklar.forEach((x,i)=>{ if(x!=null && String(x).trim()!=='') s=i+1; }); return s; };
-        const sifirVar = veri.some(q => sayiMi(q) && parseInt(String(q.dogruInd).trim(),10)===0);
-        // Yalnızca hiçbir cevap "şık sayısı"na eşit değilse (gerçekten 0 tabanlı görünüyorsa) kaydır
-        const sayiyaEsitVar = veri.some(q => sayiMi(q) && sikSayisi(q)>0 && parseInt(String(q.dogruInd).trim(),10)===sikSayisi(q));
-        const sifirTabanli = sifirVar && !sayiyaEsitVar;
+        const sifirTabanli = veri.some(q => testMi(q) && q.dogruInd!==undefined && q.dogruInd!==null && String(q.dogruInd).trim()==='0');
         if(sifirTabanli) uyari.push("Doğru şık numaraları 0'dan başlıyordu; hepsi 1 artırılarak düzeltildi.");
-        else if(sifirVar) uyari.push("Dosyada doğru şık numaraları karışık (hem 0 hem şık sayısına eşit değerler var); numaralar KAYDIRILMADI. 0 olan soruların doğru cevabı belirsiz kaldı, editörde kontrol edin.");
         const liste=[]; let atlanan=0, belirsiz=0;
         veri.forEach(q=>{
-            if(sifirTabanli && q && sayiMi(q)) q={...q, dogruInd:parseInt(q.dogruInd,10)+1};
+            if(sifirTabanli && q && q.dogruInd!==undefined && q.dogruInd!==null && /^\d+$/.test(String(q.dogruInd).trim())) q={...q, dogruInd:parseInt(q.dogruInd,10)+1};
             const s=soruNormalle(q);
             if(!s){ atlanan++; return; }
             if((s.tip==='test' && s.dogruInd==null) || (s.tip==='dy' && s.cevap==null)) belirsiz++;
@@ -1125,17 +1072,10 @@ Cevap Anahtarı: 1-C 2-A 3-E" style="height:260px; border:2px dashed var(--prima
     function sinifKaydet(){
         if(aktifSinifId===null) return;
         const ad=$("sinif-adi-input").value.trim();
-        const hamListe=$("ogrenci-liste-input").value.split("\n").map(n=>n.trim()).filter(n=>n!=="");
-        const liste=[], gorulen=new Set();
-        // yalnız birebir aynı yazılan adlar ayıklanır (aynı adlı iki farklı öğrenci "Ali Yılmaz" / "ALİ YILMAZ" korunur)
-        hamListe.forEach(n=>{ const k=n.replace(/\s+/g,' '); if(gorulen.has(k)) return; gorulen.add(k); liste.push(n); });
-        const ayiklanan=hamListe.length-liste.length;
+        const liste=$("ogrenci-liste-input").value.split("\n").map(n=>n.trim()).filter(n=>n!=="");
         siniflar[aktifSinifId].ad=ad||`Sınıf ${aktifSinifId+1}`;
         siniflar[aktifSinifId].liste=liste;
-        if(lsYaz("mt_siniflar",siniflar)){
-            $("ogrenci-liste-input").value=liste.join("\n");
-            alert("✅ Sınıf bilgileri güncellendi!"+(ayiklanan?`\n\nℹ️ Aynı adla tekrar eden ${ayiklanan} kayıt ayıklandı.`:""));
-        }
+        if(lsYaz("mt_siniflar",siniflar)) alert("✅ Sınıf bilgileri güncellendi!");
         sinifSlotlariniOlustur();
     }
     function csvHucre(v){
@@ -1177,8 +1117,6 @@ Cevap Anahtarı: 1-C 2-A 3-E" style="height:260px; border:2px dashed var(--prima
     /* ================= OYUN BAŞLATMA ================= */
     function hazirla(){
         if(!sorular.length) return alert("Henüz soru seçilmedi.\n\nSoru Bankası'ndan (örneğin 'Son eklenen grup'), taslaklardan ya da dosyadan soru yükleyin.");
-        const anahtarsizSayi=sorular.filter(q=>!anahtarVar(q)).length;
-        if(anahtarsizSayi) alert(`⚠️ ${anahtarsizSayi} sorunun cevap anahtarı yok; bu sorular puanlanmayacak.`);
         aktifSorular=[...sorular];
         if($("karistir").checked) karistirDizi(aktifSorular);
         const sv=$("turnuva-sinif-sec").value;
@@ -1244,7 +1182,7 @@ Cevap Anahtarı: 1-C 2-A 3-E" style="height:260px; border:2px dashed var(--prima
         const g = s.gorsel ? `<img src="${esc(s.gorsel)}" class="soru-gorseli">` : '';
         let govde='';
         if(s.tip==='test'){
-            govde=s.siklar.map((x,i)=> x ? `<label class="sik-label" id="L${i+1}" onclick="sesCal('tik')"><input type="radio" name="cvp" value="${i+1}"> <b style="margin-right:6px;">${sikHarf(s.siklar,i)})</b> ${sikHTML(x)}</label>` : '').join('');
+            govde=s.siklar.map((x,i)=> x ? `<label class="sik-label" id="L${i+1}" onclick="sesCal('tik')"><input type="radio" name="cvp" value="${i+1}"> ${sikHTML(x)}</label>` : '').join('');
         } else if(s.tip==='dy'){
             govde=`<label class="sik-label" id="LD"><input type="radio" name="cvp" value="D"> Doğru</label><label class="sik-label" id="LY"><input type="radio" name="cvp" value="Y"> Yanlış</label>`;
         } else if(s.tip==='eslesme'){
@@ -1335,14 +1273,6 @@ Cevap Anahtarı: 1-C 2-A 3-E" style="height:260px; border:2px dashed var(--prima
         k.puan=t?Math.round((k.d||0)/t*100):0;
         lsYaz("mt_siniflar",siniflar);
     }
-    // Sorunun doğru cevabı belirlenebiliyor mu? (yorum sorusu puanlanmadığı için burada sorulmaz)
-    function anahtarVar(s){
-        if(s.tip==='test') return !!(s.dogruInd>=1 && s.siklar && s.siklar[s.dogruInd-1]);
-        if(s.tip==='dy') return s.cevap==='D' || s.cevap==='Y';
-        if(s.tip==='eslesme') return Array.isArray(s.eslesmeler) && s.eslesmeler.length>0;
-        if(s.tip==='yorum') return true;
-        return [s.cevap].concat(s.kabul||[]).some(c=>c!=null && String(c).trim()!=='');
-    }
     function kontrol(inceleme, sureBitti){
         inceleme = inceleme===true; sureBitti = sureBitti===true;
         if(cevaplandi && !inceleme){
@@ -1354,11 +1284,8 @@ Cevap Anahtarı: 1-C 2-A 3-E" style="height:260px; border:2px dashed var(--prima
         const raw = inceleme ? (kayit?kayit.cevap:null) : cevapOku(s);
         const zamanAsimi = inceleme ? !!(kayit&&kayit.zamanAsimi) : sureBitti;
         let dogru=false, bos=false; const yorum=(s.tip==='yorum');
-        const anahtarsiz = !yorum && !anahtarVar(s);   // doğru cevabı belirlenemeyen soru: puanlanmaz
 
-        if(anahtarsiz){
-            bos=(s.tip==='eslesme') ? !(raw && raw.some(v=>v)) : (raw==null || raw==="");
-        } else if(s.tip==='test'){
+        if(s.tip==='test'){
             bos=(raw==null);
             dogru=!bos && s.dogruInd!=null && parseInt(raw,10)===s.dogruInd;
             if(!bos && !dogru){ const e=$("L"+raw); if(e) e.classList.add('yanlis'); }
@@ -1378,11 +1305,10 @@ Cevap Anahtarı: 1-C 2-A 3-E" style="height:260px; border:2px dashed var(--prima
             if(!bos && !dogru){ const t=$("txt-cevap"); if(t) t.classList.add("yanlis"); }
         }
 
-        if(!inceleme && bos && !zamanAsimi && !yorum && !anahtarsiz && !confirm("Cevap seçmediniz. Boş geçilsin mi?")) return;
+        if(!inceleme && bos && !zamanAsimi && !yorum && !confirm("Cevap seçmediniz. Boş geçilsin mi?")) return;
 
         const f=$("geri-bildirim");
-        if(anahtarsiz){ f.innerText="Bu sorunun cevap anahtarı yok; puanlanmadı."; f.style.color="var(--warning)"; }
-        else if(yorum){ f.innerHTML = s.cevap ? `Örnek cevap: ${esc(s.cevap)}` : "Açık uçlu soru"; f.style.color="var(--primary)"; }
+        if(yorum){ f.innerHTML = s.cevap ? `Örnek cevap: ${esc(s.cevap)}` : "Açık uçlu soru"; f.style.color="var(--primary)"; }
         else if(dogru){ f.innerText="Tebrikler! 🎉"; f.style.color="var(--success)"; }
         else if(bos){ f.innerText = zamanAsimi ? "⏰ Süre doldu" : "Boş"; f.style.color="var(--warning)"; }
         else { f.innerText="Yanlış"; f.style.color="var(--danger)"; }
@@ -1390,7 +1316,7 @@ Cevap Anahtarı: 1-C 2-A 3-E" style="height:260px; border:2px dashed var(--prima
         if(s.aciklama){ const a=$("aciklama-kutusu"); a.innerText="💡 "+s.aciklama; a.style.display="block"; }
 
         if(!inceleme){
-            const durum = (yorum||anahtarsiz)?'a':(bos?'b':(dogru?'d':'y'));
+            const durum = yorum?'a':(bos?'b':(dogru?'d':'y'));
             sonuclar[index]={durum, cevap:raw, ogrenci:turnuvaModu?secilenOgrenci:null, zamanAsimi};
             if(durum==='d') d++; else if(durum==='y') y++; else if(durum==='b') b++;
             if(durum!=='a'){
@@ -1476,16 +1402,11 @@ Cevap Anahtarı: 1-C 2-A 3-E" style="height:260px; border:2px dashed var(--prima
     function islem(tur){
         const t=$("tip-sec").value, soru=$("txt-soru").value.trim(), ac=$("aciklama-gir").value.trim();
         if(!soru) return alert("Soru metni boş!");
-        if(t==='eslesme' && tur==='guncelle'){
-            const eski=sorular.find(x=>x.id==duzenleId);
-            if(eski && Array.isArray(eski.eslesmeler) && eski.eslesmeler.length>8 && !confirm(`Bu soruda ${eski.eslesmeler.length} eşleştirme çifti var; bu editör en fazla 8 çift gösterir. Kaydederseniz fazla çiftler silinir.\n\nYine de kaydedilsin mi? (İptal = vazgeç, soru değişmez)`)) return;
-        }
         const v={id:yeniId(), tip:t, soru, aciklama:ac, gorsel:aktifGorselData, cevap:null, siklar:[], eslesmeler:[], dogruInd:null};
         Object.assign(v,etiketOku());
         if(t==='test'){
             for(let i=1;i<=5;i++) v.siklar.push($(`sik-${i}`).value.trim());
             if(v.siklar.filter(x=>x).length<2) return alert("En az 2 şık girin.");
-            if(siklarArasiBosVar(v.siklar)) return alert("Ortadaki bir şık boş bırakılmış. Şıkları boşluksuz, sırayla (A, B, C…) doldurun.");
             const r=document.querySelector('input[name="d_sik"]:checked');
             if(!r) return alert("Doğru şıkkı işaretleyin.");
             const di=parseInt(r.value,10);
@@ -1531,7 +1452,7 @@ Cevap Anahtarı: 1-C 2-A 3-E" style="height:260px; border:2px dashed var(--prima
         if(!ad) return alert("Ad girin");
         if(!sorular.length) return alert("Soru yok");
         const k=lsOku("ogm_sorular",{}); k[ad]=sorular;
-        if(lsYaz("ogm_sorular",k)){ const b=bankaEkle(sorular.map(s=>({...s}))); alert("Kaydedildi"+(b.hata?"\n❌ Ancak sorular soru bankasına KAYDEDİLEMEDİ (depolama dolu olabilir). Tam yedek alın.":(b.eklenen?`\n🗂️ ${b.eklenen} yeni soru soru bankasına da eklendi.`:""))); kutuphaneListesiGuncelle(); }
+        if(lsYaz("ogm_sorular",k)){ const b=bankaEkle(sorular.map(s=>({...s}))); alert("Kaydedildi"+(b.eklenen?`\n🗂️ ${b.eklenen} yeni soru soru bankasına da eklendi.`:"")); kutuphaneListesiGuncelle(); }
     }
     function kutuphaneListesiGuncelle(){
         const k=lsOku("ogm_sorular",{});
@@ -1541,14 +1462,10 @@ Cevap Anahtarı: 1-C 2-A 3-E" style="height:260px; border:2px dashed var(--prima
             Object.keys(k).forEach(ad=>{ l.innerHTML+=`<option value="${esc(ad)}">${esc(ad)} (${k[ad].length} soru)</option>`; });
         });
     }
-    function listeDegisimOnay(neyle){
-        if(!sorular.length) return true;
-        return confirm(`Şu anki sınav listesi (${sorular.length} soru) ${neyle||'bu dosyadakilerle'} değiştirilecek. Devam edilsin mi?`);
-    }
     function kutuphanedenYukle(){
         const ad=$("kutuphane-listesi").value; if(!ad) return;
         const k=lsOku("ogm_sorular",{});
-        if(k[ad]){ if(!listeDegisimOnay('bu taslaktakilerle')) return; const r=soruListeNormalle(k[ad]); sorular=r.liste; $('yuklenen-soru-bilgi').innerText=`✅ ${ad} yüklendi (${sorular.length} soru)`; yuklemeBilgiGuncelle(); listeKaydet(); }
+        if(k[ad]){ const r=soruListeNormalle(k[ad]); sorular=r.liste; $('yuklenen-soru-bilgi').innerText=`✅ ${ad} yüklendi (${sorular.length} soru)`; yuklemeBilgiGuncelle(); listeKaydet(); }
     }
     function kaydetDosya(){
         if(!sorular.length) return alert("İndirilecek soru yok.");
@@ -1569,7 +1486,6 @@ Cevap Anahtarı: 1-C 2-A 3-E" style="height:260px; border:2px dashed var(--prima
     function dosyaSecildi(input){
         dosyadanOku(input, r=>{
             if(!r.liste.length) return alert("Dosyada geçerli soru bulunamadı.");
-            if(!listeDegisimOnay()) return;
             sorular=r.liste; $('yuklenen-soru-bilgi').innerText=`✅ Dosya yüklendi (${sorular.length} soru)`; yuklemeBilgiGuncelle(); listeKaydet();
             if(r.uyari.length) alert("ℹ️ "+r.uyari.join("\n"));
         });
@@ -1577,7 +1493,6 @@ Cevap Anahtarı: 1-C 2-A 3-E" style="height:260px; border:2px dashed var(--prima
     function editorDosyaAc(input){
         dosyadanOku(input, r=>{
             if(!r.liste.length) return alert("Dosyada geçerli soru bulunamadı.");
-            if(!listeDegisimOnay()) return;
             sorular=r.liste; yeniSoruModu(); listele();
             alert(`${sorular.length} soru editöre yüklendi.`+(r.uyari.length?"\n\nℹ️ "+r.uyari.join("\n"):""));
         });
@@ -1592,7 +1507,7 @@ Cevap Anahtarı: 1-C 2-A 3-E" style="height:260px; border:2px dashed var(--prima
         let h=`<div class="rv-soru">${soruHTML(q.soru)}</div>`;
         if(q.gorsel) h=`<img src="${esc(q.gorsel)}" class="soru-gorseli" style="max-height:180px;">`+h;
         if(q.tip==='test'){
-            h+=q.siklar.map((x,i)=>x?`<div class="rv-sik ${q.dogruInd===i+1?'dogru':''}"><b>${sikHarf(q.siklar,i)})</b> ${sikHTML(x)}${q.dogruInd===i+1?' ✅':''}</div>`:'').join('');
+            h+=q.siklar.map((x,i)=>x?`<div class="rv-sik ${q.dogruInd===i+1?'dogru':''}"><b>${'ABCDE'[i]})</b> ${sikHTML(x)}${q.dogruInd===i+1?' ✅':''}</div>`:'').join('');
             if(q.dogruInd==null) h+='<div class="rv-uyari kirmizi">Doğru şık belirlenmemiş.</div>';
         } else if(q.tip==='dy'){
             h+=`<div class="rv-sik dogru">Cevap: <b>${q.cevap==='D'?'Doğru':(q.cevap==='Y'?'Yanlış':'?')}</b></div>`;
@@ -1639,7 +1554,6 @@ Cevap Anahtarı: 1-C 2-A 3-E" style="height:260px; border:2px dashed var(--prima
             n.siklar=[1,2,3,4,5].map(i=>v('s'+i));
             const dolu=n.siklar.filter(x=>x).length;
             if(dolu<2) return {hata:'En az 2 şık gerekli.'};
-            if(siklarArasiBosVar(n.siklar)) return {hata:'Ortadaki bir şık boş bırakılmış. Şıkları boşluksuz, sırayla doldurun.'};
             const r=document.querySelector(`input[name="${p}-d"]:checked`);
             if(!r) return {hata:'Doğru şıkkı işaretleyin.'};
             n.dogruInd=parseInt(r.value,10);
@@ -2422,7 +2336,6 @@ ${JSON.stringify(liste)}`;
         if(suphe && !confirm(suphe+' şüpheli soru da seçili. Bunları doğru cevabı kendiniz kontrol ettiyseniz devam edin. Eklensin mi?')) return;
         const liste=sec.map(o=>soruNormalle(o.q)).filter(Boolean);
         const b=bankaEkle(liste.map(q=>({...q})));
-        if(b.hata) return alert('❌ Kaydedilemedi: sorular soru bankasına yazılamadı (depolama dolu olabilir). Hiçbir şey eklenmedi; pencere açık bırakıldı. Tam yedek alıp görselli soruları azaltın.');
         if($('rv-sinava').checked){ sorular=sorular.concat(liste); }
         $('ai-review-modal').classList.add('gizli');
         listele(); if(!$('banka').classList.contains('gizli')) bankaCiz();
@@ -2442,8 +2355,8 @@ ${JSON.stringify(liste)}`;
             const k=soruAnahtar(s); if(var_.has(k)){ tekrar++; return; }
             var_.add(k); b.push({...s,id:yeniId(),eklenme:parti}); eklenen++;
         });
-        if(eklenen && !bankaYaz(b)) return {eklenen:0,tekrar,hata:true};   // yazılamadıysa eklenen sayılmaz
-        return {eklenen,tekrar,hata:false};
+        if(eklenen) bankaYaz(b);
+        return {eklenen,tekrar};
     }
 
     let bk={sayfa:0, sec:new Set(), duzenle:null, detay:null};
@@ -2475,8 +2388,7 @@ ${JSON.stringify(liste)}`;
         if(bk.sayfa>=toplamSayfa) bk.sayfa=toplamSayfa-1;
         const goster=liste.slice(bk.sayfa*BK_SAYFA,(bk.sayfa+1)*BK_SAYFA);
         const suphe=tum.filter(s=>s.dogrulama==='suphe').length, dogr=tum.filter(s=>s.dogrulama==='dogrulandi').length;
-        bellekGoster();
-        $('bk-ozet').innerHTML=`Bankada<b>${tum.length}</b> soru${tum.length?` · ✅ ${dogr} doğrulandı · ⚠️ ${suphe} şüpheli`:''} · filtreye uyan <b>${liste.length}</b>`;
+        $('bk-ozet').innerHTML=`Bankada <b>${tum.length}</b> soru${tum.length?` · ✅ ${dogr} doğrulandı · ⚠️ ${suphe} şüpheli`:''} · filtreye uyan <b>${liste.length}</b>`;
         $('bk-secili-sayi').innerText=bk.sec.size?`${bk.sec.size} soru seçili`:'';
         if(!tum.length) $('bk-liste').innerHTML='<p style="color:var(--text-sub); text-align:center; padding:30px;">Banka henüz boş. <b>🤖 AI ile Soru Üret</b> ile soru üretin ya da editörde hazırladığınız soruları <b>Tarayıcıya Kaydet</b>leyin; otomatik olarak buraya da eklenir.</p>';
         else if(!goster.length) $('bk-liste').innerHTML='<p style="color:var(--text-sub); text-align:center;">Filtreye uyan soru yok.</p>';
@@ -2547,7 +2459,6 @@ ${JSON.stringify(liste)}`;
         dosyadanOku(input,r=>{
             if(!r.liste.length) return alert('Dosyada geçerli soru bulunamadı.');
             const s=bankaEkle(r.liste); bankaCiz();
-            if(s.hata) return alert('❌ Kaydedilemedi: sorular soru bankasına yazılamadı (depolama dolu olabilir). Tam yedek alın.');
             alert(`✅ ${s.eklenen} soru bankaya eklendi`+(s.tekrar?` (${s.tekrar} tanesi zaten vardı)`:'')+'.'+(r.uyari.length?'\n\nℹ️ '+r.uyari.join('\n'):''));
         });
     }
@@ -2567,23 +2478,20 @@ ${JSON.stringify(liste)}`;
             if(!v||v.tur!=='mt-egitim-yedek') return alert('❌ Bu dosya bir Eğitim Sistemi yedeği değil.');
             const nBanka=Array.isArray(v.banka)?v.banka.length:0, nTas=v.taslaklar?Object.keys(v.taslaklar).length:0;
             if(!confirm(`Yedek: ${nBanka} banka sorusu, ${nTas} taslak, ${Array.isArray(v.siniflar)?v.siniflar.length:0} sınıf.\n\nSorular ve taslaklar mevcutlarla BİRLEŞTİRİLİR (tekrarlar atlanır). Devam edilsin mi?`)) return;
-            let ek=0; const basarisiz=[];
-            if(Array.isArray(v.banka)){ const s=bankaEkle(soruListeNormalle(v.banka).liste); ek=s.eklenen; if(s.hata) basarisiz.push('soru bankası'); }
+            let ek=0;
+            if(Array.isArray(v.banka)){ const s=bankaEkle(soruListeNormalle(v.banka).liste); ek=s.eklenen; }
             if(v.taslaklar && typeof v.taslaklar==='object'){
                 const k=lsOku('ogm_sorular',{});
                 Object.keys(v.taslaklar).forEach(ad=>{ let yeni=ad; while(k[yeni]!==undefined && JSON.stringify(k[yeni])!==JSON.stringify(v.taslaklar[ad])) yeni+=' (yedek)'; k[yeni]=v.taslaklar[ad]; });
-                if(!lsYaz('ogm_sorular',k)) basarisiz.push('taslaklar');
+                lsYaz('ogm_sorular',k);
             }
             if(Array.isArray(v.siniflar) && v.siniflar.length && confirm('Yedekteki sınıf listeleri ve istatistikleri de geri yüklensin mi?\n(Tamam = mevcut sınıfların YERİNE geçer, İptal = sınıflara dokunma)')){
-                const eskiSiniflar=siniflar;
                 siniflar=v.siniflar.map((s,i)=>({id:i,ad:s.ad||`Sınıf ${i+1}`,liste:Array.isArray(s.liste)?s.liste:[],istatistik:s.istatistik||{}}));
-                if(lsYaz('mt_siniflar',siniflar)) sinifSlotlariniOlustur();
-                else { basarisiz.push('sınıflar'); siniflar=eskiSiniflar; }   // yazılamadıysa ekrandaki sınıfları da değiştirme
+                lsYaz('mt_siniflar',siniflar); sinifSlotlariniOlustur();
             }
-            if(v.takimAdlari && !lsYaz('mt_takim_adlari',v.takimAdlari)) basarisiz.push('takım adları');
+            if(v.takimAdlari) lsYaz('mt_takim_adlari',v.takimAdlari);
             kutuphaneListesiGuncelle(); bankaCiz();
-            if(basarisiz.length) alert(`❌ Kaydedilemedi: ${basarisiz.join(', ')} (depolama dolu olabilir). Yedek tam geri yüklenemedi; yazılamayan bölümlerde mevcut verileriniz korundu. Başarı sayılmaz.`);
-            else alert(`✅ Yedek geri yüklendi. Bankaya ${ek} yeni soru eklendi.`);
+            alert(`✅ Yedek geri yüklendi. Bankaya ${ek} yeni soru eklendi.`);
         };
         r.readAsText(input.files[0]); input.value='';
     }
@@ -2864,7 +2772,7 @@ ${JSON.stringify(liste)}`;
         const liste=tempSorular.map(s=>{ const x={...s}; delete x._oneri; delete x._no; return x; });
         sorular=sorular.concat(liste);
         const b=bankaEkle(liste.map(s=>({...s})));
-        alert(`✅ ${liste.length} soru sınav listesine eklendi.\n`+(b.hata?'❌ Soru bankasına KAYDEDİLEMEDİ (depolama dolu olabilir). Tam yedek alın.':`🗂️ Soru bankasına: ${b.eklenen}`+(b.tekrar?` (${b.tekrar} tanesi zaten vardı)`:''))+(oneri?`\n\n⚠️ ${oneri} sorunun cevabı AI önerisidir; bankada "şüpheli" olarak işaretlendi.`:''));
+        alert(`✅ ${liste.length} soru sınav listesine eklendi.\n🗂️ Soru bankasına: ${b.eklenen}`+(b.tekrar?` (${b.tekrar} tanesi zaten vardı)`:'')+(oneri?`\n\n⚠️ ${oneri} sorunun cevabı AI önerisidir; bankada "şüpheli" olarak işaretlendi.`:''));
         $("smart-import-area").value=""; aktarKaynak=null; kapatImport(); listele();
         if(!$('banka').classList.contains('gizli')) bankaCiz();
     }
@@ -3192,8 +3100,8 @@ ${metin!=null?'\nBELGE METNİ:\n"""\n'+metin+'\n"""':'\nBELGE ekte.'}
         let h='';
         if(q.gorsel) h+=`<img src="${esc(q.gorsel)}" style="max-height:30vh; max-width:100%; display:block; margin:0 auto 15px; border-radius:8px;">`;
         h+=soruHTML(q.soru);
-        if(q.tip==='test') h+='<div style="font-size:22px; text-align:left; margin-top:15px;">'+q.siklar.map((x,i)=>x?`<div>${sikHarf(q.siklar,i)}) ${sikHTML(x)}</div>`:'').join('')+'</div>';
-        if(cevapGoster) h+=`<span class="og-cevap">${esc(q.tip==='test'?`${sikHarf(q.siklar,q.dogruInd-1)}) ${q.cevap}`:q.cevap)}</span>`;
+        if(q.tip==='test') h+='<div style="font-size:22px; text-align:left; margin-top:15px;">'+q.siklar.map((x,i)=>x?`<div>${"ABCDE"[i]}) ${sikHTML(x)}</div>`:'').join('')+'</div>';
+        if(cevapGoster) h+=`<span class="og-cevap">${esc(q.tip==='test'?`${"ABCDE"[q.dogruInd-1]}) ${q.cevap}`:q.cevap)}</span>`;
         return h;
     }
 
@@ -3205,7 +3113,6 @@ ${metin!=null?'\nBELGE METNİ:\n"""\n'+metin+'\n"""':'\nBELGE ekte.'}
     function ogDosya(input){
         dosyadanOku(input, r=>{
             if(!r.liste.length) return alert("Dosyada geçerli soru bulunamadı.");
-            if(!listeDegisimOnay()) return;
             sorular=r.liste; ogBilgiGuncelle();
             if(r.uyari.length) alert("ℹ️ "+r.uyari.join("\n"));
         });
@@ -3213,7 +3120,7 @@ ${metin!=null?'\nBELGE METNİ:\n"""\n'+metin+'\n"""':'\nBELGE ekte.'}
     function ogKutuphane(){
         const ad=$("og-kutuphane").value; if(!ad) return;
         const k=lsOku("ogm_sorular",{});
-        if(k[ad]){ if(!listeDegisimOnay('bu taslaktakilerle')) return; sorular=soruListeNormalle(k[ad]).liste; ogBilgiGuncelle(); }
+        if(k[ad]){ sorular=soruListeNormalle(k[ad]).liste; ogBilgiGuncelle(); }
     }
     function ogOrnek(){
         if(sorular.length && !confirm("Yüklü sorular örnek sorularla değiştirilsin mi?")) return;
@@ -3499,7 +3406,7 @@ ${metin!=null?'\nBELGE METNİ:\n"""\n'+metin+'\n"""':'\nBELGE ekte.'}
             if(ml.elenen.has(i)) c='elendi';
             if(ml.secilen===i && !ml.goster) c+=' sec';
             if(ml.goster){ if(ml.goster.dogru===i) c='dogru'; else if(ml.goster.yanlis===i) c='yanlis'; }
-            return `<button class="ml-sik ${c}" onclick="mlSec(${i})"><b>${sikHarf(q.siklar,i)}:</b> ${sikHTML(x)}</button>`;
+            return `<button class="ml-sik ${c}" onclick="mlSec(${i})"><b>${'ABCDE'[i]}:</b> ${sikHTML(x)}</button>`;
         }).join('');
         const dis=(k)=> (!ml.jokerler[k]||ml.kilitli||ml.sonuc||ml.bitti||(k==='degis'&&!ml.yedek.length))?'disabled':'';
         $('ml-joker').innerHTML=`<button class="btn-purple" ${dis('j50')} onclick="mlJoker('j50')">50:50</button>`
@@ -3657,14 +3564,7 @@ ${metin!=null?'\nBELGE METNİ:\n"""\n'+metin+'\n"""':'\nBELGE ekte.'}
 
     /* ===== Sınav listesi kalıcılığı + Sınavı Başlat'ta bankadan yükleme ===== */
     const AKTIF_LISTE_KEY='mt_aktif_liste';
-    let listeKaydetUyarildi=false;
-    function listeKaydet(){
-        try{ localStorage.setItem(AKTIF_LISTE_KEY, JSON.stringify(sorular)); listeKaydetUyarildi=false; return true; }
-        catch(e){
-            if(!listeKaydetUyarildi){ listeKaydetUyarildi=true; alert("⚠️ Sınav listesi kaydedilemedi (depolama dolu olabilir). Tam yedek alın."); }
-            return false;
-        }
-    }
+    function listeKaydet(){ try{ localStorage.setItem(AKTIF_LISTE_KEY, JSON.stringify(sorular)); }catch(e){} }
     function listeGeriYukle(){
         if(sorular.length) return;
         try{ const v=JSON.parse(localStorage.getItem(AKTIF_LISTE_KEY)||'[]'); if(Array.isArray(v) && v.length) sorular=soruListeNormalle(v).liste; }catch(e){}
@@ -3915,7 +3815,7 @@ ${metin!=null?'\nBELGE METNİ:\n"""\n'+metin+'\n"""':'\nBELGE ekte.'}
         if(turnuvaModu && turnuvaSecimYontemi==='manuel') ogrenciListeCiz();
     }
     function dogruCevapMetni(s){
-        if(s.tip==='test' && s.dogruInd) return 'Doğru cevap: '+sikHarf(s.siklar,s.dogruInd-1)+') '+String(s.siklar[s.dogruInd-1]||'').replace(/<\/?(u|b|i)>/g,'');
+        if(s.tip==='test' && s.dogruInd) return 'Doğru cevap: '+'ABCDE'[s.dogruInd-1]+') '+String(s.siklar[s.dogruInd-1]||'').replace(/<\/?(u|b|i)>/g,'');
         if(s.tip==='dy') return 'Doğru cevap: '+(s.cevap==='D'?'Doğru':'Yanlış');
         if(s.tip==='bosluk' && s.cevap) return 'Doğru cevap: '+s.cevap;
         return '';
@@ -3953,7 +3853,7 @@ ${metin!=null?'\nBELGE METNİ:\n"""\n'+metin+'\n"""':'\nBELGE ekte.'}
             h+=`<div class="q"><strong>${i+1}.</strong>`;
             if(s.gorsel) h+=`<img src="${esc(s.gorsel)}" class="print-gorsel">`;
             h+=` ${soruHTML(s.soru)}`;
-            if(s.tip==='test'){ h+=`<ul>`; s.siklar.forEach((k,j)=>{ if(k) h+=`<li>${sikHarf(s.siklar,j)}) ${sikHTML(k)}</li>`; }); h+=`</ul>`; }
+            if(s.tip==='test'){ h+=`<ul>`; s.siklar.forEach((k,j)=>{ if(k) h+=`<li>${"ABCDE"[j]}) ${sikHTML(k)}</li>`; }); h+=`</ul>`; }
             else if(s.tip==='dy'){ h+=`<br><i>( ) Doğru &nbsp; ( ) Yanlış</i>`; }
             else if(s.tip==='eslesme'){ h+=`<br><i>(Eşleştirme)</i>`; s.eslesmeler.forEach(e=>h+=`<br>${esc(e.sol)} ______`); h+=`<br><br>Seçenekler: ${karistirDizi(s.eslesmeler.map(e=>e.sag)).map(esc).join(', ')}`; }
             h+=`</div>`;
@@ -3962,7 +3862,7 @@ ${metin!=null?'\nBELGE METNİ:\n"""\n'+metin+'\n"""':'\nBELGE ekte.'}
         sorular.forEach((s,i)=>{
             if(i>0 && i%4===0) h+=`</tr><tr>`;
             let c="-";
-            if(s.tip==='test') c=(s.dogruInd && s.siklar[s.dogruInd-1])?sikHarf(s.siklar,s.dogruInd-1):"?";
+            if(s.tip==='test') c=s.dogruInd?"ABCDE"[s.dogruInd-1]:"?";
             else if(s.tip==='dy') c=s.cevap==='D'?'Doğru':(s.cevap==='Y'?'Yanlış':'?');
             else if(s.tip==='eslesme') c=s.eslesmeler.map(e=>`• ${esc(e.sol)}➡${esc(e.sag)}`).join("<br>");
             else c=esc(s.cevap||"Açık Uçlu");
